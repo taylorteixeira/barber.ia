@@ -1,4 +1,12 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+  Alert,
+} from 'react-native';
 import { useState } from 'react';
 import { Link, useRouter } from 'expo-router';
 import { User, Mail, Lock, Eye, EyeOff, Phone } from 'lucide-react-native';
@@ -35,7 +43,7 @@ export default function RegisterScreen() {
     setTimeout(() => {
       setLoading(false);
       Alert.alert('Sucesso', 'Conta criada com sucesso!', [
-        { text: 'OK', onPress: () => router.replace('/(tabs)') }
+        { text: 'OK', onPress: () => router.replace('/(tabs)') },
       ]);
     }, 1500);
   };
@@ -100,7 +108,11 @@ export default function RegisterScreen() {
               style={styles.eyeIcon}
               onPress={() => setShowPassword(!showPassword)}
             >
-              {showPassword ? <EyeOff size={20} color="#6B7280" /> : <Eye size={20} color="#6B7280" />}
+              {showPassword ? (
+                <EyeOff size={20} color="#6B7280" />
+              ) : (
+                <Eye size={20} color="#6B7280" />
+              )}
             </TouchableOpacity>
           </View>
 
@@ -118,12 +130,19 @@ export default function RegisterScreen() {
               style={styles.eyeIcon}
               onPress={() => setShowConfirmPassword(!showConfirmPassword)}
             >
-              {showConfirmPassword ? <EyeOff size={20} color="#6B7280" /> : <Eye size={20} color="#6B7280" />}
+              {showConfirmPassword ? (
+                <EyeOff size={20} color="#6B7280" />
+              ) : (
+                <Eye size={20} color="#6B7280" />
+              )}
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity
-            style={[styles.registerButton, loading && styles.registerButtonDisabled]}
+            style={[
+              styles.registerButton,
+              loading && styles.registerButtonDisabled,
+            ]}
             onPress={handleRegister}
             disabled={loading}
           >
