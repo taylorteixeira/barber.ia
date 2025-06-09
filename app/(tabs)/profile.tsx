@@ -1,0 +1,309 @@
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  SafeAreaView,
+  Image,
+  Alert,
+} from 'react-native';
+import { useState } from 'react';
+import { useRouter } from 'expo-router';
+import { User, Settings, Calendar, Star, CreditCard, Bell, CircleHelp as HelpCircle, LogOut, ChevronRight, CreditCard as Edit } from 'lucide-react-native';
+
+export default function ProfileScreen() {
+  const [user] = useState({
+    name: 'João Silva',
+    email: 'joao.silva@email.com',
+    phone: '(11) 99999-9999',
+    avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
+    totalBookings: 24,
+    reviewsGiven: 18,
+    avgRating: 4.8,
+  });
+
+  const router = useRouter();
+
+  const menuItems = [
+    {
+      id: 'edit-profile',
+      title: 'Editar Perfil',
+      icon: Edit,
+      color: '#2563EB',
+      onPress: () => Alert.alert('Em breve', 'Funcionalidade será implementada'),
+    },
+    {
+      id: 'bookings-history',
+      title: 'Histórico de Agendamentos',
+      icon: Calendar,
+      color: '#10B981',
+      onPress: () => router.push('/(tabs)/bookings'),
+    },
+    {
+      id: 'my-reviews',
+      title: 'Minhas Avaliações',
+      icon: Star,
+      color: '#F59E0B',
+      onPress: () => Alert.alert('Em breve', 'Funcionalidade será implementada'),
+    },
+    {
+      id: 'payment-methods',
+      title: 'Métodos de Pagamento',
+      icon: CreditCard,
+      color: '#8B5CF6',
+      onPress: () => Alert.alert('Em breve', 'Funcionalidade será implementada'),
+    },
+    {
+      id: 'notifications',
+      title: 'Notificações',
+      icon: Bell,
+      color: '#F97316',
+      onPress: () => Alert.alert('Em breve', 'Funcionalidade será implementada'),
+    },
+    {
+      id: 'settings',
+      title: 'Configurações',
+      icon: Settings,
+      color: '#6B7280',
+      onPress: () => Alert.alert('Em breve', 'Funcionalidade será implementada'),
+    },
+    {
+      id: 'help',
+      title: 'Ajuda e Suporte',
+      icon: HelpCircle,
+      color: '#06B6D4',
+      onPress: () => Alert.alert('Em breve', 'Funcionalidade será implementada'),
+    },
+  ];
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Sair da conta',
+      'Tem certeza que deseja sair da sua conta?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Sair',
+          style: 'destructive',
+          onPress: () => {
+            router.replace('/(auth)/login');
+          },
+        },
+      ]
+    );
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Meu Perfil</Text>
+        </View>
+
+        <View style={styles.profileSection}>
+          <View style={styles.avatarContainer}>
+            <Image source={{ uri: user.avatar }} style={styles.avatar} />
+          </View>
+          <Text style={styles.userName}>{user.name}</Text>
+          <Text style={styles.userEmail}>{user.email}</Text>
+          <Text style={styles.userPhone}>{user.phone}</Text>
+        </View>
+
+        <View style={styles.statsSection}>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{user.totalBookings}</Text>
+            <Text style={styles.statLabel}>Agendamentos</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{user.reviewsGiven}</Text>
+            <Text style={styles.statLabel}>Avaliações</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <View style={styles.ratingContainer}>
+              <Text style={styles.statNumber}>{user.avgRating}</Text>
+              <Star size={16} color="#F59E0B" fill="#F59E0B" style={styles.ratingIcon} />
+            </View>
+            <Text style={styles.statLabel}>Média</Text>
+          </View>
+        </View>
+
+        <View style={styles.menuSection}>
+          {menuItems.map((item) => (
+            <TouchableOpacity key={item.id} style={styles.menuItem} onPress={item.onPress}>
+              <View style={styles.menuItemLeft}>
+                <View style={[styles.menuIcon, { backgroundColor: `${item.color}15` }]}>
+                  <item.icon size={20} color={item.color} />
+                </View>
+                <Text style={styles.menuItemText}>{item.title}</Text>
+              </View>
+              <ChevronRight size={20} color="#9CA3AF" />
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <LogOut size={20} color="#EF4444" />
+          <Text style={styles.logoutButtonText}>Sair da Conta</Text>
+        </TouchableOpacity>
+
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>Versão 1.0.0</Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  header: {
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 16,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontFamily: 'Inter-Bold',
+    color: '#111827',
+  },
+  profileSection: {
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingBottom: 32,
+  },
+  avatarContainer: {
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 4,
+    borderColor: '#FFFFFF',
+  },
+  userName: {
+    fontSize: 24,
+    fontFamily: 'Inter-Bold',
+    color: '#111827',
+    marginBottom: 4,
+  },
+  userEmail: {
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    color: '#6B7280',
+    marginBottom: 2,
+  },
+  userPhone: {
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    color: '#6B7280',
+  },
+  statsSection: {
+    flexDirection: 'row',
+    backgroundColor: '#F9FAFB',
+    marginHorizontal: 24,
+    borderRadius: 16,
+    paddingVertical: 20,
+    marginBottom: 32,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statDivider: {
+    width: 1,
+    backgroundColor: '#E5E7EB',
+    marginVertical: 8,
+  },
+  statNumber: {
+    fontSize: 20,
+    fontFamily: 'Inter-Bold',
+    color: '#111827',
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: '#6B7280',
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ratingIcon: {
+    marginLeft: 4,
+  },
+  menuSection: {
+    paddingHorizontal: 24,
+    marginBottom: 32,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    paddingHorizontal: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  menuItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  menuIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  menuItemText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Medium',
+    color: '#111827',
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 24,
+    paddingVertical: 16,
+    backgroundColor: '#FEF2F2',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#FCA5A5',
+    marginBottom: 32,
+  },
+  logoutButtonText: {
+    fontSize: 16,
+    fontFamily: 'Inter-SemiBold',
+    color: '#EF4444',
+    marginLeft: 8,
+  },
+  footer: {
+    alignItems: 'center',
+    paddingBottom: 24,
+  },
+  footerText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#9CA3AF',
+  },
+});
