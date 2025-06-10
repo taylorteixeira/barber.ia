@@ -127,8 +127,7 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Text style={styles.greeting}>Olá! 👋</Text>
-          <Text style={styles.headerTitle}>Encontre seu barbeiro ideal</Text>
+          <Text style={styles.headerTitle}>Encontre seu barbeiro</Text>
         </View>
 
         <TouchableOpacity style={styles.locationButton} onPress={requestLocation}>
