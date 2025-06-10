@@ -10,11 +10,11 @@ import {
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
 import * as SplashScreen from 'expo-splash-screen';
+import { initDatabase } from '@/services/database';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
-  useFrameworkReady();
+export default function RootLayout() {  useFrameworkReady();
 
   const [fontsLoaded, fontError] = useFonts({
     'Inter-Regular': Inter_400Regular,
@@ -24,9 +24,20 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync();
-    }
+    const prepare = async () => {
+      try {
+        // Initialize database
+        await initDatabase();
+        
+        if (fontsLoaded || fontError) {
+          await SplashScreen.hideAsync();
+        }
+      } catch (e) {
+        console.warn('Error initializing app:', e);
+      }
+    };
+
+    prepare();
   }, [fontsLoaded, fontError]);
 
   if (!fontsLoaded && !fontError) {

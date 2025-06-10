@@ -8,22 +8,39 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { User, Settings, Calendar, Star, CreditCard, Bell, CircleHelp as HelpCircle, LogOut, ChevronRight, CreditCard as Edit } from 'lucide-react-native';
+import { logoutUser, getCurrentUser } from '@/services/database';
 
 export default function ProfileScreen() {
-  const [user] = useState({
-    name: 'João Silva',
-    email: 'joao.silva@email.com',
-    phone: '(11) 99999-9999',
+  const [user, setUser] = useState({
+    name: 'Carregando...',
+    email: 'Carregando...',
+    phone: 'Carregando...',
     avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
-    totalBookings: 24,
-    reviewsGiven: 18,
-    avgRating: 4.8,
+    totalBookings: 0,
+    reviewsGiven: 0,
+    avgRating: 0,
   });
 
   const router = useRouter();
+  
+  useEffect(() => {
+    const loadUserData = async () => {
+      const userData = await getCurrentUser();
+      if (userData) {
+        setUser({
+          ...user,
+          name: userData.name,
+          email: userData.email,
+          phone: userData.phone || 'Não informado',
+        });
+      }
+    };
+    
+    loadUserData();
+  }, []);
 
   const menuItems = [
     {
@@ -86,7 +103,8 @@ export default function ProfileScreen() {
         {
           text: 'Sair',
           style: 'destructive',
-          onPress: () => {
+          onPress: async () => {
+            await logoutUser();
             router.replace('/(auth)/login');
           },
         },

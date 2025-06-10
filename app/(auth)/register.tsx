@@ -10,6 +10,7 @@ import {
 import { useState } from 'react';
 import { Link, useRouter } from 'expo-router';
 import { User, Mail, Lock, Eye, EyeOff, Phone } from 'lucide-react-native';
+import { registerUser } from '@/services/database';
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
@@ -21,7 +22,6 @@ export default function RegisterScreen() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
   const handleRegister = async () => {
     if (!name || !email || !phone || !password || !confirmPassword) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos');
@@ -39,13 +39,28 @@ export default function RegisterScreen() {
     }
 
     setLoading(true);
-    // Simulate registration process
-    setTimeout(() => {
+    
+    try {
+      const success = await registerUser({
+        name,
+        email,
+        phone,
+        password
+      });
+      
+      if (success) {
+        Alert.alert('Sucesso', 'Conta criada com sucesso!', [
+          { text: 'OK', onPress: () => router.replace('/(auth)/login') },
+        ]);
+      } else {
+        Alert.alert('Erro', 'Ocorreu um erro ao criar sua conta. O email já pode estar em uso.');
+      }
+    } catch (error) {
+      console.error('Error during registration:', error);
+      Alert.alert('Erro', 'Ocorreu um erro ao criar sua conta. Tente novamente.');
+    } finally {
       setLoading(false);
-      Alert.alert('Sucesso', 'Conta criada com sucesso!', [
-        { text: 'OK', onPress: () => router.replace('/(tabs)') },
-      ]);
-    }, 1500);
+    }
   };
 
   return (

@@ -10,6 +10,7 @@ import {
 import { useState } from 'react';
 import { Link, useRouter } from 'expo-router';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react-native';
+import { loginUser } from '@/services/database';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -17,7 +18,6 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos');
@@ -25,11 +25,20 @@ export default function LoginScreen() {
     }
 
     setLoading(true);
-    // Simulate login process
-    setTimeout(() => {
+    try {
+      const user = await loginUser(email, password);
+      
+      if (user) {
+        router.replace('/(tabs)');
+      } else {
+        Alert.alert('Erro', 'Email ou senha incorretos');
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      Alert.alert('Erro', 'Ocorreu um erro ao fazer login. Tente novamente.');
+    } finally {
       setLoading(false);
-      router.replace('/(tabs)');
-    }, 1500);
+    }
   };
 
   const handleSocialLogin = (provider: string) => {
