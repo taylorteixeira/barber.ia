@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import { MapPin, Search, Star, Navigation, Filter } from 'lucide-react-native';
+import { Search, Star, Navigation, Filter } from 'lucide-react-native';
 import * as Location from 'expo-location';
 import { getBarbers, initBarbersDatabase, Barber } from '@/services/database';
 
@@ -187,14 +187,11 @@ export default function HomeScreen() {
             ))}
           </ScrollView>
         </View>
-
         <View style={styles.barbersContainer}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
               {selectedCategory
-                ? `Categoria: ${
-                    categories.find((c) => c.id === selectedCategory)?.name
-                  }`
+                ? `Categoria: ${categories.find((c) => c.id === selectedCategory)?.name}`
                 : 'Barbeiros próximos'}
             </Text>
             <TouchableOpacity>
@@ -203,16 +200,6 @@ export default function HomeScreen() {
           </View>
           <View style={styles.barbersList}>
             {filteredBarbers.map(renderBarberCard)}
-          </View>
-        </View>
-
-        <View style={styles.mapContainer}>
-          <Text style={styles.sectionTitle}>Mapa de barbeiros</Text>
-          <View style={styles.mapPlaceholder}>
-            <MapPin size={48} color="#6B7280" />
-            <Text style={styles.mapPlaceholderText}>
-              Mapa interativo em breve
-            </Text>
           </View>
         </View>
       </ScrollView>
@@ -352,83 +339,65 @@ const styles = StyleSheet.create({
   },
   barberCard: {
     flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 16,
     marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     elevation: 2,
   },
   barberImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 12,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     marginRight: 16,
   },
   barberInfo: {
     flex: 1,
-    justifyContent: 'space-between',
   },
   barberName: {
-    fontSize: 18,
-    fontFamily: 'Inter-SemiBold',
+    fontSize: 16,
+    fontFamily: 'Inter-Bold',
     color: '#111827',
     marginBottom: 4,
   },
   barberStats: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: 8,
   },
   ratingText: {
     fontSize: 14,
-    fontFamily: 'Inter-Medium',
-    color: '#111827',
+    fontFamily: 'Inter-Regular',
+    color: '#374151',
     marginLeft: 4,
   },
   reviewsText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: 'Inter-Regular',
     color: '#6B7280',
-    marginLeft: 2,
+    marginLeft: 4,
   },
   distanceText: {
     fontSize: 14,
-    fontFamily: 'Inter-Medium',
+    fontFamily: 'Inter-Regular',
     color: '#6B7280',
   },
   priceText: {
     fontSize: 16,
-    fontFamily: 'Inter-SemiBold',
-    color: '#10B981',
-  },
-  mapContainer: {
-    marginBottom: 32,
-  },
-  mapPlaceholder: {
-    marginHorizontal: 24,
-    height: 200,
-    backgroundColor: '#F9FAFB',
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  mapPlaceholderText: {
-    fontSize: 16,
-    fontFamily: 'Inter-Medium',
-    color: '#6B7280',
-    marginTop: 8,
+    fontFamily: 'Inter-Bold',
+    color: '#111827',
   },
 });

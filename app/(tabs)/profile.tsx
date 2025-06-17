@@ -12,7 +12,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import {
   User,
-  Settings,
   Calendar,
   Star,
   CreditCard,
@@ -74,32 +73,6 @@ export default function ProfileScreen() {
 
   const menuItems = [
     {
-      id: 'edit-profile',
-      title: 'Editar Perfil',
-      icon: Edit,
-      color: '#2563EB',
-      onPress: () => {
-        Alert.prompt(
-          'Editar Nome',
-          'Digite seu novo nome:',
-          [
-            { text: 'Cancelar', style: 'cancel' },
-            {
-              text: 'Salvar',
-              onPress: (newName) => {
-                if (newName?.trim()) {
-                  setUser((prev) => ({ ...prev, name: newName.trim() }));
-                  Alert.alert('Sucesso', 'Nome atualizado com sucesso!');
-                }
-              },
-            },
-          ],
-          'plain-text',
-          user.name
-        );
-      },
-    },
-    {
       id: 'bookings-history',
       title: 'Histórico de Agendamentos',
       icon: Calendar,
@@ -116,55 +89,6 @@ export default function ProfileScreen() {
           'Minhas Avaliações',
           `Você avaliou ${user.reviewsGiven} serviços com uma média de ${user.avgRating} estrelas.`,
           [{ text: 'OK' }]
-        );
-      },
-    },
-    {
-      id: 'payment-methods',
-      title: 'Métodos de Pagamento',
-      icon: CreditCard,
-      color: '#8B5CF6',
-      onPress: () => {
-        Alert.alert(
-          'Métodos de Pagamento',
-          'Cartão de Crédito: **** 1234\nPIX: Cadastrado\nDinheiro: Aceito',
-          [{ text: 'OK' }]
-        );
-      },
-    },
-    {
-      id: 'notifications',
-      title: 'Notificações',
-      icon: Bell,
-      color: '#F97316',
-      onPress: () => {
-        Alert.alert(
-          'Configurações de Notificação',
-          'Lembrete de agendamento: Ativado\nPromoções: Ativado\nAtualizações: Ativado',
-          [{ text: 'OK' }]
-        );
-      },
-    },
-    {
-      id: 'settings',
-      title: 'Configurações',
-      icon: Settings,
-      color: '#6B7280',
-      onPress: () => {
-        Alert.alert(
-          'Configurações',
-          'Tema: Claro\nIdioma: Português\nLocalização: Ativada',
-          [
-            { text: 'Cancelar', style: 'cancel' },
-            {
-              text: 'Alterar Tema',
-              onPress: () =>
-                Alert.alert(
-                  'Tema alterado',
-                  'Funcionalidade em desenvolvimento'
-                ),
-            },
-          ]
         );
       },
     },
