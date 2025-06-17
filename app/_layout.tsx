@@ -10,11 +10,16 @@ import {
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
 import * as SplashScreen from 'expo-splash-screen';
-import { initDatabase } from '@/services/database';
+import {
+  initDatabase,
+  initBarbersDatabase,
+  initBookingsDatabase,
+} from '@/services/database';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {  useFrameworkReady();
+export default function RootLayout() {
+  useFrameworkReady();
 
   const [fontsLoaded, fontError] = useFonts({
     'Inter-Regular': Inter_400Regular,
@@ -28,7 +33,10 @@ export default function RootLayout() {  useFrameworkReady();
       try {
         // Initialize database
         await initDatabase();
-        
+        // Seed barbers and bookings
+        await initBarbersDatabase();
+        await initBookingsDatabase();
+
         if (fontsLoaded || fontError) {
           await SplashScreen.hideAsync();
         }
@@ -49,6 +57,10 @@ export default function RootLayout() {  useFrameworkReady();
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="barber/[id]"
+          options={{ headerShown: true, title: 'Perfil do Barbeiro' }}
+        />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />

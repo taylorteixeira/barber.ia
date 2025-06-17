@@ -13,26 +13,16 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { MapPin, Search, Star, Navigation, Filter } from 'lucide-react-native';
 import * as Location from 'expo-location';
-
-type Barber = {
-  id: string;
-  name: string;
-  rating: number;
-  distance: number;
-  price: number;
-  image: string;
-  reviews: number;
-  location: {
-    latitude: number;
-    longitude: number;
-  };
-};
+import { getBarbers, initBarbersDatabase, Barber } from '@/services/database';
 
 export default function HomeScreen() {
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [nearbyBarbers, setNearbyBarbers] = useState<Barber[]>([]);
+  const [filteredBarbers, setFilteredBarbers] = useState<Barber[]>([]);
   const router = useRouter();
 
   const categories = [
@@ -43,49 +33,55 @@ export default function HomeScreen() {
     { id: 'promocoes', name: 'Promoções', icon: '🔥' },
   ];
 
-  // Mock data for nearby barbers
-  const mockBarbers: Barber[] = [
-    {
-      id: '1',
-      name: 'Barbearia Premium',
-      rating: 4.8,
-      distance: 0.5,
-      price: 35,
-      image: 'https://images.pexels.com/photos/1813272/pexels-photo-1813272.jpeg',
-      reviews: 124,
-      location: { latitude: -23.5505, longitude: -46.6333 },
-    },
-    {
-      id: '2',
-      name: 'Cortes Modernos',
-      rating: 4.6,
-      distance: 1.2,
-      price: 28,
-      image: 'https://images.pexels.com/photos/1319460/pexels-photo-1319460.jpeg',
-      reviews: 89,
-      location: { latitude: -23.5515, longitude: -46.6343 },
-    },
-    {
-      id: '3',
-      name: 'Studio do Barbeiro',
-      rating: 4.9,
-      distance: 0.8,
-      price: 42,
-      image: 'https://images.pexels.com/photos/1570807/pexels-photo-1570807.jpeg',
-      reviews: 156,
-      location: { latitude: -23.5495, longitude: -46.6323 },
-    },
-  ];
-
+  // Load barbers from database
   useEffect(() => {
-    setNearbyBarbers(mockBarbers);
+    const loadBarbers = async () => {
+      await initBarbersDatabase();
+      try {
+        const data = await getBarbers();
+        setNearbyBarbers(data);
+        setFilteredBarbers(data);
+      } catch (err) {
+        console.error('Failed to load barbers:', err);
+      }
+    };
+    loadBarbers();
   }, []);
+
+  // Filter barbers based on selected category
+  useEffect(() => {
+    if (!selectedCategory) {
+      setFilteredBarbers(nearbyBarbers);
+    } else {
+      // Simple filtering - in a real app you'd have service categories in the data
+      const filtered = nearbyBarbers.filter((barber) => {
+        switch (selectedCategory) {
+          case 'corte':
+            return barber.price <= 35; // Lower price for basic cuts
+          case 'barba':
+            return barber.rating >= 4.7; // High-rated for beard work
+          case 'sobrancelha':
+            return barber.price >= 30; // Premium service
+          case 'pacotes':
+            return barber.price >= 40; // Package deals
+          case 'promocoes':
+            return barber.price <= 30; // Promotional prices
+          default:
+            return true;
+        }
+      });
+      setFilteredBarbers(filtered);
+    }
+  }, [selectedCategory, nearbyBarbers]);
 
   const requestLocation = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permissão negada', 'É necessário permitir acesso à localização');
+        Alert.alert(
+          'Permissão negada',
+          'É necessário permitir acesso à localização'
+        );
         return;
       }
 
@@ -98,7 +94,7 @@ export default function HomeScreen() {
   };
 
   const handleBarberPress = (barberId: string) => {
-    router.push(`/barber/${barberId}`);
+    router.push({ pathname: '/barber/[id]', params: { id: barberId } });
   };
 
   const renderBarberCard = (barber: Barber) => (
@@ -125,12 +121,18 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Encontre seu barbeiro</Text>
         </View>
 
-        <TouchableOpacity style={styles.locationButton} onPress={requestLocation}>
+        <TouchableOpacity
+          style={styles.locationButton}
+          onPress={requestLocation}
+        >
           <Navigation size={20} color="#2563EB" />
           <Text style={styles.locationButtonText}>
             {location ? 'Localização obtida' : 'Usar minha localização'}
@@ -152,23 +154,31 @@ export default function HomeScreen() {
 
         <View style={styles.categoriesContainer}>
           <Text style={styles.sectionTitle}>Categorias</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesScroll}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.categoriesScroll}
+          >
             {categories.map((category) => (
               <TouchableOpacity
                 key={category.id}
                 style={[
                   styles.categoryChip,
-                  selectedCategory === category.id && styles.categoryChipSelected,
+                  selectedCategory === category.id &&
+                    styles.categoryChipSelected,
                 ]}
                 onPress={() =>
-                  setSelectedCategory(selectedCategory === category.id ? null : category.id)
+                  setSelectedCategory(
+                    selectedCategory === category.id ? null : category.id
+                  )
                 }
               >
                 <Text style={styles.categoryEmoji}>{category.icon}</Text>
                 <Text
                   style={[
                     styles.categoryText,
-                    selectedCategory === category.id && styles.categoryTextSelected,
+                    selectedCategory === category.id &&
+                      styles.categoryTextSelected,
                   ]}
                 >
                   {category.name}
@@ -180,13 +190,19 @@ export default function HomeScreen() {
 
         <View style={styles.barbersContainer}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Barbeiros próximos</Text>
+            <Text style={styles.sectionTitle}>
+              {selectedCategory
+                ? `Categoria: ${
+                    categories.find((c) => c.id === selectedCategory)?.name
+                  }`
+                : 'Barbeiros próximos'}
+            </Text>
             <TouchableOpacity>
               <Text style={styles.seeAllText}>Ver todos</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.barbersList}>
-            {nearbyBarbers.map(renderBarberCard)}
+            {filteredBarbers.map(renderBarberCard)}
           </View>
         </View>
 
@@ -194,7 +210,9 @@ export default function HomeScreen() {
           <Text style={styles.sectionTitle}>Mapa de barbeiros</Text>
           <View style={styles.mapPlaceholder}>
             <MapPin size={48} color="#6B7280" />
-            <Text style={styles.mapPlaceholderText}>Mapa interativo em breve</Text>
+            <Text style={styles.mapPlaceholderText}>
+              Mapa interativo em breve
+            </Text>
           </View>
         </View>
       </ScrollView>
