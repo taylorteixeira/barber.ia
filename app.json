@@ -1,20 +1,23 @@
 {
   "expo": {
-    "name": "expo-nativewind",
+    "name": "barbear.ia",
     "slug": "expo-nativewind",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/Logo.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+     "android": {
+      "package": "com.barbear.ia"
+    },
     "ios": {
       "supportsTablet": true
     },
     "web": {
       "bundler": "metro",
       "output": "single",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/Logo.png"
     },
     "plugins": [
       "expo-router",
@@ -25,6 +28,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "6e37fae7-f785-4601-addc-7c7d6aa98db9"
+      }
     }
   }
 }

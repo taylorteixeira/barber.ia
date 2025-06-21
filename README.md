@@ -79,5 +79,7 @@ barber.ia/
 ## Observações
 - O app não utiliza backend: todo o cadastro, login e sessão são feitos localmente no dispositivo.
 ---
+## Distribuição
+- npx eas build -p android --profile preview --aab
 
 Sinta-se à vontade para contribuir ou adaptar o projeto para suas necessidades!
