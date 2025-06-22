@@ -10,7 +10,7 @@ import {
 import { useState } from 'react';
 import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import { User, Mail, Lock, Eye, EyeOff, Phone, ArrowLeft } from 'lucide-react-native';
-import { registerUser } from '@/services/database';
+import { registerAndLoginUser } from '@/services/database';
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
@@ -28,6 +28,11 @@ export default function RegisterScreen() {
   };
 
   const handleRegister = async () => {
+    // Se for barbeiro, redirecionar para o onboarding completo
+    if (userType === 'barber') {
+      router.push('/(auth)/barber-onboarding');
+      return;
+    }
     if (!name || !email || !phone || !password || !confirmPassword) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos');
       return;
@@ -41,11 +46,9 @@ export default function RegisterScreen() {
     if (password.length < 6) {
       Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres');
       return;
-    }
-
-    setLoading(true);
+    }    setLoading(true);
     
-    try {      const success = await registerUser({
+    try {      const loggedInUser = await registerAndLoginUser({
         name,
         email,
         phone,
@@ -53,9 +56,11 @@ export default function RegisterScreen() {
         userType
       });
       
-      if (success) {
-        Alert.alert('Sucesso', 'Conta criada com sucesso!', [
-          { text: 'OK', onPress: () => router.replace(`/(auth)/login?userType=${userType}`) },
+      if (loggedInUser) {        Alert.alert('Bem-vindo!', 'Conta criada com sucesso! Você já está logado.', [
+          { 
+            text: 'Começar', 
+            onPress: () => router.replace('/(tabs)')
+          },
         ]);
       } else {
         Alert.alert('Erro', 'Ocorreu um erro ao criar sua conta. O email já pode estar em uso.');

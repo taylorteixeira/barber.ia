@@ -179,6 +179,25 @@ export const registerUser = async (user: User): Promise<boolean> => {
   }
 };
 
+// Register and auto-login user
+export const registerAndLoginUser = async (user: Omit<User, 'id'>): Promise<User | null> => {
+  try {
+    // First register the user
+    const registerSuccess = await registerUser(user);
+    
+    if (!registerSuccess) {
+      return null;
+    }
+
+    // Then automatically log them in
+    const loggedInUser = await loginUser(user.email, user.password);
+    return loggedInUser;
+  } catch (error) {
+    console.error('Error registering and logging in user:', error);
+    return null;
+  }
+};
+
 // Login a user
 export const loginUser = async (
   email: string,

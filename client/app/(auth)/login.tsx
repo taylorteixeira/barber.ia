@@ -151,12 +151,13 @@ export default function LoginScreen() {
             onPress={() => handleSocialLogin('Apple')}
           >
             <Text style={styles.socialButtonText}>Continuar com Apple</Text>          </TouchableOpacity>
-        </View>
-
-        <View style={styles.footer}>
+        </View>        <View style={styles.footer}>
           <Text style={styles.footerText}>
             Não tem uma conta?{' '}
-            <Link href={`/(auth)/register?userType=${userType}`} asChild>
+            <Link 
+              href={userType === 'barber' ? '/(auth)/barber-onboarding' : `/(auth)/register?userType=${userType}`} 
+              asChild
+            >
               <Text style={styles.footerLink}>Cadastre-se</Text>
             </Link>
           </Text>
