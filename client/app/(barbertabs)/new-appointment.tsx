@@ -401,9 +401,9 @@ export default function NewAppointment() {
 
         {/* Barber Selection */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Barbeiro</Text>
-          <TouchableOpacity
-            style={styles.selectionCard}            onPress={() => setShowBarberModal(true)}
+          <Text style={styles.sectionTitle}>Barbeiro</Text>          <TouchableOpacity
+            style={styles.selectionCard}
+            onPress={() => setShowBarberModal(true)}
           >
             {selectedBarber ? (
               <View style={styles.selectedItem}>

@@ -90,6 +90,12 @@ export default function BarberTabLayout() {
           href: null,
         }}
       />
+      <Tabs.Screen
+        name="support"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

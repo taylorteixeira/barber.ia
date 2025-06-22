@@ -114,13 +114,12 @@ export default function BarberProfile() {
     },
     {
       title: 'Configurações',
-      items: [
-        {
+      items: [        {
           id: 'help',
           title: 'Ajuda e Suporte',
           icon: HelpCircle,
           color: '#06B6D4',
-          onPress: () => Alert.alert('Ajuda', 'Entre em contato conosco pelo email suporte@barber.ia'),
+          onPress: () => router.push('/(barbertabs)/support' as any),
         },
       ],
     },
