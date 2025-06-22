@@ -69,7 +69,8 @@ export default function RegisterScreen() {
   };
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>        {/* Back Button */}
+      <View style={styles.content}>
+        {/* Back Button */}
         <TouchableOpacity 
           style={styles.backButton}
           onPress={handleGoBack}
@@ -180,9 +181,10 @@ export default function RegisterScreen() {
           >
             <Text style={styles.registerButtonText}>
               {loading ? 'Criando conta...' : 'Criar Conta'}
-            </Text>
-          </TouchableOpacity>
-        </View>        <View style={styles.footer}>
+            </Text>          </TouchableOpacity>
+        </View>
+
+        <View style={styles.footer}>
           <Text style={styles.footerText}>
             Já tem uma conta?{' '}
             <Link href={`/(auth)/login?userType=${userType}`} asChild>

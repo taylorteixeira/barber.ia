@@ -74,38 +74,41 @@ export default function BarberProfile() {
       ]
     );
   };
-
   const menuSections = [
     {
       title: 'Perfil Profissional',
-      items: [
-        {
+      items: [        {
           id: 'edit-profile',
           title: 'Editar Perfil',
           icon: Edit,
           color: '#3B82F6',
-          onPress: () => Alert.alert('Editar Perfil', 'Funcionalidade será implementada'),
+          onPress: () => router.push('/(barbertabs)/edit-profile' as any),
         },
         {
           id: 'services',
           title: 'Meus Serviços',
           icon: SettingsIcon,
           color: '#8B5CF6',
-          onPress: () => Alert.alert('Serviços', 'Funcionalidade será implementada'),
+          onPress: () => router.push('/(barbertabs)/services' as any),
         },
         {
+          id: 'products',
+          title: 'Meus Produtos',
+          icon: MapPin,
+          color: '#F59E0B',
+          onPress: () => router.push('/(barbertabs)/products' as any),
+        },        {
           id: 'pricing',
           title: 'Tabela de Preços',
           icon: DollarSign,
           color: '#10B981',
-          onPress: () => Alert.alert('Preços', 'Funcionalidade será implementada'),
-        },
-        {
+          onPress: () => router.push('/(barbertabs)/pricing' as any),
+        },        {
           id: 'schedule',
-          title: 'Horário de Funcionamento',
+          title: 'Horário da Barbearia',
           icon: Clock,
           color: '#F59E0B',
-          onPress: () => Alert.alert('Horários', 'Funcionalidade será implementada'),
+          onPress: () => router.push('/(barbertabs)/barbershop-hours' as any),
         },
       ],
     },

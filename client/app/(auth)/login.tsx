@@ -67,7 +67,8 @@ export default function LoginScreen() {
   };
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>        {/* Back Button */}
+      <View style={styles.content}>
+        {/* Back Button */}
         <TouchableOpacity 
           style={styles.backButton}
           onPress={handleGoBack}
@@ -149,9 +150,10 @@ export default function LoginScreen() {
             style={styles.socialButton}
             onPress={() => handleSocialLogin('Apple')}
           >
-            <Text style={styles.socialButtonText}>Continuar com Apple</Text>
-          </TouchableOpacity>
-        </View>        <View style={styles.footer}>
+            <Text style={styles.socialButtonText}>Continuar com Apple</Text>          </TouchableOpacity>
+        </View>
+
+        <View style={styles.footer}>
           <Text style={styles.footerText}>
             Não tem uma conta?{' '}
             <Link href={`/(auth)/register?userType=${userType}`} asChild>
