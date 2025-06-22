@@ -51,12 +51,14 @@ export default function RootLayout() {
   if (!fontsLoaded && !fontError) {
     return null;
   }
-
   return (
     <>
       <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="landing" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(barbertabs)" options={{ headerShown: false }} />
         <Stack.Screen
           name="barber/[id]"
           options={{ headerShown: true, title: 'Perfil do Barbeiro' }}

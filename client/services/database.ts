@@ -5,10 +5,7 @@ import * as bcrypt from 'bcryptjs';
 // Fallback para aleatoriedade no bcryptjs em ambiente React Native/Expo
 if (typeof bcrypt.setRandomFallback === 'function') {
   bcrypt.setRandomFallback((len: number) => {
-    const buf = new Uint8Array(len);
-    for (let i = 0; i < len; ++i) {
-      buf[i] = Math.floor(Math.random() * 256);
-    }
+    const buf = Array.from({ length: len }, () => Math.floor(Math.random() * 256));
     return buf;
   });
 }
@@ -20,6 +17,7 @@ export interface User {
   email: string;
   phone: string;
   password: string;
+  userType: 'client' | 'barber';
 }
 
 // Storage keys
@@ -75,15 +73,14 @@ export const registerUser = async (user: User): Promise<boolean> => {
     } catch (err) {
       console.error('Bcrypt hash error:', err);
       return false;
-    }
-
-    // Create new user
+    }    // Create new user
     const newUser: User = {
       id: counter,
       name: user.name,
       email: user.email,
       phone: user.phone,
       password: hashedPassword,
+      userType: user.userType,
     };
 
     // Add to users array
@@ -123,15 +120,14 @@ export const loginUser = async (
     }
 
     // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (isPasswordValid) {
+    const isPasswordValid = await bcrypt.compare(password, user.password);    if (isPasswordValid) {
       // Store user session without password
       const userSession = {
         id: user.id,
         name: user.name,
         email: user.email,
         phone: user.phone,
+        userType: user.userType,
       };
 
       await SecureStore.setItemAsync(

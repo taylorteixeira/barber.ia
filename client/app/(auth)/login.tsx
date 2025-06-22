@@ -7,9 +7,9 @@ import {
   SafeAreaView,
   Alert,
 } from 'react-native';
-import { useState } from 'react';
-import { Link, useRouter } from 'expo-router';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react-native';
+import { useState, useEffect } from 'react';
+import { Link, useRouter, useLocalSearchParams } from 'expo-router';
+import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react-native';
 import { loginUser } from '@/services/database';
 
 export default function LoginScreen() {
@@ -18,6 +18,12 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const userType = (params.userType as 'client' | 'barber') || 'client';
+  const handleGoBack = () => {
+    router.push('/landing');
+  };
+
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos');
@@ -29,7 +35,19 @@ export default function LoginScreen() {
       const user = await loginUser(email, password);
       
       if (user) {
-        router.replace('/(tabs)');
+        // Check if user type matches
+        if (user.userType !== userType) {
+          const typeText = userType === 'client' ? 'cliente' : 'barbeiro';
+          Alert.alert('Erro', `Esta conta não é de ${typeText}. Verifique o tipo de acesso.`);
+          setLoading(false);
+          return;
+        }        console.log('Navigating to:', userType === 'barber' ? '/(barbertabs)' : '/(tabs)');
+        
+        if (userType === 'barber') {
+          router.replace('/(barbertabs)' as any);
+        } else {
+          router.replace('/(tabs)');
+        }
       } else {
         Alert.alert('Erro', 'Email ou senha incorretos');
       }
@@ -47,13 +65,25 @@ export default function LoginScreen() {
       `Login com ${provider} será implementado em breve`
     );
   };
-
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
+      <View style={styles.content}>        {/* Back Button */}
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={handleGoBack}
+        >
+          <ArrowLeft size={24} color="#6B7280" />
+        </TouchableOpacity>
+        
         <View style={styles.header}>
-          <Text style={styles.title}>Bem-vindo de volta!</Text>
-          <Text style={styles.subtitle}>Faça login para continuar</Text>
+          <Text style={styles.title}>
+            {userType === 'barber' ? 'Área do Barbeiro' : 'Área do Cliente'}
+          </Text>
+          <Text style={styles.subtitle}>
+            {userType === 'barber' 
+              ? 'Gerencie sua barbearia e clientes' 
+              : 'Encontre e agende com barbeiros'}
+          </Text>
         </View>
 
         <View style={styles.form}>
@@ -121,12 +151,10 @@ export default function LoginScreen() {
           >
             <Text style={styles.socialButtonText}>Continuar com Apple</Text>
           </TouchableOpacity>
-        </View>
-
-        <View style={styles.footer}>
+        </View>        <View style={styles.footer}>
           <Text style={styles.footerText}>
             Não tem uma conta?{' '}
-            <Link href="/(auth)/register" asChild>
+            <Link href={`/(auth)/register?userType=${userType}`} asChild>
               <Text style={styles.footerLink}>Cadastre-se</Text>
             </Link>
           </Text>
@@ -140,11 +168,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-  },
-  content: {
+  },  content: {
     flex: 1,
     paddingHorizontal: 24,
     justifyContent: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 24,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
   },
   header: {
     marginBottom: 40,

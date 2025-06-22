@@ -8,8 +8,8 @@ import {
   Alert,
 } from 'react-native';
 import { useState } from 'react';
-import { Link, useRouter } from 'expo-router';
-import { User, Mail, Lock, Eye, EyeOff, Phone } from 'lucide-react-native';
+import { Link, useRouter, useLocalSearchParams } from 'expo-router';
+import { User, Mail, Lock, Eye, EyeOff, Phone, ArrowLeft } from 'lucide-react-native';
 import { registerUser } from '@/services/database';
 
 export default function RegisterScreen() {
@@ -21,7 +21,12 @@ export default function RegisterScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const router = useRouter();  const params = useLocalSearchParams();
+  const userType = (params.userType as 'client' | 'barber') || 'client';
+  const handleGoBack = () => {
+    router.push('/landing');
+  };
+
   const handleRegister = async () => {
     if (!name || !email || !phone || !password || !confirmPassword) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos');
@@ -40,17 +45,17 @@ export default function RegisterScreen() {
 
     setLoading(true);
     
-    try {
-      const success = await registerUser({
+    try {      const success = await registerUser({
         name,
         email,
         phone,
-        password
+        password,
+        userType
       });
       
       if (success) {
         Alert.alert('Sucesso', 'Conta criada com sucesso!', [
-          { text: 'OK', onPress: () => router.replace('/(auth)/login') },
+          { text: 'OK', onPress: () => router.replace(`/(auth)/login?userType=${userType}`) },
         ]);
       } else {
         Alert.alert('Erro', 'Ocorreu um erro ao criar sua conta. O email já pode estar em uso.');
@@ -62,13 +67,25 @@ export default function RegisterScreen() {
       setLoading(false);
     }
   };
-
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
+      <View style={styles.content}>        {/* Back Button */}
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={handleGoBack}
+        >
+          <ArrowLeft size={24} color="#6B7280" />
+        </TouchableOpacity>
+        
         <View style={styles.header}>
-          <Text style={styles.title}>Criar Conta</Text>
-          <Text style={styles.subtitle}>Preencha os dados para começar</Text>
+          <Text style={styles.title}>
+            Criar Conta {userType === 'barber' ? 'Barbeiro' : 'Cliente'}
+          </Text>
+          <Text style={styles.subtitle}>
+            {userType === 'barber' 
+              ? 'Cadastre sua barbearia na plataforma' 
+              : 'Preencha os dados para começar'}
+          </Text>
         </View>
 
         <View style={styles.form}>
@@ -165,12 +182,10 @@ export default function RegisterScreen() {
               {loading ? 'Criando conta...' : 'Criar Conta'}
             </Text>
           </TouchableOpacity>
-        </View>
-
-        <View style={styles.footer}>
+        </View>        <View style={styles.footer}>
           <Text style={styles.footerText}>
             Já tem uma conta?{' '}
-            <Link href="/(auth)/login" asChild>
+            <Link href={`/(auth)/login?userType=${userType}`} asChild>
               <Text style={styles.footerLink}>Faça login</Text>
             </Link>
           </Text>
@@ -184,11 +199,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-  },
-  content: {
+  },  content: {
     flex: 1,
     paddingHorizontal: 24,
     justifyContent: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 24,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
   },
   header: {
     marginBottom: 40,
