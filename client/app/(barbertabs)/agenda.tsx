@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Alert,
   Modal,
+  TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
@@ -25,8 +27,13 @@ import {
   XCircle,
   MessageSquare,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Download,
+  FileText,
+  Calendar,
+  Settings
 } from 'lucide-react-native';
+import { exportAppointments, getPredefinedPeriods, AppointmentExport, ExportOptions } from '../../services/exportService';
 
 interface AppointmentDetail {
   id: string;
@@ -44,10 +51,17 @@ interface AppointmentDetail {
 }
 
 export default function BarberAgenda() {
-  const router = useRouter();
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const router = useRouter();  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentDetail | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  
+  // Estados para exportação
+  const [exportModalVisible, setExportModalVisible] = useState(false);
+  const [exportFormat, setExportFormat] = useState<'csv' | 'excel' | 'pdf'>('csv');
+  const [exportStartDate, setExportStartDate] = useState('');
+  const [exportEndDate, setExportEndDate] = useState('');
+  const [exportStatus, setExportStatus] = useState<string[]>([]);
+  const [isExporting, setIsExporting] = useState(false);
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
     const today = new Date();
     const dayOfWeek = today.getDay();
@@ -277,7 +291,6 @@ export default function BarberAgenda() {
       ]
     );
   };
-
   const handleCallClient = () => {
     if (selectedAppointment) {
       Alert.alert(
@@ -294,15 +307,97 @@ export default function BarberAgenda() {
     }
   };
 
+  // Funções de exportação
+  const openExportModal = () => {
+    const predefinedPeriods = getPredefinedPeriods();
+    setExportStartDate(predefinedPeriods.thisMonth.startDate);
+    setExportEndDate(predefinedPeriods.thisMonth.endDate);
+    setExportModalVisible(true);
+  };
+
+  const closeExportModal = () => {
+    setExportModalVisible(false);
+    setExportFormat('csv');
+    setExportStartDate('');
+    setExportEndDate('');
+    setExportStatus([]);
+  };
+
+  const handleExport = async () => {
+    if (!exportStartDate || !exportEndDate) {
+      Alert.alert('Erro', 'Selecione as datas de início e fim');
+      return;
+    }
+
+    if (new Date(exportStartDate) > new Date(exportEndDate)) {
+      Alert.alert('Erro', 'A data de início deve ser menor que a data de fim');
+      return;
+    }
+
+    setIsExporting(true);
+
+    try {
+      // Converter agendamentos para o formato de exportação
+      const appointmentsToExport: AppointmentExport[] = appointments.map(apt => ({
+        id: apt.id,
+        date: apt.date,
+        time: apt.time,
+        client: apt.client,
+        service: apt.service,
+        duration: apt.duration,
+        status: apt.status,
+        phone: apt.phone,
+        email: apt.email,
+        price: apt.price,
+        notes: apt.notes,
+        createdAt: apt.createdAt,
+        barber: 'Proprietário', // Por enquanto assumindo que é sempre o proprietário
+      }));
+
+      const exportOptions: ExportOptions = {
+        format: exportFormat,
+        startDate: exportStartDate,
+        endDate: exportEndDate,
+        status: exportStatus.length > 0 ? exportStatus : undefined,
+      };
+
+      await exportAppointments(appointmentsToExport, exportOptions);
+      closeExportModal();
+    } catch (error) {
+      console.error('Erro na exportação:', error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const toggleExportStatus = (status: string) => {
+    setExportStatus(prev => 
+      prev.includes(status) 
+        ? prev.filter(s => s !== status)
+        : [...prev, status]
+    );
+  };
+
+  const setPredefinedPeriod = (period: keyof ReturnType<typeof getPredefinedPeriods>) => {
+    const periods = getPredefinedPeriods();
+    const selectedPeriod = periods[period];
+    setExportStartDate(selectedPeriod.startDate);
+    setExportEndDate(selectedPeriod.endDate);
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
+    <SafeAreaView style={styles.container}>      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Agenda</Text>
-        <TouchableOpacity style={styles.addButton} onPress={handleAddAppointment}>
-          <Plus size={20} color="#FFFFFF" />
-        </TouchableOpacity>
-      </View>      {/* Date Selector */}
+        <View style={styles.headerButtons}>
+          <TouchableOpacity style={styles.exportButton} onPress={openExportModal}>
+            <Download size={18} color="#059669" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.addButton} onPress={handleAddAppointment}>
+            <Plus size={20} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
+      </View>{/* Date Selector */}
       <View style={styles.dateContainer}>
         <View style={styles.weekNavigation}>
           <TouchableOpacity 
@@ -636,6 +731,184 @@ export default function BarberAgenda() {
                 </View>
               </>
             )}
+          </View>
+        </View>      </Modal>
+
+      {/* Modal de Exportação */}
+      <Modal
+        visible={exportModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={closeExportModal}
+      >
+        <View style={styles.exportModalContent}>
+          {/* Header do Modal */}
+          <View style={styles.exportModalHeader}>
+            <Text style={styles.exportModalTitle}>Exportar Agendamentos</Text>
+            <TouchableOpacity onPress={closeExportModal}>
+              <X size={24} color="#6B7280" />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {/* Formato de Arquivo */}
+            <View style={styles.exportSection}>
+              <Text style={styles.exportSectionTitle}>Formato do Arquivo</Text>
+              <View style={styles.formatButtons}>
+                <TouchableOpacity
+                  style={[
+                    styles.formatButton,
+                    exportFormat === 'csv' && styles.formatButtonSelected,
+                  ]}
+                  onPress={() => setExportFormat('csv')}
+                >
+                  <FileText size={16} color={exportFormat === 'csv' ? '#059669' : '#6B7280'} />
+                  <Text style={[
+                    styles.formatButtonText,
+                    exportFormat === 'csv' && styles.formatButtonTextSelected,
+                  ]}>CSV</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[
+                    styles.formatButton,
+                    exportFormat === 'excel' && styles.formatButtonSelected,
+                  ]}
+                  onPress={() => setExportFormat('excel')}
+                >
+                  <FileText size={16} color={exportFormat === 'excel' ? '#059669' : '#6B7280'} />
+                  <Text style={[
+                    styles.formatButtonText,
+                    exportFormat === 'excel' && styles.formatButtonTextSelected,
+                  ]}>Excel</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[
+                    styles.formatButton,
+                    exportFormat === 'pdf' && styles.formatButtonSelected,
+                  ]}
+                  onPress={() => setExportFormat('pdf')}
+                >
+                  <FileText size={16} color={exportFormat === 'pdf' ? '#059669' : '#6B7280'} />
+                  <Text style={[
+                    styles.formatButtonText,
+                    exportFormat === 'pdf' && styles.formatButtonTextSelected,
+                  ]}>PDF</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Período */}
+            <View style={styles.exportSection}>
+              <Text style={styles.exportSectionTitle}>Período</Text>
+              <View style={styles.periodButtons}>
+                {Object.entries(getPredefinedPeriods()).map(([key, period]) => (
+                  <TouchableOpacity
+                    key={key}
+                    style={[
+                      styles.periodButton,
+                      exportStartDate === period.startDate && 
+                      exportEndDate === period.endDate && 
+                      styles.periodButtonSelected,
+                    ]}
+                    onPress={() => setPredefinedPeriod(key as any)}
+                  >
+                    <Text style={[
+                      styles.periodButtonText,
+                      exportStartDate === period.startDate && 
+                      exportEndDate === period.endDate && 
+                      styles.periodButtonTextSelected,
+                    ]}>
+                      {period.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              
+              <View style={styles.dateInputs}>
+                <View style={styles.dateInputContainer}>
+                  <Text style={styles.dateLabel}>Data Início</Text>
+                  <TextInput
+                    style={styles.dateInput}
+                    value={exportStartDate}
+                    onChangeText={setExportStartDate}
+                    placeholder="YYYY-MM-DD"
+                    placeholderTextColor="#9CA3AF"
+                  />
+                </View>
+                <View style={styles.dateInputContainer}>
+                  <Text style={styles.dateLabel}>Data Fim</Text>
+                  <TextInput
+                    style={styles.dateInput}
+                    value={exportEndDate}
+                    onChangeText={setExportEndDate}
+                    placeholder="YYYY-MM-DD"
+                    placeholderTextColor="#9CA3AF"
+                  />
+                </View>
+              </View>
+            </View>
+
+            {/* Filtros de Status */}
+            <View style={styles.exportSection}>
+              <Text style={styles.exportSectionTitle}>Status (Opcional)</Text>
+              <View style={styles.statusFilters}>
+                {[
+                  { key: 'confirmed', label: 'Confirmado' },
+                  { key: 'pending', label: 'Pendente' },
+                  { key: 'completed', label: 'Concluído' },
+                  { key: 'cancelled', label: 'Cancelado' },
+                ].map((status) => (
+                  <TouchableOpacity
+                    key={status.key}
+                    style={[
+                      styles.statusFilter,
+                      exportStatus.includes(status.key) && styles.statusFilterSelected,
+                    ]}
+                    onPress={() => toggleExportStatus(status.key)}
+                  >
+                    <Text style={[
+                      styles.statusFilterText,
+                      exportStatus.includes(status.key) && styles.statusFilterTextSelected,
+                    ]}>
+                      {status.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text style={styles.dateLabel}>
+                {exportStatus.length === 0 ? 'Todos os status serão incluídos' : `${exportStatus.length} status selecionados`}
+              </Text>
+            </View>
+          </ScrollView>
+
+          {/* Ações do Modal */}
+          <View style={styles.exportModalActions}>
+            <TouchableOpacity
+              style={styles.exportCancelButton}
+              onPress={closeExportModal}
+            >
+              <Text style={styles.exportCancelButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[
+                styles.exportConfirmButton,
+                isExporting && styles.exportConfirmButtonDisabled,
+              ]}
+              onPress={handleExport}
+              disabled={isExporting}
+            >
+              {isExporting ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Download size={16} color="#FFFFFF" />
+              )}
+              <Text style={styles.exportConfirmButtonText}>
+                {isExporting ? 'Exportando...' : 'Exportar'}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -1194,10 +1467,198 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     marginBottom: 2,
     marginTop: 8,
-  },
-  additionalValue: {
+  },  additionalValue: {
     fontSize: 14,
     fontFamily: 'Inter-SemiBold',
     color: '#374151',
+  },
+  // Estilos para exportação
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  exportButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F0FDF4',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+  },
+  exportModalContent: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 20,
+    maxHeight: '80%',
+  },
+  exportModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  exportModalTitle: {
+    fontSize: 20,
+    fontFamily: 'Inter-Bold',
+    color: '#1F2937',
+  },
+  exportSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  exportSectionTitle: {
+    fontSize: 16,
+    fontFamily: 'Inter-SemiBold',
+    color: '#1F2937',
+    marginBottom: 12,
+  },
+  formatButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  formatButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+    backgroundColor: '#FFFFFF',
+  },
+  formatButtonSelected: {
+    borderColor: '#059669',
+    backgroundColor: '#F0FDF4',
+  },
+  formatButtonText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: '#6B7280',
+    marginLeft: 8,
+  },
+  formatButtonTextSelected: {
+    color: '#059669',
+  },
+  periodButtons: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+  periodButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    backgroundColor: '#F3F4F6',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  periodButtonSelected: {
+    backgroundColor: '#F0FDF4',
+    borderColor: '#BBF7D0',
+  },
+  periodButtonText: {
+    fontSize: 12,
+    fontFamily: 'Inter-Medium',
+    color: '#6B7280',
+  },
+  periodButtonTextSelected: {
+    color: '#059669',
+  },
+  dateInputs: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  dateInputContainer: {
+    flex: 1,
+  },
+  dateLabel: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  dateInput: {
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#1F2937',
+    backgroundColor: '#FFFFFF',
+  },
+  statusFilters: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  statusFilter: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    backgroundColor: '#F3F4F6',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  statusFilterSelected: {
+    backgroundColor: '#F0FDF4',
+    borderColor: '#BBF7D0',
+  },
+  statusFilterText: {
+    fontSize: 12,
+    fontFamily: 'Inter-Medium',
+    color: '#6B7280',
+  },
+  statusFilterTextSelected: {
+    color: '#059669',
+  },
+  exportModalActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    backgroundColor: '#F9FAFB',
+  },
+  exportCancelButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+  },
+  exportCancelButtonText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: '#6B7280',
+  },
+  exportConfirmButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#059669',
+  },
+  exportConfirmButtonDisabled: {
+    backgroundColor: '#9CA3AF',
+  },
+  exportConfirmButtonText: {
+    fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
+    color: '#FFFFFF',
+    marginLeft: 8,
   },
 });
