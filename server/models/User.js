@@ -33,7 +33,19 @@ const UserSchema = new mongoose.Schema({
   barbershop: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Barbershop',
-    required: true,
+    required: false, // compatibilidade
+  },
+  barbershops: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Barbershop',
+    required: false
+  }],
+  location: {
+    type: {
+      lat: { type: Number },
+      lng: { type: Number }
+    },
+    required: false
   },
   createdAt: {
     type: Date,

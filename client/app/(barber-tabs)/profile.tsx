@@ -26,35 +26,29 @@ import {
   Mail,
 } from 'lucide-react-native';
 import { getCurrentUser, logoutUser } from '../../services/database';
+import axios from 'axios';
 
 export default function BarberProfile() {
   const router = useRouter();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [barberData, setBarberData] = useState({
-    name: 'Carregando...',
-    email: 'carregando@email.com',
-    phone: '(11) 99999-9999',
-    address: 'Rua das Flores, 123 - Centro',
-    avatar: 'https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg',
-    barbershopName: 'Barbearia Premium',
-    workingHours: '09:00 - 18:00',
-    services: ['Corte', 'Barba', 'Sobrancelha'],
-    priceRange: 'R$ 25 - R$ 50',
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    avatar: '',
+    barbershopName: '',
+    workingHours: '',
+    services: [],
+    priceRange: '',
   });
 
   useEffect(() => {
-    const loadBarberData = async () => {
-      const userData = await getCurrentUser();
-      if (userData) {
-        setBarberData({
-          ...barberData,
-          name: userData.name,
-          email: userData.email,
-          phone: userData.phone || '(11) 99999-9999',
-        });
-      }
-    };
-    loadBarberData();
+    axios.get('http://localhost:5000/barber/me')
+      .then(res => setBarberData(res.data))
+      .catch(() => setBarberData({
+        name: '', email: '', phone: '', address: '', avatar: '', barbershopName: '', workingHours: '', services: [], priceRange: ''
+      }));
   }, []);
 
   const handleLogout = () => {

@@ -10,15 +10,29 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { getBarbers, Barber, createBooking } from '@/services/database';
-import {
-  Calendar,
-  Clock,
-  Star,
-  MapPin,
-  Phone,
-  User,
-} from 'lucide-react-native';
+import axios from 'axios';
+import { Star, MapPin, Clock, Phone, Calendar } from 'lucide-react-native';
+
+// Interface para o barbeiro
+interface Barber {
+  id: string;
+  name: string;
+  image: string;
+  rating: number;
+  reviews: number;
+  price: number;
+  distance: number;
+}
+
+// Função para criar agendamento real via backend
+async function createBooking(booking: any) {
+  try {
+    await axios.post('http://localhost:5000/booking', booking);
+  } catch (err) {
+    console.error('Erro ao criar agendamento:', err);
+    throw err;
+  }
+}
 
 export default function BarberProfile() {
   const params = useLocalSearchParams<{ id: string }>();
@@ -27,12 +41,10 @@ export default function BarberProfile() {
   const [barber, setBarber] = useState<Barber | null>(null);
 
   useEffect(() => {
-    const load = async () => {
-      const all = await getBarbers();
-      const found = all.find((b) => b.id === id);
-      setBarber(found || null);
-    };
-    load();
+    axios
+      .get(`http://localhost:5000/barber/${id}`)
+      .then((res: any) => setBarber(res.data))
+      .catch(() => setBarber(null));
   }, [id]);
 
   if (!barber) {

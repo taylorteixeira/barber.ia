@@ -23,7 +23,7 @@ import {
   Activity,
   TrendingDown,
 } from 'lucide-react-native';
-import { getCurrentUser } from '../../services/database';
+import axios from 'axios';
 
 export default function BarberDashboard() {
   const router = useRouter();
@@ -65,16 +65,15 @@ export default function BarberDashboard() {
   });
 
   useEffect(() => {
-    const loadBarberData = async () => {
-      const userData = await getCurrentUser();
-      if (userData) {
-        setBarberData({
-          name: userData.name,
-          barbershopName: userData.barbershopName || 'Minha Barbearia',
-        });
-      }
-    };
-    loadBarberData();
+    axios.get('http://localhost:5000/barber/me')
+      .then((res: any) => setBarberData(res.data))
+      .catch(() => setBarberData({ name: '', barbershopName: '' }));
+    axios.get('http://localhost:5000/dashboard/stats')
+      .then((res: any) => setStats(res.data))
+      .catch(() => setStats({ todayAppointments: 0, weekRevenue: 0, totalClients: 0, averageRating: 0, pendingAppointments: 0, monthlyGrowth: 0 }));
+    axios.get('http://localhost:5000/dashboard/data')
+      .then((res: any) => setDashboardData(res.data))
+      .catch(() => setDashboardData({ weeklyComparison: { thisWeek: 0, lastWeek: 0, growth: 0 }, topServices: [], clientRetention: { returning: 0, new: 0 }, dailyRevenue: [], busyHours: [] }));
   }, []);
   const handleQuickAction = (action: string) => {
     switch (action) {

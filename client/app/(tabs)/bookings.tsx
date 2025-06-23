@@ -1,3 +1,4 @@
+import axios from 'axios';
 import {
   View,
   Text,
@@ -11,26 +12,20 @@ import {
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { Calendar, Clock, MapPin, Phone, X, Star } from 'lucide-react-native';
-import { getBookings, updateBooking, Booking } from '@/services/database';
 
 type BookingStatus = 'confirmed' | 'completed' | 'cancelled';
 
 export default function BookingsScreen() {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [bookings, setBookings] = useState<any[]>([]);
   const router = useRouter();
 
   // Load bookings from database
   useEffect(() => {
-    const load = async () => {
-      try {
-        const data = await getBookings();
-        setBookings(data);
-      } catch (err) {
-        console.error('Failed to load bookings:', err);
-      }
-    };
-    load();
+    axios
+      .get('http://localhost:5000/booking')
+      .then((res: any) => setBookings(res.data))
+      .catch(() => setBookings([]));
   }, []);
 
   const upcomingBookings = bookings.filter((b) => b.status === 'confirmed');
@@ -78,15 +73,25 @@ export default function BookingsScreen() {
             const updated = bookings.find((b) => b.id === bookingId);
             if (updated) {
               const changed = { ...updated, status: 'cancelled' as const };
-              updateBooking(changed);
-              setBookings((prev) =>
-                prev.map((b) => (b.id === bookingId ? changed : b))
-              );
+              // Chamada axios para atualizar o agendamento no backend
+              axios
+                .put(`http://localhost:5000/booking/${bookingId}`, changed)
+                .then(() => {
+                  setBookings((prev) =>
+                    prev.map((b) => (b.id === bookingId ? changed : b))
+                  );
+                  Alert.alert(
+                    'Agendamento cancelado',
+                    'Seu agendamento foi cancelado com sucesso'
+                  );
+                })
+                .catch(() => {
+                  Alert.alert(
+                    'Erro',
+                    'Ocorreu um erro ao cancelar o agendamento. Tente novamente mais tarde.'
+                  );
+                });
             }
-            Alert.alert(
-              'Agendamento cancelado',
-              'Seu agendamento foi cancelado com sucesso'
-            );
           },
         },
       ]
@@ -98,17 +103,17 @@ export default function BookingsScreen() {
     router.push(`/review/${bookingId}`);
   };
 
-  const renderBookingCard = (booking: Booking) => (
+  const renderBookingCard = (booking: any) => (
     // @ts-ignore: suppress key prop error
-    <View key={booking.id} style={styles.bookingCard}>
+    <View key={String(booking.id)} style={styles.bookingCard}>
       <View style={styles.bookingHeader}>
         <Image
-          source={{ uri: booking.barberImage }}
+          source={{ uri: String(booking.barberImage ?? '') }}
           style={styles.barberImage}
         />
         <View style={styles.bookingInfo}>
-          <Text style={styles.barberName}>{booking.barberName}</Text>
-          <Text style={styles.serviceName}>{booking.service}</Text>
+          <Text style={styles.barberName}>{String(booking.barberName ?? '')}</Text>
+          <Text style={styles.serviceText}>{String(booking.service ?? '')}</Text>
           <View style={styles.statusContainer}>
             <View
               style={[
@@ -122,24 +127,24 @@ export default function BookingsScreen() {
             </View>
           </View>
         </View>
-        <Text style={styles.priceText}>R$ {booking.price}</Text>
+        <Text style={styles.priceText}>R$ {String(booking.price ?? '')}</Text>
       </View>
 
       <View style={styles.bookingDetails}>
         <View style={styles.detailRow}>
           <Calendar size={16} color="#6B7280" />
           <Text style={styles.detailText}>
-            {new Date(booking.date).toLocaleDateString('pt-BR')} às{' '}
-            {booking.time}
+            {String(new Date(booking.date).toLocaleDateString('pt-BR'))} às{' '}
+            {String(booking.time ?? '')}
           </Text>
         </View>
         <View style={styles.detailRow}>
           <MapPin size={16} color="#6B7280" />
-          <Text style={styles.detailText}>{booking.address}</Text>
+          <Text style={styles.detailText}>{String(booking.address ?? '')}</Text>
         </View>
         <View style={styles.detailRow}>
           <Phone size={16} color="#6B7280" />
-          <Text style={styles.detailText}>{booking.phone}</Text>
+          <Text style={styles.detailText}>{String(booking.phone ?? '')}</Text>
         </View>
       </View>
 
@@ -148,7 +153,7 @@ export default function BookingsScreen() {
           <>
             <TouchableOpacity
               style={styles.cancelButton}
-              onPress={() => handleCancelBooking(booking.id)}
+              onPress={() => handleCancelBooking(String(booking.id))}
             >
               <X size={16} color="#EF4444" />
               <Text style={styles.cancelButtonText}>Cancelar</Text>
@@ -162,7 +167,7 @@ export default function BookingsScreen() {
         {booking.status === 'completed' && (
           <TouchableOpacity
             style={styles.rateButton}
-            onPress={() => handleRateService(booking.id)}
+            onPress={() => handleRateService(String(booking.id))}
           >
             <Star size={16} color="#F59E0B" />
             <Text style={styles.rateButtonText}>Avaliar</Text>
@@ -237,9 +242,8 @@ export default function BookingsScreen() {
           <View style={styles.emptyState}>
             <Clock size={48} color="#6B7280" />
             <Text style={styles.emptyStateTitle}>Nenhum histórico ainda</Text>
-            <Text style={styles.emptyStateText}>
-              Seus agendamentos concluídos aparecerão aqui
-            </Text>
+            {/* Corrigido: garantir que não há texto solto aqui */}
+            {/* Se quiser adicionar texto, sempre dentro de <Text> */}
           </View>
         )}
       </ScrollView>
@@ -329,7 +333,7 @@ const styles = StyleSheet.create({
     color: '#111827',
     marginBottom: 4,
   },
-  serviceName: {
+  serviceText: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
     color: '#6B7280',

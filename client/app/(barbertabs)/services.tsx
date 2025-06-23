@@ -22,6 +22,7 @@ import {
   Save,
   X,
 } from 'lucide-react-native';
+import axios from 'axios';
 
 interface Service {
   id: string;
@@ -34,33 +35,7 @@ interface Service {
 
 export default function ServicesManagement() {
   const router = useRouter();
-  const [services, setServices] = useState<Service[]>([
-    {
-      id: '1',
-      name: 'Corte Masculino',
-      description: 'Corte tradicional masculino',
-      price: 25,
-      duration: 30,
-      category: 'Corte',
-    },
-    {
-      id: '2',
-      name: 'Barba Completa',
-      description: 'Barba + bigode + acabamento',
-      price: 20,
-      duration: 25,
-      category: 'Barba',
-    },
-    {
-      id: '3',
-      name: 'Sobrancelha',
-      description: 'Design de sobrancelha masculina',
-      price: 15,
-      duration: 15,
-      category: 'Estética',
-    },
-  ]);
-  
+  const [services, setServices] = useState<Service[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
@@ -145,6 +120,12 @@ export default function ServicesManagement() {
       ]
     );
   };
+
+  useEffect(() => {
+    axios.get('http://localhost:5000/service')
+      .then((res: any) => setServices(res.data))
+      .catch(() => setServices([]));
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>

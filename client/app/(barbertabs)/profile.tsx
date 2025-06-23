@@ -25,37 +25,51 @@ import {
   Phone,
   Mail,
 } from 'lucide-react-native';
-import { getCurrentUser, logoutUser } from '@/services/database';
+import axios from 'axios';
+import * as ImagePicker from 'expo-image-picker';
+import { uploadAvatar } from '@/services/database';
 
 export default function BarberProfile() {
   const router = useRouter();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [barberData, setBarberData] = useState({
-    name: 'Carregando...',
-    email: 'carregando@email.com',
-    phone: '(11) 99999-9999',
-    address: 'Rua das Flores, 123 - Centro',
-    avatar: 'https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg',
-    barbershopName: 'Barbearia Premium',
-    workingHours: '09:00 - 18:00',
-    services: ['Corte', 'Barba', 'Sobrancelha'],
-    priceRange: 'R$ 25 - R$ 50',
+    id: '',
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    avatar: '',
+    barbershopName: '',
+    workingHours: '',
+    services: [],
+    priceRange: '',
   });
 
   useEffect(() => {
-    const loadBarberData = async () => {
-      const userData = await getCurrentUser();
-      if (userData) {
-        setBarberData({
-          ...barberData,
-          name: userData.name,
-          email: userData.email,
-          phone: userData.phone || '(11) 99999-9999',
-        });
-      }
-    };
-    loadBarberData();
+    axios.get('http://localhost:5000/barber/me')
+      .then((res: any) => setBarberData(res.data))
+      .catch(() => setBarberData({
+        id: '', name: '', email: '', phone: '', address: '', avatar: '', barbershopName: '', workingHours: '', services: [], priceRange: ''
+      }));
   }, []);
+
+  // Função para selecionar imagem da galeria e atualizar avatar
+  const pickAvatar = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      const avatarUrl = await uploadAvatar(uri, 'barber', barberData.id || 'me');
+      if (avatarUrl) {
+        setBarberData((prev) => ({ ...prev, avatar: avatarUrl }));
+        await axios.put(`http://localhost:5000/barber/${barberData.id || 'me'}`, { avatar: avatarUrl });
+      }
+    }
+  };
 
   const handleLogout = () => {
     Alert.alert(
@@ -67,7 +81,6 @@ export default function BarberProfile() {
           text: 'Sair',
           style: 'destructive',
           onPress: async () => {
-            await logoutUser();
             router.replace('/landing');
           },
         },
@@ -135,22 +148,24 @@ export default function BarberProfile() {
 
         {/* Profile Info */}
         <View style={styles.profileSection}>
-          <Image source={{ uri: barberData.avatar }} style={styles.avatar} />
+          <TouchableOpacity onPress={pickAvatar}>
+            <Image source={{ uri: barberData.avatar }} style={styles.avatar} />
+          </TouchableOpacity>
           <View style={styles.profileInfo}>
-            <Text style={styles.name}>{barberData.name}</Text>
-            <Text style={styles.barbershopName}>{barberData.barbershopName}</Text>
+            <Text style={styles.name}>{String(barberData.name ?? '')}</Text>
+            <Text style={styles.barbershopName}>{String(barberData.barbershopName ?? '')}</Text>
             <View style={styles.contactInfo}>
               <View style={styles.contactItem}>
                 <Mail size={14} color="#6B7280" />
-                <Text style={styles.contactText}>{barberData.email}</Text>
+                <Text style={styles.contactText}>{String(barberData.email ?? '')}</Text>
               </View>
               <View style={styles.contactItem}>
                 <Phone size={14} color="#6B7280" />
-                <Text style={styles.contactText}>{barberData.phone}</Text>
+                <Text style={styles.contactText}>{String(barberData.phone ?? '')}</Text>
               </View>
               <View style={styles.contactItem}>
                 <MapPin size={14} color="#6B7280" />
-                <Text style={styles.contactText}>{barberData.address}</Text>
+                <Text style={styles.contactText}>{String(barberData.address ?? '')}</Text>
               </View>
             </View>
           </View>

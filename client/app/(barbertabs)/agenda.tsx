@@ -10,7 +10,7 @@ import {
   TextInput,
   ActivityIndicator,
 } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { 
   Calendar as CalendarIcon, 
@@ -34,6 +34,7 @@ import {
   Settings
 } from 'lucide-react-native';
 import { exportAppointments, getPredefinedPeriods, AppointmentExport, ExportOptions } from '../../services/exportService';
+import axios from 'axios';
 
 interface AppointmentDetail {
   id: string;
@@ -70,111 +71,19 @@ export default function BarberAgenda() {
     monday.setDate(today.getDate() + mondayOffset);
     return monday;
   });
-    const appointments: AppointmentDetail[] = [
-    { 
-      id: '1', 
-      time: '09:00', 
-      client: 'João Silva', 
-      service: 'Corte + Barba', 
-      duration: 60, 
-      status: 'confirmed',
-      phone: '(11) 99999-1111',
-      email: 'joao@email.com',
-      price: 45,
-      notes: 'Cliente prefere barba mais curta',
-      createdAt: '2025-06-22T10:30:00Z',
-      date: '2025-06-22'
-    },
-    { 
-      id: '2', 
-      time: '10:30', 
-      client: 'Pedro Santos', 
-      service: 'Corte', 
-      duration: 30, 
-      status: 'confirmed',
-      phone: '(11) 99999-2222',
-      price: 25,
-      createdAt: '2025-06-22T09:15:00Z',
-      date: '2025-06-22'
-    },
-    { 
-      id: '3', 
-      time: '11:45', 
-      client: 'Carlos Lima', 
-      service: 'Barba', 
-      duration: 30, 
-      status: 'confirmed',
-      phone: '(11) 99999-3333',
-      email: 'carlos@email.com',
-      price: 20,
-      createdAt: '2025-06-21T16:20:00Z',
-      date: '2025-06-23'
-    },
-    { 
-      id: '4', 
-      time: '14:30', 
-      client: 'Ana Costa', 
-      service: 'Corte', 
-      duration: 45, 
-      status: 'pending',
-      phone: '(11) 99999-4444',
-      price: 25,
-      notes: 'Primeira vez na barbearia',
-      createdAt: '2025-06-22T12:00:00Z',
-      date: '2025-06-23'
-    },
-    { 
-      id: '5', 
-      time: '15:45', 
-      client: 'Rafael Oliveira', 
-      service: 'Corte + Barba', 
-      duration: 60, 
-      status: 'confirmed',
-      phone: '(11) 99999-5555',
-      email: 'rafael@email.com',
-      price: 45,
-      createdAt: '2025-06-20T14:30:00Z',
-      date: '2025-06-24'
-    },
-    { 
-      id: '6', 
-      time: '17:00', 
-      client: 'Lucas Ferreira', 
-      service: 'Corte', 
-      duration: 30, 
-      status: 'confirmed',
-      phone: '(11) 99999-6666',
-      price: 25,
-      createdAt: '2025-06-22T11:45:00Z',
-      date: '2025-06-24'
-    },
-    { 
-      id: '7', 
-      time: '09:30', 
-      client: 'Marina Santos', 
-      service: 'Corte Feminino', 
-      duration: 45, 
-      status: 'pending',
-      phone: '(11) 99999-7777',
-      email: 'marina@email.com',
-      price: 35,
-      createdAt: '2025-06-22T08:00:00Z',
-      date: '2025-06-25'
-    },
-    { 
-      id: '8', 
-      time: '16:00', 
-      client: 'Roberto Silva', 
-      service: 'Barba + Bigode', 
-      duration: 40, 
-      status: 'confirmed',
-      phone: '(11) 99999-8888',
-      price: 30,
-      notes: 'Cliente tem alergia a alguns produtos',
-      createdAt: '2025-06-21T15:20:00Z',
-      date: '2025-06-26'
-    },
-  ];
+    const [appointments, setAppointments] = useState<AppointmentDetail[]>([]);
+  useEffect(() => {
+    axios.get('http://localhost:5000/booking')
+      .then((res) => {
+        // Força o tipo e filtra apenas objetos válidos
+        const data = Array.isArray(res.data) ? res.data.filter(item =>
+          item && typeof item === 'object' &&
+          'id' in item && 'time' in item && 'duration' in item && 'client' in item && 'service' in item && 'status' in item
+        ) : [];
+        setAppointments(data as AppointmentDetail[]);
+      })
+      .catch(() => setAppointments([]));
+  }, []);
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmed': return '#10B981';
@@ -498,16 +407,16 @@ export default function BarberAgenda() {
               onPress={() => openAppointmentDetails(appointment)}
             >
               <View style={styles.timeColumn}>
-                <Text style={styles.appointmentTime}>{appointment.time}</Text>
+                <Text style={styles.appointmentTime}>{String(appointment.time ?? '')}</Text>
                 <View style={styles.durationContainer}>
                   <Clock size={12} color="#6B7280" />
-                  <Text style={styles.durationText}>{appointment.duration}min</Text>
+                  <Text style={styles.durationText}>{String(appointment.duration ?? '')}min</Text>
                 </View>
               </View>
 
               <View style={styles.appointmentDetails}>
-                <Text style={styles.clientName}>{appointment.client}</Text>
-                <Text style={styles.serviceText}>{appointment.service}</Text>
+                <Text style={styles.clientName}>{String(appointment.client ?? '')}</Text>
+                <Text style={styles.serviceText}>{String(appointment.service ?? '')}</Text>
                 <View style={styles.statusContainer}>
                   <View style={[
                     styles.statusDot, 
@@ -610,7 +519,7 @@ export default function BarberAgenda() {
                       <View style={styles.contactInfo}>
                         <View style={styles.infoRow}>
                           <Phone size={18} color="#6B7280" />
-                          <Text style={styles.infoText}>{selectedAppointment.phone}</Text>
+                          <Text style={styles.infoText}>{String(selectedAppointment.phone ?? '')}</Text>
                           <TouchableOpacity onPress={handleCallClient} style={styles.callButton}>
                             <Phone size={14} color="#FFFFFF" />
                             <Text style={styles.callButtonText}>Ligar</Text>
@@ -619,7 +528,7 @@ export default function BarberAgenda() {
                         {selectedAppointment.email && (
                           <View style={styles.infoRow}>
                             <MessageSquare size={18} color="#6B7280" />
-                            <Text style={styles.infoText}>{selectedAppointment.email}</Text>
+                            <Text style={styles.infoText}>{String(selectedAppointment.email ?? '')}</Text>
                           </View>
                         )}
                       </View>
@@ -634,18 +543,18 @@ export default function BarberAgenda() {
                         <Text style={styles.serviceName}>{selectedAppointment.service}</Text>
                         <View style={styles.priceTag}>
                           <DollarSign size={16} color="#059669" />
-                          <Text style={styles.priceText}>R$ {selectedAppointment.price.toFixed(2)}</Text>
+                          <Text style={styles.priceText}>R$ {String(selectedAppointment.price ?? '')}</Text>
                         </View>
                       </View>
                       
                       <View style={styles.timeDetails}>
                         <View style={styles.timeItem}>
                           <Clock size={16} color="#6B7280" />
-                          <Text style={styles.timeText}>Horário: {selectedAppointment.time}</Text>
+                          <Text style={styles.timeText}>Horário: {String(selectedAppointment.time ?? '')}</Text>
                         </View>
                         <View style={styles.timeItem}>
                           <CalendarIcon size={16} color="#6B7280" />
-                          <Text style={styles.timeText}>Duração: {selectedAppointment.duration} min</Text>
+                          <Text style={styles.timeText}>Duração: {String(selectedAppointment.duration ?? '')} min</Text>
                         </View>
                       </View>
                     </View>
@@ -656,7 +565,7 @@ export default function BarberAgenda() {
                       <Text style={styles.sectionTitle}>Observações</Text>
                       <View style={styles.notesCard}>
                         <MessageSquare size={18} color="#F59E0B" />
-                        <Text style={[styles.notesText, { marginLeft: 8, flex: 1 }]}>{selectedAppointment.notes}</Text>
+                        <Text style={[styles.notesText, { marginLeft: 8, flex: 1 }]}>{String(selectedAppointment.notes ?? '')}</Text>
                       </View>
                     </View>
                   )}

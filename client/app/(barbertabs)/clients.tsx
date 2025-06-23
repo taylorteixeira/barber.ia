@@ -8,64 +8,140 @@ import {
   TextInput,
   Image,
 } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Phone, Mail, Star, Plus } from 'lucide-react-native';
+import axios from 'axios';
+import * as ImagePicker from 'expo-image-picker';
+import { uploadAvatar } from '@/services/database';
+
+// Definição do tipo para cliente
+interface ClientType {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  lastVisit: string;
+  totalVisits: number;
+  avatar: string;
+  rating: number;
+  preferredService: string;
+}
 
 export default function BarberClients() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [clients, setClients] = useState<ClientType[]>([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editingClient, setEditingClient] = useState<ClientType | null>(null);
+  const [clientForm, setClientForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    avatar: '',
+    preferredService: '',
+  });
 
-  const clients = [
-    {
-      id: '1',
-      name: 'João Silva',
-      phone: '(11) 99999-1111',
-      email: 'joao@email.com',
-      lastVisit: '2024-06-20',
-      totalVisits: 15,
-      avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
-      rating: 5,
-      preferredService: 'Corte + Barba',
-    },
-    {
-      id: '2',
-      name: 'Pedro Santos',
-      phone: '(11) 99999-2222',
-      email: 'pedro@email.com',
-      lastVisit: '2024-06-18',
-      totalVisits: 8,
-      avatar: 'https://images.pexels.com/photos/1212984/pexels-photo-1212984.jpeg',
-      rating: 4,
-      preferredService: 'Corte',
-    },
-    {
-      id: '3',
-      name: 'Carlos Lima',
-      phone: '(11) 99999-3333',
-      email: 'carlos@email.com',
-      lastVisit: '2024-06-15',
-      totalVisits: 22,
-      avatar: 'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg',
-      rating: 5,
-      preferredService: 'Barba',
-    },
-    {
-      id: '4',
-      name: 'Ana Costa',
-      phone: '(11) 99999-4444',
-      email: 'ana@email.com',
-      lastVisit: '2024-06-12',
-      totalVisits: 5,
-      avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg',
-      rating: 4,
-      preferredService: 'Corte',
-    },
-  ];
+  useEffect(() => {
+    axios.get('http://localhost:5000/client')
+      .then((res) => setClients(res.data))
+      .catch(() => setClients([]));
+  }, []);
 
-  const filteredClients = clients.filter(client =>
-    client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    client.phone.includes(searchQuery) ||
-    client.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Função para selecionar imagem da galeria (para usar na criação/edição)
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      let clientId = editingClient?.id;
+      // Se estiver criando novo cliente, o upload será feito após o cadastro
+      if (clientId) {
+        const avatarUrl = await uploadAvatar(uri, 'client', clientId);
+        if (avatarUrl) {
+          setClientForm((prev) => ({ ...prev, avatar: avatarUrl }));
+          await axios.put(`http://localhost:5000/client/${clientId}`, { ...clientForm, avatar: avatarUrl });
+        }
+      } else {
+        // Para novo cliente, apenas atualiza o form localmente
+        setClientForm((prev) => ({ ...prev, avatar: uri }));
+      }
+    }
+  };
+
+  const openNewClientModal = () => {
+    setEditingClient(null);
+    setClientForm({ name: '', email: '', phone: '', avatar: '', preferredService: '' });
+    setModalVisible(true);
+  };
+
+  const openEditClientModal = (client: ClientType) => {
+    setEditingClient(client);
+    setClientForm({
+      name: client.name,
+      email: client.email,
+      phone: client.phone,
+      avatar: client.avatar,
+      preferredService: client.preferredService || '',
+    });
+    setModalVisible(true);
+  };
+
+  const handleSaveClient = async () => {
+    try {
+      if (!clientForm.name || !clientForm.email || !clientForm.phone) {
+        alert('Preencha nome, e-mail e telefone');
+        return;
+      }
+      if (editingClient) {
+        // Editar cliente
+        await axios.put(`http://localhost:5000/client/${editingClient.id}`, clientForm);
+      } else {
+        // Novo cliente
+        await axios.post('http://localhost:5000/client', clientForm);
+      }
+      setModalVisible(false);
+      setClientForm({ name: '', email: '', phone: '', avatar: '', preferredService: '' });
+      setEditingClient(null);
+      // Atualizar lista
+      const res = await axios.get('http://localhost:5000/client');
+      setClients(res.data);
+    } catch (e) {
+      alert('Erro ao salvar cliente');
+    }
+  };
+
+  const handleEdit = (client: ClientType) => {
+    openEditClientModal(client);
+  };
+
+  const handleDeleteClient = async (client: ClientType) => {
+    try {
+      await axios.delete(`http://localhost:5000/client/${client.id}`);
+      setModalVisible(false);
+      setEditingClient(null);
+      // Atualizar lista
+      const res = await axios.get('http://localhost:5000/client');
+      setClients(res.data);
+    } catch (e) {
+      alert('Erro ao excluir cliente');
+    }
+  };
+
+  // Proteção extra para garantir que todos os campos existem e são strings
+  const safeString = (value: any) => typeof value === 'string' ? value : '';
+  const safeNumber = (value: any) => typeof value === 'number' && !isNaN(value) ? value : 0;
+
+  // Busca protegida
+  const filteredClients = clients.filter(client => {
+    const name = safeString(client.name).toLowerCase();
+    const phone = safeString(client.phone);
+    const email = safeString(client.email).toLowerCase();
+    const query = searchQuery.toLowerCase();
+    return name.includes(query) || phone.includes(query) || email.includes(query);
+  });
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -83,7 +159,7 @@ export default function BarberClients() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Meus Clientes</Text>
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity style={styles.addButton} onPress={openNewClientModal}>
           <Plus size={20} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
@@ -108,17 +184,22 @@ export default function BarberClients() {
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>
             {clients.filter(c => {
-              const lastVisit = new Date(c.lastVisit);
+              const lastVisitStr = safeString(c.lastVisit);
+              if (!lastVisitStr) return false;
+              const lastVisitDate = new Date(lastVisitStr);
+              if (isNaN(lastVisitDate.getTime())) return false;
               const oneWeekAgo = new Date();
               oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-              return lastVisit >= oneWeekAgo;
+              return lastVisitDate >= oneWeekAgo;
             }).length}
           </Text>
           <Text style={styles.statLabel}>Esta Semana</Text>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>
-            {(clients.reduce((sum, c) => sum + c.rating, 0) / clients.length).toFixed(1)}
+            {clients.length > 0 ? (
+              (clients.reduce((sum, c) => sum + safeNumber(c.rating), 0) / clients.length).toFixed(1)
+            ) : '0.0'}
           </Text>
           <Text style={styles.statLabel}>Avaliação Média</Text>
         </View>
@@ -126,33 +207,26 @@ export default function BarberClients() {
 
       {/* Clients List */}
       <ScrollView style={styles.clientsList} showsVerticalScrollIndicator={false}>
-        {filteredClients.map((client) => (
-          <TouchableOpacity key={client.id} style={styles.clientCard}>
-            <Image source={{ uri: client.avatar }} style={styles.clientAvatar} />
-            
+        {filteredClients.map((client, idx) => (
+          <TouchableOpacity key={client.id || idx} style={styles.clientCard} onPress={() => handleEdit(client)}>
+            <Image source={{ uri: safeString(client.avatar) || 'https://ui-avatars.com/api/?name=Cliente' }} style={styles.clientAvatar} />
             <View style={styles.clientInfo}>
               <View style={styles.clientHeader}>
-                <Text style={styles.clientName}>{client.name}</Text>
+                <Text style={styles.clientName}>{safeString(client.name)}</Text>
                 <View style={styles.ratingContainer}>
-                  {renderStars(client.rating)}
+                  {renderStars(safeNumber(client.rating))}
                 </View>
               </View>
               
-              <Text style={styles.clientPhone}>{client.phone}</Text>
-              <Text style={styles.clientEmail}>{client.email}</Text>
+              <Text style={styles.clientPhone}>{safeString(client.phone)}</Text>
+              <Text style={styles.clientEmail}>{safeString(client.email)}</Text>
               
               <View style={styles.clientStats}>
-                <Text style={styles.preferredService}>
-                  Preferência: {client.preferredService}
-                </Text>
-                <Text style={styles.visitCount}>
-                  {client.totalVisits} visitas
-                </Text>
+                <Text style={styles.preferredService}>Preferência: {safeString(client.preferredService)}</Text>
+                <Text style={styles.visitCount}>{safeNumber(client.totalVisits)} visitas</Text>
               </View>
               
-              <Text style={styles.lastVisit}>
-                Última visita: {new Date(client.lastVisit).toLocaleDateString('pt-BR')}
-              </Text>
+              <Text style={styles.lastVisit}>Última visita: {String(new Date(client.lastVisit).toLocaleDateString('pt-BR'))}</Text>
             </View>
 
             <View style={styles.clientActions}>
@@ -166,6 +240,34 @@ export default function BarberClients() {
           </TouchableOpacity>
         ))}
       </ScrollView>
+
+      {/* Modal de cadastro/edição de cliente */}
+      {modalVisible && (
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'center', alignItems: 'center', zIndex: 10 }}>
+          <View style={{ backgroundColor: '#fff', borderRadius: 12, padding: 24, width: '90%' }}>
+            <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16 }}>{editingClient ? 'Editar Cliente' : 'Novo Cliente'}</Text>
+            <TextInput style={styles.input} placeholder="Nome" value={clientForm.name} onChangeText={t => setClientForm(f => ({ ...f, name: t }))} />
+            <TextInput style={styles.input} placeholder="E-mail" value={clientForm.email} onChangeText={t => setClientForm(f => ({ ...f, email: t }))} keyboardType="email-address" />
+            <TextInput style={styles.input} placeholder="Telefone" value={clientForm.phone} onChangeText={t => setClientForm(f => ({ ...f, phone: t }))} keyboardType="phone-pad" />
+            <TextInput style={styles.input} placeholder="Serviço preferido" value={clientForm.preferredService} onChangeText={t => setClientForm(f => ({ ...f, preferredService: t }))} />
+            
+            <TouchableOpacity onPress={pickImage} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+              <Image source={{ uri: clientForm.avatar || 'https://ui-avatars.com/api/?name=Cliente' }} style={{ width: 48, height: 48, borderRadius: 24, marginRight: 12 }} />
+              <Text style={{ fontSize: 16, fontFamily: 'Inter-Regular', color: '#1F2937' }}>{clientForm.avatar ? 'Alterar Imagem' : 'Selecionar Imagem'}</Text>
+            </TouchableOpacity>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 16 }}>
+              {editingClient && (
+                <TouchableOpacity onPress={() => handleDeleteClient(editingClient)} style={{ marginRight: 16 }}>
+                  <Text style={{ color: '#DC2626', fontWeight: 'bold' }}>Excluir</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={{ marginRight: 16 }}><Text>Cancelar</Text></TouchableOpacity>
+              <TouchableOpacity onPress={handleSaveClient}><Text style={{ color: '#059669', fontWeight: 'bold' }}>{editingClient ? 'Salvar' : 'Adicionar'}</Text></TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -333,5 +435,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
+  },
+  input: {
+    height: 48,
+    borderColor: '#D1D5DB',
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    color: '#1F2937',
   },
 });

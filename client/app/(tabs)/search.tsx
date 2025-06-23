@@ -8,9 +8,10 @@ import {
   SafeAreaView,
   Image,
 } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { Search, Filter, MapPin, Star, SlidersHorizontal } from 'lucide-react-native';
+import axios from 'axios';
 
 type Barber = {
   id: string;
@@ -27,6 +28,7 @@ export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [searchResults, setSearchResults] = useState<Barber[]>([]);
   const router = useRouter();
 
   const filters = [
@@ -36,48 +38,11 @@ export default function SearchScreen() {
     { id: 'services', name: 'Serviços', options: ['Corte', 'Barba', 'Sobrancelha', 'Pacotes'] },
   ];
 
-  const searchResults: Barber[] = [
-    {
-      id: '1',
-      name: 'Barbearia Premium',
-      rating: 4.8,
-      distance: 0.5,
-      price: 35,
-      image: 'https://images.pexels.com/photos/1813272/pexels-photo-1813272.jpeg',
-      reviews: 124,
-      specialties: ['Corte', 'Barba'],
-    },
-    {
-      id: '2',
-      name: 'Cortes Modernos',
-      rating: 4.6,
-      distance: 1.2,
-      price: 28,
-      image: 'https://images.pexels.com/photos/1319460/pexels-photo-1319460.jpeg',
-      reviews: 89,
-      specialties: ['Corte', 'Sobrancelha'],
-    },
-    {
-      id: '3',
-      name: 'Studio do Barbeiro',
-      rating: 4.9,
-      distance: 0.8,
-      price: 42,
-      image: 'https://images.pexels.com/photos/1570807/pexels-photo-1570807.jpeg',
-      reviews: 156,
-      specialties: ['Corte', 'Barba', 'Pacotes'],
-    },
-    {
-      id: '4',
-      name: 'Barbearia Clássica',
-      rating: 4.7,
-      distance: 2.1,
-      price: 32,
-      image: 'https://images.pexels.com/photos/1805600/pexels-photo-1805600.jpeg',
-      reviews: 98,
-      specialties: ['Corte', 'Barba'],
-    },
-  ];
+  useEffect(() => {
+    axios.get('http://localhost:5000/barbershop')
+      .then((res: any) => setSearchResults(res.data))
+      .catch(() => setSearchResults([]));
+  }, []);
 
   const handleBarberPress = (barberId: string) => {
     router.push(`/barber/${barberId}`);
@@ -91,26 +56,26 @@ export default function SearchScreen() {
     >
       <Image source={{ uri: barber.image }} style={styles.barberImage} />
       <View style={styles.barberInfo}>
-        <Text style={styles.barberName}>{barber.name}</Text>
+        <Text style={styles.barberName}>{String(barber.name ?? '')}</Text>
         <View style={styles.barberStats}>
           <View style={styles.ratingContainer}>
             <Star size={14} color="#F59E0B" fill="#F59E0B" />
-            <Text style={styles.ratingText}>{barber.rating}</Text>
-            <Text style={styles.reviewsText}>({barber.reviews})</Text>
+            <Text style={styles.ratingText}>{String(barber.rating ?? '')}</Text>
+            <Text style={styles.reviewsText}>({String(barber.reviews ?? 0)})</Text>
           </View>
           <View style={styles.distanceContainer}>
             <MapPin size={12} color="#6B7280" />
-            <Text style={styles.distanceText}>{barber.distance}km</Text>
+            <Text style={styles.distanceText}>{String(barber.distance ?? 0)}km</Text>
           </View>
         </View>
         <View style={styles.specialtiesContainer}>
           {barber.specialties.map((specialty, index) => (
             <View key={index} style={styles.specialtyTag}>
-              <Text style={styles.specialtyText}>{specialty}</Text>
+              <Text style={styles.specialtyText}>{String(specialty ?? '')}</Text>
             </View>
           ))}
         </View>
-        <Text style={styles.priceText}>A partir de R$ {barber.price}</Text>
+        <Text style={styles.priceText}>A partir de R$ {String(barber.price ?? '')}</Text>
       </View>
     </TouchableOpacity>
   );

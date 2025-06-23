@@ -1,33 +1,30 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { checkUserSession, initDatabase, getCurrentUser } from '@/services/database';
+import { Text, View } from 'react-native';
 
 export default function IndexScreen() {
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const init = async () => {
-      // Initialize the database
-      await initDatabase();
-      
-      // Check if user is logged in
-      const isLoggedIn = await checkUserSession();
-
-      if (isLoggedIn) {
-        // Get user data to determine user type
-        const userData = await getCurrentUser();
-        const userType = userData?.userType || 'client';        if (userType === 'barber') {
-          router.replace('/(barbertabs)' as any);
-        } else {
-          router.replace('/(tabs)');
-        }
-      } else {
+      try {
         router.replace('/landing');
+      } catch (error: any) {
+        setError(error?.message || String(error));
       }
     };
-
     init();
   }, []);
+
+  if (error) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 12 }}>Erro na inicialização</Text>
+        <Text style={{ color: 'red', fontFamily: 'monospace' }}>{error}</Text>
+      </View>
+    );
+  }
 
   return null;
 }

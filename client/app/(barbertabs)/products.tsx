@@ -24,6 +24,8 @@ import {
   X,
   ImageIcon,
 } from 'lucide-react-native';
+import axios from 'axios';
+import * as ImagePicker from 'expo-image-picker';
 
 interface Product {
   id: string;
@@ -38,38 +40,7 @@ interface Product {
 
 export default function ProductsManagement() {
   const router = useRouter();
-  const [products, setProducts] = useState<Product[]>([
-    {
-      id: '1',
-      name: 'Pomada para Cabelo',
-      description: 'Pomada modeladora efeito molhado',
-      price: 35.90,
-      stock: 12,
-      brand: 'BarberShop Pro',
-      category: 'Cabelo',
-      image: 'https://images.pexels.com/photos/3738347/pexels-photo-3738347.jpeg',
-    },
-    {
-      id: '2',
-      name: 'Óleo para Barba',
-      description: 'Óleo hidratante para barba',
-      price: 28.50,
-      stock: 8,
-      brand: 'BeardCare',
-      category: 'Barba',
-      image: 'https://images.pexels.com/photos/4041392/pexels-photo-4041392.jpeg',
-    },
-    {
-      id: '3',
-      name: 'Shampoo Masculino',
-      description: 'Shampoo anticaspa masculino',
-      price: 22.90,
-      stock: 15,
-      brand: 'MenCare',
-      category: 'Cabelo',
-    },
-  ]);
-  
+  const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -79,7 +50,7 @@ export default function ProductsManagement() {
     price: '',
     stock: '',
     brand: '',
-    category: '',
+    category: 'Cabelo',
     image: '',
   });
 
@@ -90,6 +61,12 @@ export default function ProductsManagement() {
     product.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
     product.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  useEffect(() => {
+    axios.get('http://localhost:5000/product')
+      .then((res: any) => setProducts(res.data))
+      .catch(() => setProducts([]));
+  }, []);
 
   const openAddModal = () => {
     setEditingProduct(null);
@@ -170,6 +147,21 @@ export default function ProductsManagement() {
     setProducts(products.map(p => 
       p.id === product.id ? { ...p, stock: newStock } : p
     ));
+  };
+
+  // Função para selecionar imagem da galeria
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+    if (!result.canceled) {
+      // Aqui você pode enviar a imagem para o backend ao criar/editar produto
+      // Exemplo: result.assets[0].uri
+      setFormData({ ...formData, image: result.assets[0].uri });
+    }
   };
 
   return (
@@ -394,6 +386,12 @@ export default function ProductsManagement() {
                 ))}
               </ScrollView>
             </View>
+
+            {/* Image Picker Button */}
+            <TouchableOpacity onPress={pickImage} style={styles.imagePickerButton}>
+              <ImageIcon size={24} color="#374151" />
+              <Text style={styles.imagePickerText}>Selecionar Imagem</Text>
+            </TouchableOpacity>
           </ScrollView>
         </SafeAreaView>
       </Modal>
@@ -730,5 +728,22 @@ const styles = StyleSheet.create({
   },
   categoryOptionTextSelected: {
     color: '#FFFFFF',
+  },
+  imagePickerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  imagePickerText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: '#374151',
+    marginLeft: 8,
   },
 });

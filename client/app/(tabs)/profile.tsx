@@ -21,20 +21,14 @@ import {
   ChevronRight,
   CreditCard as Edit,
 } from 'lucide-react-native';
-import {
-  logoutUser,
-  getCurrentUser,
-  getBookings,
-  Booking,
-  initBookingsDatabase,
-} from '@/services/database';
+import axios from 'axios';
 
 export default function ProfileScreen() {
   const [user, setUser] = useState({
-    name: 'Carregando...',
-    email: 'Carregando...',
-    phone: 'Carregando...',
-    avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
+    name: '',
+    email: '',
+    phone: '',
+    avatar: '',
     totalBookings: 0,
     reviewsGiven: 0,
     avgRating: 0,
@@ -43,32 +37,20 @@ export default function ProfileScreen() {
   const router = useRouter();
 
   useEffect(() => {
-    const loadUserData = async () => {
-      await initBookingsDatabase();
-      const userData = await getCurrentUser();
-      if (userData) {
-        // fetch user stats
-        const bookings: Booking[] = await getBookings();
-        const userBookings = bookings.filter((b) => b.status !== 'cancelled');
-        const total = userBookings.length;
-        const completedBookings = userBookings.filter(
-          (b) => b.status === 'completed'
-        );
-        // placeholder avg rating
-        const avgRating = completedBookings.length > 0 ? 4.5 : 0;
+    axios
+      .get('http://localhost:5000/user/me')
+      .then((res: any) => setUser(res.data))
+      .catch(() =>
         setUser({
-          ...user,
-          name: userData.name,
-          email: userData.email,
-          phone: userData.phone || 'Não informado',
-          totalBookings: total,
-          avgRating,
-          reviewsGiven: completedBookings.length,
-        });
-      }
-    };
-
-    loadUserData();
+          name: '',
+          email: '',
+          phone: '',
+          avatar: '',
+          totalBookings: 0,
+          reviewsGiven: 0,
+          avgRating: 0,
+        })
+      );
   }, []);
 
   const menuItems = [
@@ -87,7 +69,9 @@ export default function ProfileScreen() {
       onPress: () => {
         Alert.alert(
           'Minhas Avaliações',
-          `Você avaliou ${user.reviewsGiven} serviços com uma média de ${user.avgRating} estrelas.`,
+          `Você avaliou ${String(user.reviewsGiven ?? 0)} serviços com uma média de ${String(
+            user.avgRating ?? 0
+          )} estrelas.`,
           [{ text: 'OK' }]
         );
       },
@@ -132,7 +116,7 @@ export default function ProfileScreen() {
         text: 'Sair',
         style: 'destructive',
         onPress: async () => {
-          await logoutUser();
+          await axios.post('http://localhost:5000/user/logout');
           router.replace('/(auth)/login');
         },
       },
@@ -153,9 +137,9 @@ export default function ProfileScreen() {
           <View style={styles.avatarContainer}>
             <Image source={{ uri: user.avatar }} style={styles.avatar} />
           </View>
-          <Text style={styles.userName}>{user.name}</Text>
-          <Text style={styles.userEmail}>{user.email}</Text>
-          <Text style={styles.userPhone}>{user.phone}</Text>
+          <Text style={styles.userName}>{String(user.name ?? '')}</Text>
+          <Text style={styles.userEmail}>{String(user.email ?? '')}</Text>
+          <Text style={styles.userPhone}>{String(user.phone ?? '')}</Text>
         </View>
 
         <View style={styles.statsSection}>

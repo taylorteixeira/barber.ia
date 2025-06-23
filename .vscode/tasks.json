@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "Instalar axios no client",
+			"command": "npm install axios",
+			"group": "build",
+			"isBackground": false
+		}
+	]
+}

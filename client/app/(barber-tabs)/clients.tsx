@@ -8,58 +8,47 @@ import {
   TextInput,
   Image,
 } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Phone, Mail, Star, Plus } from 'lucide-react-native';
+import axios from 'axios';
+
+interface ClientType {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  avatar: string;
+  rating: number;
+  lastVisit: string;
+  preferredService: string;
+  totalVisits: number;
+}
 
 export default function BarberClients() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [clients, setClients] = useState<ClientType[]>([]);
 
-  const clients = [
-    {
-      id: '1',
-      name: 'João Silva',
-      phone: '(11) 99999-1111',
-      email: 'joao@email.com',
-      lastVisit: '2024-06-20',
-      totalVisits: 15,
-      avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
-      rating: 5,
-      preferredService: 'Corte + Barba',
-    },
-    {
-      id: '2',
-      name: 'Pedro Santos',
-      phone: '(11) 99999-2222',
-      email: 'pedro@email.com',
-      lastVisit: '2024-06-18',
-      totalVisits: 8,
-      avatar: 'https://images.pexels.com/photos/1212984/pexels-photo-1212984.jpeg',
-      rating: 4,
-      preferredService: 'Corte',
-    },
-    {
-      id: '3',
-      name: 'Carlos Lima',
-      phone: '(11) 99999-3333',
-      email: 'carlos@email.com',
-      lastVisit: '2024-06-15',
-      totalVisits: 22,
-      avatar: 'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg',
-      rating: 5,
-      preferredService: 'Barba',
-    },
-    {
-      id: '4',
-      name: 'Ana Costa',
-      phone: '(11) 99999-4444',
-      email: 'ana@email.com',
-      lastVisit: '2024-06-12',
-      totalVisits: 5,
-      avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg',
-      rating: 4,
-      preferredService: 'Corte',
-    },
-  ];
+  useEffect(() => {
+    axios.get('http://localhost:5000/client')
+      .then(res => {
+        // Força o tipo e filtra apenas objetos válidos
+        const data = Array.isArray(res.data)
+          ? res.data.filter((item): item is ClientType =>
+              item && typeof item === 'object' &&
+              typeof item.id === 'string' &&
+              typeof item.name === 'string' &&
+              typeof item.phone === 'string' &&
+              typeof item.email === 'string' &&
+              typeof item.avatar === 'string' &&
+              typeof item.rating === 'number' &&
+              typeof item.lastVisit === 'string' &&
+              typeof item.preferredService === 'string' &&
+              typeof item.totalVisits === 'number')
+          : [];
+        setClients(data);
+      })
+      .catch(() => setClients([]));
+  }, []);
 
   const filteredClients = clients.filter(client =>
     client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

@@ -114,8 +114,8 @@ export default function WelcomeScreen() {
                   <feature.icon size={20} color="#3B82F6" />
                 </View>
                 <View style={styles.featureContent}>
-                  <Text style={styles.featureTitle}>{feature.title}</Text>
-                  <Text style={styles.featureDescription}>{feature.description}</Text>
+                  <Text style={styles.featureTitle}>{String(feature.title)}</Text>
+                  <Text style={styles.featureDescription}>{String(feature.description)}</Text>
                 </View>
               </Animated.View>
             ))}

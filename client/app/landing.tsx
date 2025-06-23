@@ -145,20 +145,16 @@ export default function LandingScreen() {
             </View>
             
             {/* Título com efeito neon */}
-            <Animated.View style={[styles.titleContainer, { transform: [{ scale: scaleAnim }] }]}>
-              <Text style={styles.appName}>
+            <Animated.View style={[styles.titleContainer, { transform: [{ scale: scaleAnim }] }]}>  
+              <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                 <Text style={styles.barberText}>Barber</Text>
                 <Text style={styles.iaText}>.IA</Text>
-              </Text>
+              </View>
               <View style={styles.neonUnderline} />
             </Animated.View>
-              <Text style={styles.tagline}>
-              🚀 O futuro da gestão de barbearias chegou
-            </Text>
-            
+            <Text style={styles.tagline}>🚀 O futuro da gestão de barbearias chegou</Text>
             <Text style={styles.subtitle}>
-              Sistema completo de gestão para barbearias com tecnologia avançada.
-              Transforme sua barbearia em uma experiência do próximo nível.
+              Sistema completo de gestão para barbearias com tecnologia avançada. Transforme sua barbearia em uma experiência do próximo nível.
             </Text>
 
             {/* Tech Features com efeito cyberpunk */}
@@ -201,7 +197,7 @@ export default function LandingScreen() {
             ]}
           >
             <View style={styles.selectionHeader}>
-              <Text style={styles.selectionTitle}>Escolha sua dimensão</Text>
+              <Text style={styles.selectionTitle}>{String('Escolha sua dimensão')}</Text>
               <View style={styles.hologramLine} />
             </View>
             
@@ -228,9 +224,7 @@ export default function LandingScreen() {
                     <View style={styles.cardText}>
                       <Text style={styles.cardTitle}>CLIENTE</Text>
                       <Text style={styles.cardSubtitle}>Portal do Futuro</Text>
-                      <Text style={styles.cardDescription}>
-                        Acesse o universo das melhores barbearias com tecnologia de ponta
-                      </Text>
+                      <Text style={styles.cardDescription}>Acesse o universo das melhores barbearias com tecnologia de ponta</Text>
                       <View style={styles.cardTechSpecs}>
                         <View style={styles.techSpec}>
                           <Rocket size={12} color="#60A5FA" />
@@ -273,9 +267,8 @@ export default function LandingScreen() {
                     </View>
                     <View style={styles.cardText}>
                       <Text style={styles.cardTitle}>BARBEIRO</Text>
-                      <Text style={styles.cardSubtitle}>Central de Comando</Text>                      <Text style={styles.cardDescription}>
-                        Dashboard completo com agenda, relatórios e gestão inteligente
-                      </Text>
+                      <Text style={styles.cardSubtitle}>Central de Comando</Text>
+                      <Text style={styles.cardDescription}>Dashboard completo com agenda, relatórios e gestão inteligente</Text>
                       <View style={styles.cardTechSpecs}>
                         <View style={styles.techSpec}>
                           <TrendingUp size={12} color="#10B981" />
@@ -308,9 +301,9 @@ export default function LandingScreen() {
             ]}
           >
             <View style={styles.premiumHeader}>
-              <Text style={styles.premiumTitle}>Tecnologia do Amanhã</Text>
+              <Text style={styles.premiumTitle}>{String('Tecnologia do Amanhã')}</Text>
               <View style={styles.premiumLine} />
-              <Text style={styles.premiumSubtitle}>Disponível Hoje</Text>
+              <Text style={styles.premiumSubtitle}>{String('Disponível Hoje')}</Text>
             </View>
             
             <View style={styles.benefitsGrid}>
@@ -320,9 +313,7 @@ export default function LandingScreen() {
                   <View style={styles.benefitIconGlow} />
                 </View>
                 <Text style={styles.benefitTitle}>Elite Rating</Text>
-                <Text style={styles.benefitDescription}>
-                  Avaliado 5⭐ pelos melhores profissionais do setor
-                </Text>
+                <Text style={styles.benefitDescription}>Avaliado 5⭐ pelos melhores profissionais do setor</Text>
               </View>
                 <View style={styles.benefitCard}>
                 <View style={styles.benefitIconContainer}>
@@ -330,9 +321,7 @@ export default function LandingScreen() {
                   <View style={styles.benefitIconGlow} />
                 </View>
                 <Text style={styles.benefitTitle}>Analytics Completo</Text>
-                <Text style={styles.benefitDescription}>
-                  Relatórios detalhados e exportação em CSV/Excel/PDF
-                </Text>
+                <Text style={styles.benefitDescription}>Relatórios detalhados e exportação em CSV/Excel/PDF</Text>
               </View>
                 <View style={styles.benefitCard}>
                 <View style={styles.benefitIconContainer}>
@@ -340,9 +329,7 @@ export default function LandingScreen() {
                   <View style={styles.benefitIconGlow} />
                 </View>
                 <Text style={styles.benefitTitle}>Agenda Inteligente</Text>
-                <Text style={styles.benefitDescription}>
-                  Visualização semanal e gerenciamento de horários
-                </Text>
+                <Text style={styles.benefitDescription}>Visualização semanal e gerenciamento de horários</Text>
               </View>
               
               <View style={styles.benefitCard}>
@@ -351,19 +338,13 @@ export default function LandingScreen() {
                   <View style={styles.benefitIconGlow} />
                 </View>
                 <Text style={styles.benefitTitle}>IA Visagista</Text>
-                <Text style={styles.benefitDescription}>
-                  Análise facial inteligente para sugestões de corte
-                </Text>
+                <Text style={styles.benefitDescription}>Análise facial inteligente para sugestões de corte</Text>
               </View>
             </View>
           </Animated.View>          {/* Footer futurista */}
           <View style={styles.footer}>
-            <Text style={styles.footerText}>
-              🌟 Inicie sua jornada no futuro
-            </Text>
-            <Text style={styles.footerSubtext}>
-              Gratuito • Sem limites • Revolucionário
-            </Text>
+            <Text style={styles.footerText}>🌟 Inicie sua jornada no futuro</Text>
+            <Text style={styles.footerSubtext}>Gratuito • Sem limites • Revolucionário</Text>
             <View style={styles.footerDecoration} />
           </View>
         </ScrollView>
@@ -654,7 +635,6 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
     padding: 28,
     backgroundColor: 'rgba(0, 0, 0, 0.2)',

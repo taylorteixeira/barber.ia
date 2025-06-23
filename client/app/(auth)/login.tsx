@@ -10,7 +10,7 @@ import {
 import { useState, useEffect } from 'react';
 import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react-native';
-import { loginUser } from '@/services/database';
+import axios from 'axios';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -29,31 +29,30 @@ export default function LoginScreen() {
       Alert.alert('Erro', 'Por favor, preencha todos os campos');
       return;
     }
-
     setLoading(true);
     try {
-      const user = await loginUser(email, password);
-      
-      if (user) {
-        // Check if user type matches
+      // Login real via backend
+      const res = await axios.post('http://localhost:5000/auth/login', {
+        email,
+        password,
+      });
+      const user = res.data;
+      if (user && user.userType) {
         if (user.userType !== userType) {
           const typeText = userType === 'client' ? 'cliente' : 'barbeiro';
-          Alert.alert('Erro', `Esta conta não é de ${typeText}. Verifique o tipo de acesso.`);
-          setLoading(false);
+          Alert.alert('Erro', `Você está tentando acessar como ${typeText}, mas seu cadastro é de outro tipo.`);
           return;
-        }        console.log('Navigating to:', userType === 'barber' ? '/(barbertabs)' : '/(tabs)');
-        
+        }
         if (userType === 'barber') {
           router.replace('/(barbertabs)' as any);
         } else {
           router.replace('/(tabs)');
         }
       } else {
-        Alert.alert('Erro', 'Email ou senha incorretos');
+        Alert.alert('Erro', 'Usuário ou senha inválidos');
       }
-    } catch (error) {
-      console.error('Error during login:', error);
-      Alert.alert('Erro', 'Ocorreu um erro ao fazer login. Tente novamente.');
+    } catch (err: any) {
+      Alert.alert('Erro', err?.response?.data?.message || 'Erro ao fazer login');
     } finally {
       setLoading(false);
     }
@@ -81,8 +80,8 @@ export default function LoginScreen() {
             {userType === 'barber' ? 'Área do Barbeiro' : 'Área do Cliente'}
           </Text>
           <Text style={styles.subtitle}>
-            {userType === 'barber' 
-              ? 'Gerencie sua barbearia e clientes' 
+            {userType === 'barber'
+              ? 'Gerencie sua barbearia e clientes'
               : 'Encontre e agende com barbeiros'}
           </Text>
         </View>
