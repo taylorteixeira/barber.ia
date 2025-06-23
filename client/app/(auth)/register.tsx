@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import { User, Mail, Lock, Eye, EyeOff, Phone, ArrowLeft } from 'lucide-react-native';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../../services/config';
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
@@ -43,10 +44,9 @@ export default function RegisterScreen() {
     }
 
     setLoading(true);
-    
-    try {
+      try {
       // Cadastro real via backend
-      const res = await axios.post('http://192.168.1.4:5000/auth/register', {
+      const res = await axios.post(API_ENDPOINTS.AUTH.REGISTER, {
         name,
         email,
         phone: Number(phone),

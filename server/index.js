@@ -10,8 +10,22 @@ const serviceRoutes = require('./routes/service');
 const bookingRoutes = require('./routes/booking');
 
 const app = express();
+
+// Middleware de logging
+app.use((req, res, next) => {
+  console.log(`📡 ${req.method} ${req.path} - ${new Date().toISOString()}`);
+  next();
+});
+
 app.use(express.json());
-app.use(cors());
+
+// Configuração do CORS mais permissiva para desenvolvimento
+app.use(cors({
+  origin: true, // Permite qualquer origem em desenvolvimento
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/barbershops', barbershopRoutes);

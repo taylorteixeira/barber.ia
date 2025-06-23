@@ -8,20 +8,26 @@ const router = express.Router();
 // Registro
 router.post('/register', async (req, res) => {
   const { name, phone, email, password, isBarber } = req.body;
+  console.log('📝 Tentativa de registro:', { name, phone, email, isBarber });
+  
   try {
     if (!name || !phone || !email || !password) {
+      console.log('❌ Campos obrigatórios não preenchidos');
       return res.status(400).json({ message: 'Preencha todos os campos.' });
     }
 
     const userExists = await User.findOne({ email });
     if (userExists) {
+      console.log('❌ Email já cadastrado:', email);
       return res.status(400).json({ message: 'Email já cadastrado.' });
     }
 
     const user = await User.create({ name, phone, email, password, isBarber });
-    return res.status(201).json({ message: 'Usuário registrado com sucesso!' });
+    console.log('✅ Usuário criado com sucesso:', user._id);
+    return res.status(201).json({ message: 'Usuário registrado com sucesso!', userId: user._id });
   } catch (err) {
-    return res.status(500).json({ message: 'Erro no servidor.' });
+    console.error('❌ Erro no registro:', err);
+    return res.status(500).json({ message: 'Erro no servidor.', error: err.message });
   }
 });
 

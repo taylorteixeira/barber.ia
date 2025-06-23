@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react-native';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../../services/config';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -30,9 +31,8 @@ export default function LoginScreen() {
       return;
     }
     setLoading(true);
-    try {
-      // Login real via backend
-      const res = await axios.post('http://localhost:5000/auth/login', {
+    try {      // Login real via backend
+      const res = await axios.post(API_ENDPOINTS.AUTH.LOGIN, {
         email,
         password,
       });
