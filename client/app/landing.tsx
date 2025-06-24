@@ -74,9 +74,8 @@ export default function LandingScreen() {
   const handleClientAccess = () => {
     router.push('/(auth)/login?userType=client');
   };
-
   const handleBarberAccess = () => {
-    router.push('/(auth)/barber-onboarding');
+    router.push('/(auth)/barber-welcome');
   };
 
   const rotation = rotateAnim.interpolate({

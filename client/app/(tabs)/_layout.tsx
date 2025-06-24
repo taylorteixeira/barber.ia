@@ -43,12 +43,17 @@ export default function TabLayout() {
           title: 'Agendamentos',
           tabBarIcon: ({ size, color }) => <Calendar size={size} color={color} />,
         }}
-      />
-      <Tabs.Screen
+      />      <Tabs.Screen
         name="profile"
         options={{
           title: 'Perfil',
           tabBarIcon: ({ size, color }) => <User size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="edit-profile"
+        options={{
+          href: null, // Hide from tab bar
         }}
       />
     </Tabs>

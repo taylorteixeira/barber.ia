@@ -10,7 +10,7 @@ import {
   TextInput,
   ActivityIndicator,
 } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { 
   Calendar as CalendarIcon, 
@@ -34,6 +34,7 @@ import {
   Settings
 } from 'lucide-react-native';
 import { exportAppointments, getPredefinedPeriods, AppointmentExport, ExportOptions } from '../../services/exportService';
+import { getAppointments, Appointment, getAppointmentsForCurrentBarber, updateBookingStatus, getBookingsForCurrentBarbershop } from '../../services/database';
 
 interface AppointmentDetail {
   id: string;
@@ -51,9 +52,12 @@ interface AppointmentDetail {
 }
 
 export default function BarberAgenda() {
-  const router = useRouter();  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const router = useRouter();
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentDetail | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [appointments, setAppointments] = useState<AppointmentDetail[]>([]);
+  const [loading, setLoading] = useState(true);
   
   // Estados para exportação
   const [exportModalVisible, setExportModalVisible] = useState(false);
@@ -68,9 +72,58 @@ export default function BarberAgenda() {
     const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Começar na segunda-feira
     const monday = new Date(today);
     monday.setDate(today.getDate() + mondayOffset);
-    return monday;
-  });
-    const appointments: AppointmentDetail[] = [
+    return monday;  });
+
+  // Load appointments from database
+  useEffect(() => {
+    loadAppointments();
+  }, []);
+  const loadAppointments = async () => {
+    try {
+      setLoading(true);
+      // Get appointments specific to current barber/barbershop
+      const data = await getAppointmentsForCurrentBarber();
+      
+      // Convert appointments to AppointmentDetail format
+      const formattedAppointments: AppointmentDetail[] = data.map(apt => {
+        const clientName = apt.notes?.includes('Cliente:') ? 
+          apt.notes.split('Cliente: ')[1].split(' (')[0] : 'Cliente';
+        const phone = apt.notes?.includes('Cliente:') && apt.notes.includes('(') ? 
+          apt.notes.split('(')[1].split(')')[0] : '';
+        const service = apt.notes?.includes('Serviço:') ? 
+          apt.notes.split('Serviço: ')[1].split(' -')[0] : 'Serviço';
+        const price = apt.notes?.includes('Valor: R$ ') ? 
+          parseInt(apt.notes.split('Valor: R$ ')[1].split(' ')[0]) || 0 : 0;
+        const email = apt.notes?.includes('Email:') ? 
+          apt.notes.split('Email: ')[1].trim() : '';
+
+        return {
+          id: apt.id,
+          time: apt.time,
+          client: clientName,
+          service: service,
+          duration: 30, // Default duration
+          status: apt.status as any,
+          phone: phone,
+          email: email,
+          price: price,
+          notes: apt.notes || '',
+          createdAt: apt.createdAt,
+          date: apt.date
+        };
+      });
+      
+      setAppointments(formattedAppointments);
+    } catch (error) {
+      console.error('Error loading appointments:', error);
+      Alert.alert('Erro', 'Erro ao carregar agendamentos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Mock appointments for demonstration (remove when real data is available)
+  const mockAppointments: AppointmentDetail[] = [
     { 
       id: '1', 
       time: '09:00', 
@@ -188,10 +241,10 @@ export default function BarberAgenda() {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'confirmed': return 'Confirmado';
-      case 'pending': return 'Pendente';
       case 'cancelled': return 'Cancelado';
       case 'completed': return 'Concluído';
-      default: return 'Desconhecido';
+      case 'pending': return 'Pendente';
+      default: return status;
     }
   };  const handleAddAppointment = () => {
     router.push('/(barbertabs)/new-appointment' as any);
@@ -224,9 +277,10 @@ export default function BarberAgenda() {
       setSelectedDate(newWeekDays[0]);
     }
   };
-
   const getAppointmentsForDate = (date: string) => {
-    return appointments.filter(appointment => appointment.date === date);
+    // Combine real appointments with mock ones
+    const allAppointments = [...appointments, ...mockAppointments];
+    return allAppointments.filter(appointment => appointment.date === date);
   };
 
   const getTotalAppointmentsForWeek = () => {
@@ -247,8 +301,7 @@ export default function BarberAgenda() {
   const closeModal = () => {
     setModalVisible(false);
     setSelectedAppointment(null);
-  };
-  const handleUpdateStatus = (newStatus: 'confirmed' | 'cancelled' | 'completed') => {
+  };  const handleUpdateStatus = async (newStatus: 'confirmed' | 'cancelled' | 'completed') => {
     if (!selectedAppointment) return;
 
     let title = '';
@@ -261,7 +314,7 @@ export default function BarberAgenda() {
         break;
       case 'cancelled':
         title = 'Cancelar Agendamento';
-        message = `Tem certeza que deseja cancelar o agendamento de ${selectedAppointment.client}?\n\nEsta ação não pode ser desfeita.`;
+        message = `Tem certeza que deseja cancelar o agendamento de ${selectedAppointment.client}?\n\nO cliente será notificado automaticamente.`;
         break;
       case 'completed':
         title = 'Concluir Agendamento';
@@ -279,12 +332,44 @@ export default function BarberAgenda() {
         },
         {
           text: 'Sim',
-          onPress: () => {
-            // Aqui você atualizaria o status no banco de dados
-            Alert.alert(
-              'Sucesso',
-              `Agendamento ${getStatusText(newStatus).toLowerCase()} com sucesso!`
-            );
+          onPress: async () => {
+            try {
+              // Extract booking ID from appointment ID if it exists
+              let bookingId = selectedAppointment.id;
+              if (bookingId.startsWith('booking_')) {
+                bookingId = bookingId.replace('booking_', '');
+              }
+              
+              // Update booking status with bidirectional sync
+              const success = await updateBookingStatus(
+                bookingId, 
+                newStatus === 'confirmed' ? 'confirmed' : 
+                newStatus === 'cancelled' ? 'cancelled' : 'completed',
+                'barber'
+              );
+              
+              if (success) {
+                // Update local state
+                setAppointments(prev => 
+                  prev.map(apt => 
+                    apt.id === selectedAppointment.id 
+                      ? { ...apt, status: newStatus }
+                      : apt
+                  )
+                );
+                
+                Alert.alert(
+                  'Sucesso',
+                  `Agendamento ${getStatusText(newStatus).toLowerCase()} com sucesso! O cliente foi notificado.`
+                );
+              } else {
+                Alert.alert('Erro', 'Não foi possível atualizar o agendamento. Tente novamente.');
+              }
+            } catch (error) {
+              console.error('Error updating appointment status:', error);
+              Alert.alert('Erro', 'Ocorreu um erro ao atualizar o agendamento.');
+            }
+            
             closeModal();
           }
         }

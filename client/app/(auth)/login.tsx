@@ -10,7 +10,7 @@ import {
 import { useState, useEffect } from 'react';
 import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react-native';
-import { loginUser } from '@/services/database';
+import { loginUser, setCurrentUser } from '@/services/database';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -33,15 +33,19 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       const user = await loginUser(email, password);
-      
-      if (user) {
+        if (user) {
         // Check if user type matches
         if (user.userType !== userType) {
           const typeText = userType === 'client' ? 'cliente' : 'barbeiro';
           Alert.alert('Erro', `Esta conta não é de ${typeText}. Verifique o tipo de acesso.`);
           setLoading(false);
           return;
-        }        console.log('Navigating to:', userType === 'barber' ? '/(barbertabs)' : '/(tabs)');
+        }
+        
+        // Save current user
+        await setCurrentUser(user);
+        
+        console.log('Navigating to:', userType === 'barber' ? '/(barbertabs)' : '/(tabs)');
         
         if (userType === 'barber') {
           router.replace('/(barbertabs)' as any);

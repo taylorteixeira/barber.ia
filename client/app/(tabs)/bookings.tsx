@@ -11,7 +11,7 @@ import {
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { Calendar, Clock, MapPin, Phone, X, Star } from 'lucide-react-native';
-import { getBookings, updateBooking, Booking } from '@/services/database';
+import { getBookings, updateBooking, Booking, getBookingsByUserId, getCurrentUser, updateBookingStatus } from '@/services/database';
 
 type BookingStatus = 'confirmed' | 'completed' | 'cancelled';
 
@@ -19,13 +19,20 @@ export default function BookingsScreen() {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
   const [bookings, setBookings] = useState<Booking[]>([]);
   const router = useRouter();
-
   // Load bookings from database
   useEffect(() => {
     const load = async () => {
       try {
-        const data = await getBookings();
-        setBookings(data);
+        const currentUser = await getCurrentUser();
+        if (currentUser && currentUser.id) {
+          // Load only bookings for the current user
+          const data = await getBookingsByUserId(currentUser.id);
+          setBookings(data);
+        } else {
+          // If no user is logged in, show all bookings (fallback)
+          const data = await getBookings();
+          setBookings(data);
+        }
       } catch (err) {
         console.error('Failed to load bookings:', err);
       }
@@ -63,8 +70,7 @@ export default function BookingsScreen() {
         return status;
     }
   };
-
-  const handleCancelBooking = (bookingId: string) => {
+  const handleCancelBooking = async (bookingId: string) => {
     Alert.alert(
       'Cancelar Agendamento',
       'Tem certeza que deseja cancelar este agendamento?',
@@ -73,20 +79,28 @@ export default function BookingsScreen() {
         {
           text: 'Sim, cancelar',
           style: 'destructive',
-          onPress: () => {
-            // update status and persist
-            const updated = bookings.find((b) => b.id === bookingId);
-            if (updated) {
-              const changed = { ...updated, status: 'cancelled' as const };
-              updateBooking(changed);
-              setBookings((prev) =>
-                prev.map((b) => (b.id === bookingId ? changed : b))
-              );
+          onPress: async () => {
+            try {
+              // Update status with bidirectional sync
+              const success = await updateBookingStatus(bookingId, 'cancelled', 'client');
+              
+              if (success) {
+                // Update local state
+                setBookings((prev) =>
+                  prev.map((b) => (b.id === bookingId ? { ...b, status: 'cancelled' as const } : b))
+                );
+                
+                Alert.alert(
+                  'Agendamento cancelado',
+                  'Seu agendamento foi cancelado com sucesso. O barbeiro será notificado.'
+                );
+              } else {
+                Alert.alert('Erro', 'Não foi possível cancelar o agendamento. Tente novamente.');
+              }
+            } catch (error) {
+              console.error('Error cancelling booking:', error);
+              Alert.alert('Erro', 'Ocorreu um erro ao cancelar o agendamento.');
             }
-            Alert.alert(
-              'Agendamento cancelado',
-              'Seu agendamento foi cancelado com sucesso'
-            );
           },
         },
       ]
@@ -95,8 +109,7 @@ export default function BookingsScreen() {
 
   const handleRateService = (bookingId: string) => {
     // @ts-ignore: suppress routing type error
-    router.push(`/review/${bookingId}`);
-  };
+    router.push(`/review/${bookingId}`);  };
 
   const renderBookingCard = (booking: Booking) => (
     // @ts-ignore: suppress key prop error
@@ -141,9 +154,7 @@ export default function BookingsScreen() {
           <Phone size={16} color="#6B7280" />
           <Text style={styles.detailText}>{booking.phone}</Text>
         </View>
-      </View>
-
-      <View style={styles.bookingActions}>
+      </View>      <View style={styles.bookingActions}>
         {booking.status === 'confirmed' && (
           <>
             <TouchableOpacity
@@ -409,6 +420,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter-Medium',
     color: '#D97706',
+    marginLeft: 4,
+  },
+  completeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginRight: 12,
+    backgroundColor: '#ECFDF5',
+    borderRadius: 6,
+  },
+  completeButtonText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: '#10B981',
     marginLeft: 4,
   },
   emptyState: {
