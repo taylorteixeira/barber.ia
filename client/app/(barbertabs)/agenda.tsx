@@ -122,112 +122,6 @@ export default function BarberAgenda() {
     }
   };
 
-  // Mock appointments for demonstration (remove when real data is available)
-  const mockAppointments: AppointmentDetail[] = [
-    { 
-      id: '1', 
-      time: '09:00', 
-      client: 'João Silva', 
-      service: 'Corte + Barba', 
-      duration: 60, 
-      status: 'confirmed',
-      phone: '(11) 99999-1111',
-      email: 'joao@email.com',
-      price: 45,
-      notes: 'Cliente prefere barba mais curta',
-      createdAt: '2025-06-22T10:30:00Z',
-      date: '2025-06-22'
-    },
-    { 
-      id: '2', 
-      time: '10:30', 
-      client: 'Pedro Santos', 
-      service: 'Corte', 
-      duration: 30, 
-      status: 'confirmed',
-      phone: '(11) 99999-2222',
-      price: 25,
-      createdAt: '2025-06-22T09:15:00Z',
-      date: '2025-06-22'
-    },
-    { 
-      id: '3', 
-      time: '11:45', 
-      client: 'Carlos Lima', 
-      service: 'Barba', 
-      duration: 30, 
-      status: 'confirmed',
-      phone: '(11) 99999-3333',
-      email: 'carlos@email.com',
-      price: 20,
-      createdAt: '2025-06-21T16:20:00Z',
-      date: '2025-06-23'
-    },
-    { 
-      id: '4', 
-      time: '14:30', 
-      client: 'Ana Costa', 
-      service: 'Corte', 
-      duration: 45, 
-      status: 'pending',
-      phone: '(11) 99999-4444',
-      price: 25,
-      notes: 'Primeira vez na barbearia',
-      createdAt: '2025-06-22T12:00:00Z',
-      date: '2025-06-23'
-    },
-    { 
-      id: '5', 
-      time: '15:45', 
-      client: 'Rafael Oliveira', 
-      service: 'Corte + Barba', 
-      duration: 60, 
-      status: 'confirmed',
-      phone: '(11) 99999-5555',
-      email: 'rafael@email.com',
-      price: 45,
-      createdAt: '2025-06-20T14:30:00Z',
-      date: '2025-06-24'
-    },
-    { 
-      id: '6', 
-      time: '17:00', 
-      client: 'Lucas Ferreira', 
-      service: 'Corte', 
-      duration: 30, 
-      status: 'confirmed',
-      phone: '(11) 99999-6666',
-      price: 25,
-      createdAt: '2025-06-22T11:45:00Z',
-      date: '2025-06-24'
-    },
-    { 
-      id: '7', 
-      time: '09:30', 
-      client: 'Marina Santos', 
-      service: 'Corte Feminino', 
-      duration: 45, 
-      status: 'pending',
-      phone: '(11) 99999-7777',
-      email: 'marina@email.com',
-      price: 35,
-      createdAt: '2025-06-22T08:00:00Z',
-      date: '2025-06-25'
-    },
-    { 
-      id: '8', 
-      time: '16:00', 
-      client: 'Roberto Silva', 
-      service: 'Barba + Bigode', 
-      duration: 40, 
-      status: 'confirmed',
-      phone: '(11) 99999-8888',
-      price: 30,
-      notes: 'Cliente tem alergia a alguns produtos',
-      createdAt: '2025-06-21T15:20:00Z',
-      date: '2025-06-26'
-    },
-  ];
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmed': return '#10B981';
@@ -276,11 +170,9 @@ export default function BarberAgenda() {
     if (!newWeekDays.includes(selectedDate)) {
       setSelectedDate(newWeekDays[0]);
     }
-  };
-  const getAppointmentsForDate = (date: string) => {
-    // Combine real appointments with mock ones
-    const allAppointments = [...appointments, ...mockAppointments];
-    return allAppointments.filter(appointment => appointment.date === date);
+  };  const getAppointmentsForDate = (date: string) => {
+    // Use only real appointments - no mock data
+    return appointments.filter(appointment => appointment.date === date);
   };
 
   const getTotalAppointmentsForWeek = () => {

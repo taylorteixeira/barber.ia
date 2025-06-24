@@ -25,58 +25,252 @@ import {
   TrendingDown,
   Camera,
 } from 'lucide-react-native';
-import { getCurrentUser } from '../../services/database';
+import { 
+  getCurrentUser, 
+  getAppointmentsForCurrentBarber,
+  getBookingsForCurrentBarbershop,
+  getClientsFromBookings,
+  getBarbershopByOwnerId,
+  Appointment,
+  Booking,
+  Client
+} from '../../services/database';
+
+// TypeScript interfaces
+interface DashboardStats {
+  todayAppointments: number;
+  weekRevenue: number;
+  totalClients: number;
+  averageRating: number;
+  pendingAppointments: number;
+  monthlyGrowth: number;
+}
+
+interface TopService {
+  name: string;
+  count: number;
+  revenue: number;
+}
+
+interface BusyHour {
+  hour: string;
+  appointments: number;
+}
+
+interface DashboardData {
+  weeklyComparison: {
+    thisWeek: number;
+    lastWeek: number;
+    growth: number;
+  };
+  topServices: TopService[];
+  clientRetention: {
+    returning: number;
+    new: number;
+  };
+  dailyRevenue: number[];
+  busyHours: BusyHour[];
+}
 
 export default function BarberDashboard() {
   const router = useRouter();
   const [barberData, setBarberData] = useState({
     name: 'Carregando...',
-    barbershopName: 'Barbearia Premium',
-  });
-  const [stats, setStats] = useState({
-    todayAppointments: 8,
-    weekRevenue: 1250,
-    totalClients: 245,
-    averageRating: 4.8,
-    pendingAppointments: 3,
-    monthlyGrowth: 15,
+    barbershopName: 'Minha Barbearia',
+  });  const [stats, setStats] = useState<DashboardStats>({
+    todayAppointments: 0,
+    weekRevenue: 0,
+    totalClients: 0,
+    averageRating: 0,
+    pendingAppointments: 0,
+    monthlyGrowth: 0,
   });
 
-  const [dashboardData, setDashboardData] = useState({
+  const [dashboardData, setDashboardData] = useState<DashboardData>({
     weeklyComparison: {
-      thisWeek: 8,
-      lastWeek: 6,
-      growth: 33,
+      thisWeek: 0,
+      lastWeek: 0,
+      growth: 0,
     },
-    topServices: [
-      { name: 'Corte Masculino', count: 15, revenue: 450 },
-      { name: 'Barba', count: 8, revenue: 200 },
-      { name: 'Sobrancelha', count: 5, revenue: 125 },
-    ],
+    topServices: [],
     clientRetention: {
-      returning: 78,
-      new: 22,
+      returning: 0,
+      new: 0,
     },
-    dailyRevenue: [120, 180, 95, 220, 310, 185, 240],
-    busyHours: [
-      { hour: '10:00', appointments: 3 },
-      { hour: '14:00', appointments: 5 },
-      { hour: '16:00', appointments: 4 },
-      { hour: '18:00', appointments: 2 },
-    ],
+    dailyRevenue: [0, 0, 0, 0, 0, 0, 0],
+    busyHours: [],
   });
 
+  const [recentAppointments, setRecentAppointments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  
   useEffect(() => {
-    const loadBarberData = async () => {
-      const userData = await getCurrentUser();      if (userData) {
-        setBarberData({
-          name: userData.name,
-          barbershopName: 'Minha Barbearia', // Default name for now
-        });
+    let isMounted = true; // Track if component is still mounted
+    
+    const loadDashboardData = async () => {
+      try {
+        if (!isMounted) return; // Early return if component unmounted
+        setLoading(true);
+        const userData = await getCurrentUser();        
+        if (userData && isMounted) {
+          // Load barbershop info
+          const barbershop = await getBarbershopByOwnerId(userData.id!);
+          if (!isMounted) return; // Check again after async operation
+          
+          setBarberData({
+            name: userData.name,
+            barbershopName: barbershop ? barbershop.name : 'Minha Barbearia',
+          });          // Load real appointments data
+          const appointments = await getAppointmentsForCurrentBarber();
+          const bookings = await getBookingsForCurrentBarbershop();
+          const clients = await getClientsFromBookings();
+          
+          if (!isMounted) return; // Check after all async operations
+          
+          // Set appointments for use in activity section
+          setRecentAppointments(appointments);
+
+          // Calculate today's appointments
+          const today = new Date().toISOString().split('T')[0];
+          const todayAppointments = appointments.filter(apt => apt.date === today).length;
+
+          // Calculate week revenue from bookings
+          const oneWeekAgo = new Date();
+          oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+          const weekBookings = bookings.filter(booking => 
+            new Date(booking.date) >= oneWeekAgo && booking.status === 'completed'
+          );
+          const weekRevenue = weekBookings.reduce((sum, booking) => sum + booking.price, 0);
+
+          // Calculate pending appointments
+          const pendingAppointments = appointments.filter(apt => apt.status === 'scheduled').length;
+
+          // Calculate average rating (mock for now since we don't have ratings system)
+          const averageRating = bookings.length > 0 ? 4.5 : 0;
+
+          // Calculate top services from bookings
+          const serviceStats = new Map<string, { count: number; revenue: number }>();
+          bookings.forEach(booking => {
+            if (booking.status === 'completed') {
+              const existing = serviceStats.get(booking.service) || { count: 0, revenue: 0 };
+              serviceStats.set(booking.service, {
+                count: existing.count + 1,
+                revenue: existing.revenue + booking.price
+              });
+            }
+          });
+
+          const topServices: TopService[] = Array.from(serviceStats.entries())
+            .map(([name, stats]) => ({ name, ...stats }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 3);          // Calculate busy hours with 3-hour intervals
+          const timeSlots = [
+            { range: '08:00-11:00', start: 8, end: 11 },
+            { range: '11:00-14:00', start: 11, end: 14 },
+            { range: '14:00-17:00', start: 14, end: 17 },
+            { range: '17:00-20:00', start: 17, end: 20 },
+          ];
+
+          const busyHours: BusyHour[] = timeSlots.map(slot => {
+            const count = appointments.filter(apt => {
+              const hour = parseInt(apt.time.split(':')[0]);
+              return hour >= slot.start && hour < slot.end;
+            }).length;
+            
+            return {
+              hour: slot.range,
+              appointments: count
+            };
+          }).filter(slot => slot.appointments > 0) // Only show slots with appointments
+            .sort((a, b) => b.appointments - a.appointments); // Sort by most busy
+
+          // Calculate client retention (new vs returning)
+          const clientBookingCounts = new Map<string, number>();
+          bookings.forEach(booking => {
+            if (booking.clientName) {
+              const count = clientBookingCounts.get(booking.clientName) || 0;
+              clientBookingCounts.set(booking.clientName, count + 1);
+            }
+          });
+
+          const returningClients = Array.from(clientBookingCounts.values()).filter(count => count > 1).length;
+          const newClients = Array.from(clientBookingCounts.values()).filter(count => count === 1).length;
+          const totalUniqueClients = returningClients + newClients;
+
+          const returningPercentage = totalUniqueClients > 0 ? Math.round((returningClients / totalUniqueClients) * 100) : 0;
+          const newPercentage = totalUniqueClients > 0 ? Math.round((newClients / totalUniqueClients) * 100) : 0;
+
+          // Calculate weekly comparison
+          const twoWeeksAgo = new Date();
+          twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+          const lastWeekAppointments = appointments.filter(apt => {
+            const aptDate = new Date(apt.date);
+            return aptDate >= twoWeeksAgo && aptDate < oneWeekAgo;
+          }).length;
+
+          const thisWeekAppointments = appointments.filter(apt => {
+            const aptDate = new Date(apt.date);
+            return aptDate >= oneWeekAgo;
+          }).length;          const growth = lastWeekAppointments > 0 
+            ? Math.round(((thisWeekAppointments - lastWeekAppointments) / lastWeekAppointments) * 100)
+            : 0;
+
+          if (!isMounted) return; // Final check before updating state
+
+          // Update states with real data
+          setStats({
+            todayAppointments,
+            weekRevenue,
+            totalClients: clients.length,
+            averageRating,
+            pendingAppointments,
+            monthlyGrowth: growth, // Using weekly growth as monthly for now
+          });
+
+          setDashboardData({
+            weeklyComparison: {
+              thisWeek: thisWeekAppointments,
+              lastWeek: lastWeekAppointments,
+              growth,
+            },
+            topServices,
+            clientRetention: {
+              returning: returningPercentage,
+              new: newPercentage,
+            },
+            dailyRevenue: [0, 0, 0, 0, 0, 0, 0], // Would need daily breakdown
+            busyHours,
+          });
+
+          // Set recent appointments for activity section
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          
+          const recentApts = appointments.filter(apt => {
+            const aptDate = new Date(apt.date + 'T' + apt.time);
+            return aptDate >= yesterday;
+          }).sort((a, b) => {
+            const dateA = new Date(a.date + 'T' + a.time);
+            const dateB = new Date(b.date + 'T' + b.time);
+            return dateB.getTime() - dateA.getTime();
+          }).slice(0, 3);          setRecentAppointments(recentApts);
+        }
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
-    loadBarberData();
-  }, []);  const handleQuickAction = (action: string) => {
+
+    loadDashboardData();
+    
+    // Cleanup function to prevent state updates on unmounted component
+    return () => {
+      isMounted = false;
+    };
+  }, []);const handleQuickAction = (action: string) => {
     switch (action) {
       case 'new-appointment':
         router.push('/(barbertabs)/new-appointment' as any);
@@ -124,8 +318,7 @@ export default function BarberDashboard() {
         ]
       );
     }
-  };
-  return (
+  };  return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
@@ -142,40 +335,46 @@ export default function BarberDashboard() {
           </TouchableOpacity>
         </View>
 
-        {/* Quick Stats - 4 cards principais */}
-        <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <View style={styles.statIcon}>
-              <Calendar size={20} color="#3B82F6" />
-            </View>
-            <Text style={styles.statValue}>{stats.todayAppointments}</Text>
-            <Text style={styles.statLabel}>Hoje</Text>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Carregando dados...</Text>
           </View>
-          
-          <View style={styles.statCard}>
-            <View style={styles.statIcon}>
-              <DollarSign size={20} color="#10B981" />
-            </View>
-            <Text style={styles.statValue}>R$ {stats.weekRevenue}</Text>
-            <Text style={styles.statLabel}>Semana</Text>
-          </View>
-          
-          <View style={styles.statCard}>
-            <View style={styles.statIcon}>
-              <Users size={20} color="#8B5CF6" />
-            </View>
-            <Text style={styles.statValue}>{stats.totalClients}</Text>
-            <Text style={styles.statLabel}>Clientes</Text>
-          </View>
-          
-          <View style={styles.statCard}>
-            <View style={styles.statIcon}>
-              <Star size={20} color="#F59E0B" />
-            </View>
-            <Text style={styles.statValue}>{stats.averageRating}</Text>
-            <Text style={styles.statLabel}>Avaliação</Text>
-          </View>
-        </View>        {/* Ações Rápidas */}
+        ) : (
+          <>
+            {/* Quick Stats - 4 cards principais */}
+            <View style={styles.statsContainer}>
+              <View style={styles.statCard}>
+                <View style={styles.statIcon}>
+                  <Calendar size={20} color="#3B82F6" />
+                </View>
+                <Text style={styles.statValue}>{stats.todayAppointments}</Text>
+                <Text style={styles.statLabel}>Hoje</Text>
+              </View>
+              
+              <View style={styles.statCard}>
+                <View style={styles.statIcon}>
+                  <DollarSign size={20} color="#10B981" />
+                </View>
+                <Text style={styles.statValue}>R$ {stats.weekRevenue}</Text>
+                <Text style={styles.statLabel}>Semana</Text>
+              </View>
+              
+              <View style={styles.statCard}>
+                <View style={styles.statIcon}>
+                  <Users size={20} color="#8B5CF6" />
+                </View>
+                <Text style={styles.statValue}>{stats.totalClients}</Text>
+                <Text style={styles.statLabel}>Clientes</Text>
+              </View>
+              
+              <View style={styles.statCard}>
+                <View style={styles.statIcon}>
+                  <Star size={20} color="#F59E0B" />
+                </View>
+                <Text style={styles.statValue}>{stats.averageRating > 0 ? stats.averageRating.toFixed(1) : '0'}</Text>
+                <Text style={styles.statLabel}>Avaliação</Text>
+              </View>
+            </View>{/* Ações Rápidas */}
         <View style={styles.actionsSection}>
           <Text style={styles.sectionTitle}>Ações Rápidas</Text>
           <View style={styles.actionsGrid}>
@@ -227,35 +426,58 @@ export default function BarberDashboard() {
               <Text style={styles.actionText}>Clientes</Text>
             </TouchableOpacity>
           </View>
-        </View>
-
-        {/* Atividade Recente */}
+        </View>        {/* Atividade Recente */}
         <View style={styles.activitySection}>
           <Text style={styles.sectionTitle}>Atividade Recente</Text>
           <View style={styles.activityCard}>
-            <View style={styles.activityItem}>
-              <View style={[styles.activityDot, { backgroundColor: '#10B981' }]} />
-              <View style={styles.activityContent}>
-                <Text style={styles.activityTitle}>João Silva agendou Corte + Barba</Text>
-                <Text style={styles.activityTime}>Há 15 minutos</Text>
-              </View>
-            </View>
-            
-            <View style={styles.activityItem}>
-              <View style={[styles.activityDot, { backgroundColor: '#F59E0B' }]} />
-              <View style={styles.activityContent}>
-                <Text style={styles.activityTitle}>Serviço "Barba Completa" foi atualizado</Text>
-                <Text style={styles.activityTime}>Há 2 horas</Text>
-              </View>
-            </View>
-            
-            <View style={styles.activityItem}>
-              <View style={[styles.activityDot, { backgroundColor: '#6366F1' }]} />
-              <View style={styles.activityContent}>
-                <Text style={styles.activityTitle}>Pedro Santos concluiu seu atendimento</Text>
-                <Text style={styles.activityTime}>Há 4 horas</Text>
-              </View>
-            </View>
+            {recentAppointments.length === 0 ? (
+              <Text style={styles.legendText}>Nenhuma atividade recente</Text>
+            ) : (
+              recentAppointments.map((booking, index) => {
+                const clientName = booking.notes?.includes('Cliente:') ? 
+                  booking.notes.split('Cliente: ')[1].split(' (')[0] : 'Cliente';
+                const service = booking.notes?.includes('Serviço:') ? 
+                  booking.notes.split('Serviço: ')[1].split(' -')[0] : 'Serviço';
+                
+                const bookingTime = new Date(booking.date + 'T' + booking.time);
+                const now = new Date();
+                const diffMs = now.getTime() - bookingTime.getTime();
+                const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                
+                let timeAgo = '';
+                if (diffHours > 0) {
+                  timeAgo = `Há ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
+                } else if (diffMins > 0) {
+                  timeAgo = `Há ${diffMins} minuto${diffMins > 1 ? 's' : ''}`;
+                } else {
+                  timeAgo = 'Agora mesmo';
+                }
+
+                let activityText = '';
+                let dotColor = '#10B981';
+                
+                if (booking.status === 'completed') {
+                  activityText = `${clientName} concluiu ${service}`;
+                  dotColor = '#6366F1';
+                } else if (booking.status === 'cancelled') {
+                  activityText = `${clientName} cancelou ${service}`;
+                  dotColor = '#EF4444';
+                } else {
+                  activityText = `${clientName} agendou ${service}`;
+                  dotColor = '#10B981';
+                }
+
+                return (                  <View key={index} style={styles.activityItem}>
+                    <View style={[styles.activityDot, { backgroundColor: dotColor }]} />
+                    <View style={styles.activityContent}>
+                      <Text style={styles.activityTitle}>{activityText}</Text>
+                      <Text style={styles.activityTime}>{timeAgo}</Text>
+                    </View>
+                  </View>
+                );
+              })
+            )}
           </View>
         </View>
 
@@ -284,74 +506,82 @@ export default function BarberDashboard() {
                 <Text style={styles.growthText}>+{dashboardData.weeklyComparison.growth}%</Text>
               </View>
             </View>
-          </View>
-
-          {/* Top Services */}
+          </View>          {/* Top Services */}
           <View style={styles.dashboardCard}>
             <View style={styles.dashboardHeader}>
               <Star size={20} color="#F59E0B" />
               <Text style={styles.dashboardTitle}>Serviços Mais Populares</Text>
             </View>
             <View style={styles.servicesContent}>
-              {dashboardData.topServices.map((service, index) => (
-                <View key={index} style={styles.serviceItem}>
-                  <View style={styles.serviceInfo}>
-                    <Text style={styles.serviceName}>{service.name}</Text>
-                    <Text style={styles.serviceCount}>{service.count} agendamentos</Text>
+              {dashboardData.topServices.length > 0 ? (
+                dashboardData.topServices.map((service, index) => (
+                  <View key={index} style={styles.serviceItem}>
+                    <View style={styles.serviceInfo}>
+                      <Text style={styles.serviceName}>{service.name}</Text>
+                      <Text style={styles.serviceCount}>{service.count} agendamentos</Text>
+                    </View>
+                    <Text style={styles.serviceRevenue}>R$ {service.revenue}</Text>
                   </View>
-                  <Text style={styles.serviceRevenue}>R$ {service.revenue}</Text>
-                </View>
-              ))}
+                ))              ) : (
+                <Text style={styles.legendText}>Nenhum serviço realizado ainda</Text>
+              )}
             </View>
-          </View>
-
-          {/* Client Retention */}
+          </View>          {/* Client Retention */}
           <View style={styles.dashboardCard}>
             <View style={styles.dashboardHeader}>
               <PieChart size={20} color="#8B5CF6" />
               <Text style={styles.dashboardTitle}>Retenção de Clientes</Text>
             </View>
             <View style={styles.retentionContent}>
-              <View style={styles.retentionChart}>
-                <View style={[styles.retentionSegment, { backgroundColor: '#8B5CF6', width: `${dashboardData.clientRetention.returning}%` }]} />
-                <View style={[styles.retentionSegment, { backgroundColor: '#E5E7EB', width: `${dashboardData.clientRetention.new}%` }]} />
-              </View>
-              <View style={styles.retentionLegend}>
-                <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: '#8B5CF6' }]} />
-                  <Text style={styles.legendText}>Recorrentes ({dashboardData.clientRetention.returning}%)</Text>
-                </View>
-                <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: '#E5E7EB' }]} />
-                  <Text style={styles.legendText}>Novos ({dashboardData.clientRetention.new}%)</Text>
-                </View>
-              </View>
+              {stats.totalClients > 0 ? (
+                <>
+                  <View style={styles.retentionChart}>
+                    <View style={[styles.retentionSegment, { backgroundColor: '#8B5CF6', width: `${dashboardData.clientRetention.returning}%` }]} />
+                    <View style={[styles.retentionSegment, { backgroundColor: '#E5E7EB', width: `${dashboardData.clientRetention.new}%` }]} />
+                  </View>
+                  <View style={styles.retentionLegend}>
+                    <View style={styles.legendItem}>
+                      <View style={[styles.legendDot, { backgroundColor: '#8B5CF6' }]} />
+                      <Text style={styles.legendText}>Recorrentes ({dashboardData.clientRetention.returning}%)</Text>
+                    </View>
+                    <View style={styles.legendItem}>
+                      <View style={[styles.legendDot, { backgroundColor: '#E5E7EB' }]} />
+                      <Text style={styles.legendText}>Novos ({dashboardData.clientRetention.new}%)</Text>
+                    </View>
+                  </View>
+                </>
+              ) : (
+                <Text style={styles.legendText}>Nenhum cliente cadastrado ainda</Text>
+              )}
             </View>
-          </View>
-
-          {/* Busy Hours */}
+          </View>          {/* Busy Hours */}
           <View style={styles.dashboardCard}>
             <View style={styles.dashboardHeader}>
               <Activity size={20} color="#EF4444" />
               <Text style={styles.dashboardTitle}>Horários de Pico</Text>
             </View>
             <View style={styles.busyHoursContent}>
-              {dashboardData.busyHours.map((slot, index) => (
-                <View key={index} style={styles.busyHourItem}>
-                  <Text style={styles.busyHourTime}>{slot.hour}</Text>
-                  <View style={styles.busyHourBar}>
-                    <View 
-                      style={[
-                        styles.busyHourFill, 
-                        { width: `${(slot.appointments / 5) * 100}%` }
-                      ]} 
-                    />
-                  </View>
-                  <Text style={styles.busyHourCount}>{slot.appointments}</Text>
-                </View>
-              ))}
+              {dashboardData.busyHours.length > 0 ? (
+                dashboardData.busyHours.map((slot, index) => (
+                  <View key={index} style={styles.busyHourItem}>
+                    <Text style={styles.busyHourTime}>{slot.hour}</Text>
+                    <View style={styles.busyHourBar}>
+                      <View 
+                        style={[
+                          styles.busyHourFill, 
+                          { width: `${Math.min((slot.appointments / Math.max(...dashboardData.busyHours.map(h => h.appointments))) * 100, 100)}%` }
+                        ]} 
+                      />                    </View>
+                    <Text style={styles.busyHourCount}>{slot.appointments}</Text>                  </View>
+                ))
+              ) : (
+                <Text style={styles.legendText}>Nenhum agendamento realizado ainda</Text>
+              )}
             </View>
-          </View>        </View>
+          </View>
+        </View>
+        </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -718,4 +948,51 @@ const styles = StyleSheet.create({
     color: '#1F2937',
     marginBottom: 2,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  loadingText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    color: '#6B7280',
+  },
 });
+
+// Interfaces for dashboard data
+interface TopService {
+  name: string;
+  count: number;
+  revenue: number;
+}
+
+interface BusyHour {
+  hour: string;
+  appointments: number;
+}
+
+interface DashboardStats {
+  todayAppointments: number;
+  weekRevenue: number;
+  totalClients: number;
+  averageRating: number;
+  pendingAppointments: number;
+  monthlyGrowth: number;
+}
+
+interface DashboardData {
+  weeklyComparison: {
+    thisWeek: number;
+    lastWeek: number;
+    growth: number;
+  };
+  topServices: TopService[];
+  clientRetention: {
+    returning: number;
+    new: number;
+  };
+  dailyRevenue: number[];
+  busyHours: BusyHour[];
+}
