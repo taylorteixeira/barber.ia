@@ -263,3 +263,6 @@ Este projeto está sob a licença especificada no arquivo LICENSE.
 ✅ **Experiência profissional** equivalente a apps comerciais  
 ✅ **Interface moderna** e intuitiva  
 ✅ **Código bem estruturado** e documentado  
+
+## Apresentação
+https://www.canva.com/design/DAGrTFfGOo4/jbLifiw2YqcRCngODNhIew/edit?utm_content=DAGrTFfGOo4&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
