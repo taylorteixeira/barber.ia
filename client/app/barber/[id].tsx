@@ -5,46 +5,47 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
-  Alert,
   ScrollView,
   SafeAreaView,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import axios from 'axios';
-import { Star, MapPin, Clock, Phone, Calendar } from 'lucide-react-native';
-
-// Interface para o barbeiro
-interface Barber {
-  id: string;
-  name: string;
-  image: string;
-  rating: number;
-  reviews: number;
-  price: number;
-  distance: number;
-}
-
-// Função para criar agendamento real via backend
-async function createBooking(booking: any) {
-  try {
-    await axios.post('http://localhost:5000/booking', booking);
-  } catch (err) {
-    console.error('Erro ao criar agendamento:', err);
-    throw err;
-  }
-}
+import { getBarbers, Barber, getBarbershopById, Barbershop } from '@/services/database';
+import {
+  Calendar,
+  Clock,
+  Star,
+  MapPin,
+  Phone,
+  User,
+} from 'lucide-react-native';
 
 export default function BarberProfile() {
   const params = useLocalSearchParams<{ id: string }>();
   const id = params.id;
   const router = useRouter();
   const [barber, setBarber] = useState<Barber | null>(null);
-
+  const [barbershop, setBarbershop] = useState<Barbershop | null>(null);
   useEffect(() => {
-    axios
-      .get(`http://localhost:5000/barber/${id}`)
-      .then((res: any) => setBarber(res.data))
-      .catch(() => setBarber(null));
+    const load = async () => {
+      const all = await getBarbers();
+      const found = all.find((b) => b.id === id);
+      setBarber(found || null);
+
+      // If this is a registered barbershop, get detailed info
+      if (found) {
+        if (id?.startsWith('real_')) {
+          // Handle new prefixed IDs
+          const realBarbershopId = parseInt(id.replace('real_', ''));
+          const barbershopDetails = await getBarbershopById(realBarbershopId);
+          setBarbershop(barbershopDetails);
+        } else if (!isNaN(Number(id))) {
+          // Handle old numeric IDs
+          const barbershopDetails = await getBarbershopById(Number(id));
+          setBarbershop(barbershopDetails);
+        }
+      }
+    };
+    load();
   }, [id]);
 
   if (!barber) {
@@ -53,45 +54,14 @@ export default function BarberProfile() {
         <Text>Carregando barbeiro...</Text>
       </View>
     );
-  }
-  const handleBook = async () => {
-    Alert.alert(
-      'Confirmar Agendamento',
-      `Deseja agendar um corte na ${barber.name} por R$ ${barber.price}?`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Confirmar',
-          onPress: async () => {
-            const today = new Date();
-            const date = today.toISOString().split('T')[0];
-            const time = today.toLocaleTimeString('pt-BR', {
-              hour: '2-digit',
-              minute: '2-digit',
-            });
-            const newBooking = {
-              id: Date.now().toString(),
-              barberName: barber.name,
-              barberImage: barber.image,
-              service: 'Corte + Barba',
-              date,
-              time,
-              price: barber.price,
-              status: 'confirmed' as const,
-              address: 'Rua das Flores, 123 - Centro',
-              phone: '(11) 99999-9999',
-            };
-            await createBooking(newBooking);
-            Alert.alert(
-              'Agendamento realizado',
-              'Seu agendamento foi criado com sucesso'
-            );
-            router.push('/(tabs)/bookings');
-          },
-        },
-      ]
-    );
+  }  const handleBook = () => {
+    // Navigate to booking screen with barber ID
+    router.push({
+      pathname: '/booking',
+      params: { id: id }
+    });
   };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -108,16 +78,14 @@ export default function BarberProfile() {
               </Text>
             </View>
           </View>
-        </View>
-
-        {/* Info Cards */}
+        </View>        {/* Info Cards */}
         <View style={styles.infoSection}>
           <View style={styles.infoCard}>
             <MapPin size={24} color="#2563EB" />
             <View style={styles.infoContent}>
               <Text style={styles.infoTitle}>Localização</Text>
               <Text style={styles.infoText}>
-                {barber.distance}km de distância
+                {barbershop ? barbershop.address : `${barber.distance}km de distância`}
               </Text>
             </View>
           </View>
@@ -126,7 +94,12 @@ export default function BarberProfile() {
             <Clock size={24} color="#10B981" />
             <View style={styles.infoContent}>
               <Text style={styles.infoTitle}>Horário</Text>
-              <Text style={styles.infoText}>Seg-Sáb: 8h às 18h</Text>
+              <Text style={styles.infoText}>
+                {barbershop && barbershop.workingHours && barbershop.workingHours.monday 
+                  ? `${barbershop.workingHours.monday.openTime} às ${barbershop.workingHours.monday.closeTime}`
+                  : 'Seg-Sáb: 8h às 18h'
+                }
+              </Text>
             </View>
           </View>
 
@@ -134,37 +107,58 @@ export default function BarberProfile() {
             <Phone size={24} color="#F59E0B" />
             <View style={styles.infoContent}>
               <Text style={styles.infoTitle}>Contato</Text>
-              <Text style={styles.infoText}>(11) 99999-9999</Text>
+              <Text style={styles.infoText}>
+                {barbershop ? barbershop.phone : '(11) 99999-9999'}
+              </Text>
             </View>
           </View>
         </View>
+
+        {/* Additional Barbershop Info */}
+        {barbershop && barbershop.description && (
+          <View style={styles.aboutSection}>
+            <Text style={styles.sectionTitle}>Sobre a Barbearia</Text>
+            <Text style={styles.aboutText}>{barbershop.description}</Text>
+          </View>
+        )}
 
         {/* Services */}
         <View style={styles.servicesSection}>
           <Text style={styles.sectionTitle}>Serviços Oferecidos</Text>
           <View style={styles.servicesList}>
-            <View style={styles.serviceItem}>
-              <Text style={styles.serviceName}>Corte de Cabelo</Text>
-              <Text style={styles.servicePrice}>R$ {barber.price}</Text>
-            </View>
-            <View style={styles.serviceItem}>
-              <Text style={styles.serviceName}>Barba</Text>
-              <Text style={styles.servicePrice}>
-                R$ {Math.round(barber.price * 0.8)}
-              </Text>
-            </View>
-            <View style={styles.serviceItem}>
-              <Text style={styles.serviceName}>Corte + Barba</Text>
-              <Text style={styles.servicePrice}>
-                R$ {Math.round(barber.price * 1.4)}
-              </Text>
-            </View>
-            <View style={styles.serviceItem}>
-              <Text style={styles.serviceName}>Sobrancelha</Text>
-              <Text style={styles.servicePrice}>
-                R$ {Math.round(barber.price * 0.5)}
-              </Text>
-            </View>
+            {barbershop && barbershop.services && barbershop.services.length > 0 ? (
+              barbershop.services.map((service, index) => (
+                <View key={index} style={styles.serviceItem}>
+                  <Text style={styles.serviceName}>{service.name}</Text>
+                  <Text style={styles.servicePrice}>R$ {service.price}</Text>
+                </View>
+              ))
+            ) : (
+              <>
+                <View style={styles.serviceItem}>
+                  <Text style={styles.serviceName}>Corte de Cabelo</Text>
+                  <Text style={styles.servicePrice}>R$ {barber.price}</Text>
+                </View>
+                <View style={styles.serviceItem}>
+                  <Text style={styles.serviceName}>Barba</Text>
+                  <Text style={styles.servicePrice}>
+                    R$ {Math.round(barber.price * 0.8)}
+                  </Text>
+                </View>
+                <View style={styles.serviceItem}>
+                  <Text style={styles.serviceName}>Corte + Barba</Text>
+                  <Text style={styles.servicePrice}>
+                    R$ {Math.round(barber.price * 1.4)}
+                  </Text>
+                </View>
+                <View style={styles.serviceItem}>
+                  <Text style={styles.serviceName}>Sobrancelha</Text>
+                  <Text style={styles.servicePrice}>
+                    R$ {Math.round(barber.price * 0.5)}
+                  </Text>
+                </View>
+              </>
+            )}
           </View>
         </View>
 

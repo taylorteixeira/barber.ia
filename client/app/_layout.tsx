@@ -10,6 +10,11 @@ import {
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
 import * as SplashScreen from 'expo-splash-screen';
+import {
+  initDatabase,
+  initBarbersDatabase,
+  initBookingsDatabase,
+} from '@/services/database';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -26,6 +31,12 @@ export default function RootLayout() {
   useEffect(() => {
     const prepare = async () => {
       try {
+        // Initialize database
+        await initDatabase();
+        // Seed barbers and bookings
+        await initBarbersDatabase();
+        await initBookingsDatabase();
+
         if (fontsLoaded || fontError) {
           await SplashScreen.hideAsync();
         }
@@ -39,8 +50,7 @@ export default function RootLayout() {
 
   if (!fontsLoaded && !fontError) {
     return null;
-  }
-  return (
+  }  return (
     <>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -51,6 +61,10 @@ export default function RootLayout() {
         <Stack.Screen
           name="barber/[id]"
           options={{ headerShown: true, title: 'Perfil do Barbeiro' }}
+        />
+        <Stack.Screen
+          name="booking"
+          options={{ headerShown: false }}
         />
         <Stack.Screen name="+not-found" />
       </Stack>

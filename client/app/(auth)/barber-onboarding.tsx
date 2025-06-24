@@ -27,8 +27,7 @@ import {
   Store,
   Check,
 } from 'lucide-react-native';
-import * as Location from 'expo-location';
-import axios from 'axios';
+import { registerAndLoginUser, createBarbershop } from '@/services/database';
 
 interface StepProgressProps {
   currentStep: number;
@@ -67,7 +66,6 @@ export default function BarberOnboardingScreen() {
   // Etapa 2: Dados da Barbearia
   const [barbershopData, setBarbershopData] = useState({
     name: '',
-    cnpj: '', // Adicionado campo CNPJ
     description: '',
     address: '',
     city: '',
@@ -103,7 +101,6 @@ export default function BarberOnboardingScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [locationLoading, setLocationLoading] = useState(false);
 
   const handleGoBack = () => {
     if (currentStep === 1) {
@@ -210,45 +207,12 @@ export default function BarberOnboardingScreen() {
 
     return true;
   };
-  // Exemplo de integração real para onboarding de barbeiro
-const handleOnboarding = async () => {
-  try {
-    // Cadastro do barbeiro
-    const userRes = await axios.post('http://localhost:5000/user/register', { // Troque pelo IP da sua máquina
-      name: personalData.name,
-      email: personalData.email,
-      phone: Number(personalData.phone),
-      password: personalData.password,
-      isBarber: true,
-    });
-    const userId = userRes.data?.id;
-    // Cadastro da barbearia
-    const shopRes = await axios.post('http://localhost:5000/barbershop', { // Troque pelo IP da sua máquina
-      name: barbershopData.name,
-      cnpj: barbershopData.cnpj, // Adicione um campo cnpj no formulário/barbershopData
-      address: barbershopData.address,
-      phone: Number(personalData.phone),
-      email: personalData.email,
-      ownerId: userId,
-      workingHours: businessData,
-    });
-    if (userId && shopRes.data?.id) {
-      Alert.alert('Sucesso', 'Barbeiro e barbearia cadastrados!');
-      router.replace('/(barbertabs)');
-    } else {
-      Alert.alert('Erro', 'Erro ao cadastrar barbeiro ou barbearia');
-    }
-  } catch (err: any) {
-    Alert.alert('Erro', err?.response?.data?.message || 'Erro no onboarding');
-  }
-};
-
   const handleFinishOnboarding = async () => {
     setLoading(true);
     
     try {
       // 1. Registrar o usuário barbeiro e fazer login automático
-      const { data: loggedInUser } = await axios.post('/api/auth/register', {
+      const loggedInUser = await registerAndLoginUser({
         name: personalData.name,
         email: personalData.email,
         phone: personalData.phone,
@@ -261,7 +225,7 @@ const handleOnboarding = async () => {
         setLoading(false);
         return;
       }      // 2. Criar a barbearia
-      const barbershopSuccess = await axios.post('/api/barbershops', {
+      const barbershopSuccess = await createBarbershop({
         name: barbershopData.name,
         description: barbershopData.description,
         address: barbershopData.address,
@@ -347,58 +311,6 @@ const handleOnboarding = async () => {
       Alert.alert('Erro', 'Ocorreu um erro durante o cadastro. Tente novamente.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Função para buscar endereço pela localização
-  const handleFillAddressWithLocation = async () => {
-    setLocationLoading(true);
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permissão negada', 'É necessário permitir acesso à localização');
-        setLocationLoading(false);
-        return;
-      }
-      const loc = await Location.getCurrentPositionAsync({});
-      // Geocoding reverso (pode ser substituído por API externa se necessário)
-      const geocode = await Location.reverseGeocodeAsync({
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude,
-      });
-      if (geocode && geocode.length > 0) {
-        const g = geocode[0];
-        // Para Brasil, pegar a sigla do estado se possível
-        let estado = '';
-        if (g.isoCountryCode === 'BR' && g.region) {
-          // Mapear nome do estado para sigla
-          const estadosBR: Record<string, string> = {
-            'Acre': 'AC', 'Alagoas': 'AL', 'Amapá': 'AP', 'Amazonas': 'AM', 'Bahia': 'BA',
-            'Ceará': 'CE', 'Distrito Federal': 'DF', 'Espírito Santo': 'ES', 'Goiás': 'GO',
-            'Maranhão': 'MA', 'Mato Grosso': 'MT', 'Mato Grosso do Sul': 'MS', 'Minas Gerais': 'MG',
-            'Pará': 'PA', 'Paraíba': 'PB', 'Paraná': 'PR', 'Pernambuco': 'PE', 'Piauí': 'PI',
-            'Rio de Janeiro': 'RJ', 'Rio Grande do Norte': 'RN', 'Rio Grande do Sul': 'RS',
-            'Rondônia': 'RO', 'Roraima': 'RR', 'Santa Catarina': 'SC', 'São Paulo': 'SP',
-            'Sergipe': 'SE', 'Tocantins': 'TO'
-          };
-          estado = estadosBR[g.region] ?? g.region;
-        } else {
-          estado = g.region ?? '';
-        }
-        setBarbershopData((prev) => ({
-          ...prev,
-          address: `${g.street ?? ''} ${g.name ?? ''}`.trim(),
-          city: g.city ?? g.subregion ?? '',
-          state: estado,
-          zipCode: g.postalCode ?? '',
-        }));
-      } else {
-        Alert.alert('Erro', 'Não foi possível obter o endereço');
-      }
-    } catch (e) {
-      Alert.alert('Erro', 'Não foi possível obter a localização');
-    } finally {
-      setLocationLoading(false);
     }
   };
 
@@ -489,15 +401,6 @@ const handleOnboarding = async () => {
     <ScrollView style={styles.stepContent}>
       <Text style={styles.stepTitle}>Dados da Barbearia</Text>
       <Text style={styles.stepSubtitle}>Agora vamos configurar sua barbearia</Text>
-      <TouchableOpacity
-        style={[styles.locationButton, locationLoading && { opacity: 0.6 }]}
-        onPress={handleFillAddressWithLocation}
-        disabled={locationLoading}
-      >
-        <Text style={styles.locationButtonText}>
-          {locationLoading ? 'Buscando localização...' : 'Usar minha localização'}
-        </Text>
-      </TouchableOpacity>
 
       <View style={styles.inputContainer}>
         <Store size={20} color="#6B7280" style={styles.inputIcon} />
@@ -507,16 +410,6 @@ const handleOnboarding = async () => {
           value={barbershopData.name}
           onChangeText={(text) => setBarbershopData({...barbershopData, name: text})}
           autoCapitalize="words"
-        />
-      </View>
-
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="CNPJ"
-          value={barbershopData.cnpj}
-          onChangeText={(text) => setBarbershopData({...barbershopData, cnpj: text})}
-          keyboardType="numeric"
         />
       </View>
 
@@ -1005,18 +898,5 @@ const styles = StyleSheet.create({
   },
   buttonIcon: {
     marginLeft: 8,
-  },
-  locationButton: {
-    backgroundColor: '#3B82F6',
-    borderRadius: 12,
-    paddingVertical: 16,
-    marginBottom: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  locationButtonText: {
-    fontSize: 16,
-    fontFamily: 'Inter-SemiBold',
-    color: '#FFFFFF',
   },
 });

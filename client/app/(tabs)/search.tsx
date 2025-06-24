@@ -7,11 +7,12 @@ import {
   TextInput,
   SafeAreaView,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { Search, Filter, MapPin, Star, SlidersHorizontal } from 'lucide-react-native';
-import axios from 'axios';
+import { getBarbers } from '@/services/database';
 
 type Barber = {
   id: string;
@@ -21,7 +22,12 @@ type Barber = {
   price: number;
   image: string;
   reviews: number;
-  specialties: string[];
+  specialties?: string[];
+  location: {
+    latitude: number;
+    longitude: number;
+  };
+  isRegisteredBarbershop?: boolean;
 };
 
 export default function SearchScreen() {
@@ -29,7 +35,24 @@ export default function SearchScreen() {
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [searchResults, setSearchResults] = useState<Barber[]>([]);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  useEffect(() => {
+    loadBarbers();
+  }, []);
+
+  const loadBarbers = async () => {
+    try {
+      setLoading(true);
+      const barbers = await getBarbers();
+      setSearchResults(barbers);
+    } catch (error) {
+      console.error('Error loading barbers:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filters = [
     { id: 'distance', name: 'Distância', options: ['< 1km', '1-3km', '3-5km', '> 5km'] },
@@ -37,15 +60,10 @@ export default function SearchScreen() {
     { id: 'rating', name: 'Avaliação', options: ['4+ estrelas', '4.5+ estrelas', '4.8+ estrelas'] },
     { id: 'services', name: 'Serviços', options: ['Corte', 'Barba', 'Sobrancelha', 'Pacotes'] },
   ];
-
-  useEffect(() => {
-    axios.get('http://localhost:5000/barbershop')
-      .then((res: any) => setSearchResults(res.data))
-      .catch(() => setSearchResults([]));
-  }, []);
-
-  const handleBarberPress = (barberId: string) => {
-    router.push(`/barber/${barberId}`);
+  const filteredResults = searchResults.filter(barber =>
+    barber.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );const handleBarberPress = (barberId: string) => {
+    router.push(`/barbershop/${barberId}` as any);
   };
 
   const renderBarberCard = (barber: Barber) => (
@@ -56,26 +74,25 @@ export default function SearchScreen() {
     >
       <Image source={{ uri: barber.image }} style={styles.barberImage} />
       <View style={styles.barberInfo}>
-        <Text style={styles.barberName}>{String(barber.name ?? '')}</Text>
+        <Text style={styles.barberName}>{barber.name}</Text>
         <View style={styles.barberStats}>
           <View style={styles.ratingContainer}>
             <Star size={14} color="#F59E0B" fill="#F59E0B" />
-            <Text style={styles.ratingText}>{String(barber.rating ?? '')}</Text>
-            <Text style={styles.reviewsText}>({String(barber.reviews ?? 0)})</Text>
+            <Text style={styles.ratingText}>{barber.rating}</Text>
+            <Text style={styles.reviewsText}>({barber.reviews})</Text>
           </View>
           <View style={styles.distanceContainer}>
             <MapPin size={12} color="#6B7280" />
-            <Text style={styles.distanceText}>{String(barber.distance ?? 0)}km</Text>
+            <Text style={styles.distanceText}>{barber.distance}km</Text>
           </View>
-        </View>
-        <View style={styles.specialtiesContainer}>
-          {barber.specialties.map((specialty, index) => (
+        </View>        <View style={styles.specialtiesContainer}>
+          {(barber.specialties || []).map((specialty, index) => (
             <View key={index} style={styles.specialtyTag}>
-              <Text style={styles.specialtyText}>{String(specialty ?? '')}</Text>
+              <Text style={styles.specialtyText}>{specialty}</Text>
             </View>
           ))}
         </View>
-        <Text style={styles.priceText}>A partir de R$ {String(barber.price ?? '')}</Text>
+        <Text style={styles.priceText}>A partir de R$ {barber.price}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -139,19 +156,24 @@ export default function SearchScreen() {
             ))}
           </ScrollView>
         </View>
-      )}
-
-      <View style={styles.resultsHeader}>
-        <Text style={styles.resultsCount}>{searchResults.length} barbeiros encontrados</Text>
+      )}      <View style={styles.resultsHeader}>
+        <Text style={styles.resultsCount}>{filteredResults.length} barbeiros encontrados</Text>
         <TouchableOpacity style={styles.sortButton}>
           <Text style={styles.sortButtonText}>Ordenar</Text>
           <Filter size={16} color="#6B7280" />
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.resultsList} showsVerticalScrollIndicator={false}>
-        {searchResults.map(renderBarberCard)}
-      </ScrollView>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#D97706" />
+          <Text style={styles.loadingText}>Carregando barbearias...</Text>
+        </View>
+      ) : (
+        <ScrollView style={styles.resultsList} showsVerticalScrollIndicator={false}>
+          {filteredResults.map(renderBarberCard)}
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }
@@ -355,5 +377,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Inter-SemiBold',
     color: '#10B981',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  loadingText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Medium',
+    color: '#6B7280',
+    marginTop: 12,
   },
 });

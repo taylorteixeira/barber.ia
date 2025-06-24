@@ -19,14 +19,16 @@ import {
   Edit,
 } from 'lucide-react-native';
 import {
+  getCurrentUser,
+  getBarbershopByOwnerId,
+  updateBarbershop,
+  createBarbershop,
   getDefaultWorkingHours,
   User,
   Barbershop,
   WorkingHours,
   DaySchedule,
 } from '../../services/database';
-import axios from 'axios';
-import { getCurrentUser } from '@/services/auth';
 
 export default function BarbershopHours() {
   const router = useRouter();
@@ -46,11 +48,12 @@ export default function BarbershopHours() {
       const user = await getCurrentUser();
       if (user) {
         setCurrentUser(user);
-        // Buscar barbearia do usuário via API
-        const res = await axios.get('http://localhost:5000/barbershop/me');
-        if (res.data) {
-          setBarbershop(res.data);
-          setWorkingHours(res.data.workingHours);
+
+        // Buscar barbearia do usuário
+        const shop = await getBarbershopByOwnerId(user.id!);
+        if (shop) {
+          setBarbershop(shop);
+          setWorkingHours(shop.workingHours);
         }
       }
     } catch (error) {
@@ -101,23 +104,17 @@ export default function BarbershopHours() {
         workingHours,
       };
 
-      // Substitua por uma chamada de API para atualizar a barbearia
-      const res = await axios.put('http://localhost:5000/barbershop/me', updatedBarbershop);
-
-      if (res.status === 200) {
+      const success = await updateBarbershop(updatedBarbershop);
+      
+      if (success) {
         Alert.alert('Sucesso', 'Horários de funcionamento atualizados!');
         setBarbershop(updatedBarbershop);
       } else {
         Alert.alert('Erro', 'Erro ao salvar horários');
       }
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        console.error('Erro ao salvar:', error.response.data);
-        Alert.alert('Erro', `Erro ao salvar: ${JSON.stringify(error.response.data)}`);
-      } else {
-        console.error('Erro ao salvar:', error);
-        Alert.alert('Erro', 'Erro interno ao salvar');
-      }
+      console.error('Erro ao salvar:', error);
+      Alert.alert('Erro', 'Erro interno ao salvar');
     }
   };
 

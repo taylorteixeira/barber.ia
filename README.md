@@ -35,6 +35,9 @@ barber.ia/
 
 ## Como funciona
 
+Instalar: npm install
+Iniciar: epx expo start --offline
+
 - **Cadastro:**
   - O usuário informa nome, e-mail, telefone e senha.
   - A senha é criptografada com bcryptjs e os dados são salvos localmente usando o SecureStore.

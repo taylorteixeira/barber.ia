@@ -34,7 +34,7 @@ import {
   Settings
 } from 'lucide-react-native';
 import { exportAppointments, getPredefinedPeriods, AppointmentExport, ExportOptions } from '../../services/exportService';
-import axios from 'axios';
+import { getAppointments, Appointment, getAppointmentsForCurrentBarber, updateBookingStatus, getBookingsForCurrentBarbershop } from '../../services/database';
 
 interface AppointmentDetail {
   id: string;
@@ -52,9 +52,12 @@ interface AppointmentDetail {
 }
 
 export default function BarberAgenda() {
-  const router = useRouter();  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const router = useRouter();
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentDetail | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [appointments, setAppointments] = useState<AppointmentDetail[]>([]);
+  const [loading, setLoading] = useState(true);
   
   // Estados para exportação
   const [exportModalVisible, setExportModalVisible] = useState(false);
@@ -69,21 +72,116 @@ export default function BarberAgenda() {
     const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Começar na segunda-feira
     const monday = new Date(today);
     monday.setDate(today.getDate() + mondayOffset);
-    return monday;
-  });
-    const [appointments, setAppointments] = useState<AppointmentDetail[]>([]);
+    return monday;  });
+  // Load appointments from database
   useEffect(() => {
-    axios.get('http://localhost:5000/booking')
-      .then((res) => {
-        // Força o tipo e filtra apenas objetos válidos
-        const data = Array.isArray(res.data) ? res.data.filter(item =>
-          item && typeof item === 'object' &&
-          'id' in item && 'time' in item && 'duration' in item && 'client' in item && 'service' in item && 'status' in item
-        ) : [];
-        setAppointments(data as AppointmentDetail[]);
-      })
-      .catch(() => setAppointments([]));
+    let isMounted = true; // Track if component is still mounted
+    
+    const loadAppointmentsData = async () => {
+      try {
+        if (!isMounted) return;
+        setLoading(true);
+        // Get appointments specific to current barber/barbershop
+        const data = await getAppointmentsForCurrentBarber();
+        
+        if (!isMounted) return; // Check again after async operation
+        
+        // Convert appointments to AppointmentDetail format
+        const formattedAppointments: AppointmentDetail[] = data.map(apt => {
+          const clientName = apt.notes?.includes('Cliente:') ? 
+            apt.notes.split('Cliente: ')[1].split(' (')[0] : 'Cliente';
+          const phone = apt.notes?.includes('Cliente:') && apt.notes.includes('(') ? 
+            apt.notes.split('(')[1].split(')')[0] : '';
+          const service = apt.notes?.includes('Serviço:') ? 
+            apt.notes.split('Serviço: ')[1].split(' -')[0] : 'Serviço';
+          const price = apt.notes?.includes('Valor: R$ ') ? 
+            parseInt(apt.notes.split('Valor: R$ ')[1].split(' ')[0]) || 0 : 0;
+          const email = apt.notes?.includes('Email:') ? 
+            apt.notes.split('Email: ')[1].trim() : '';
+
+          return {
+            id: apt.id,
+            time: apt.time,
+            client: clientName,
+            service: service,
+            duration: 30, // Default duration
+            status: apt.status as any,
+            phone: phone,
+            email: email,
+            price: price,
+            notes: apt.notes || '',
+            createdAt: apt.createdAt,
+            date: apt.date
+          };
+        });
+        
+        if (isMounted) {
+          setAppointments(formattedAppointments);
+        }
+      } catch (error) {
+        console.error('Error loading appointments:', error);
+        if (isMounted) {
+          Alert.alert('Erro', 'Erro ao carregar agendamentos');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadAppointmentsData();
+    
+    // Cleanup function to prevent state updates on unmounted component
+    return () => {
+      isMounted = false;
+    };
   }, []);
+  
+  const loadAppointments = async () => {
+    try {
+      setLoading(true);
+      // Get appointments specific to current barber/barbershop
+      const data = await getAppointmentsForCurrentBarber();
+      
+      // Convert appointments to AppointmentDetail format
+      const formattedAppointments: AppointmentDetail[] = data.map(apt => {
+        const clientName = apt.notes?.includes('Cliente:') ? 
+          apt.notes.split('Cliente: ')[1].split(' (')[0] : 'Cliente';
+        const phone = apt.notes?.includes('Cliente:') && apt.notes.includes('(') ? 
+          apt.notes.split('(')[1].split(')')[0] : '';
+        const service = apt.notes?.includes('Serviço:') ? 
+          apt.notes.split('Serviço: ')[1].split(' -')[0] : 'Serviço';
+        const price = apt.notes?.includes('Valor: R$ ') ? 
+          parseInt(apt.notes.split('Valor: R$ ')[1].split(' ')[0]) || 0 : 0;
+        const email = apt.notes?.includes('Email:') ? 
+          apt.notes.split('Email: ')[1].trim() : '';
+
+        return {
+          id: apt.id,
+          time: apt.time,
+          client: clientName,
+          service: service,
+          duration: 30, // Default duration
+          status: apt.status as any,
+          phone: phone,
+          email: email,
+          price: price,
+          notes: apt.notes || '',
+          createdAt: apt.createdAt,
+          date: apt.date
+        };
+      });
+      
+      setAppointments(formattedAppointments);
+    } catch (error) {
+      console.error('Error loading appointments:', error);
+      Alert.alert('Erro', 'Erro ao carregar agendamentos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmed': return '#10B981';
@@ -97,10 +195,10 @@ export default function BarberAgenda() {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'confirmed': return 'Confirmado';
-      case 'pending': return 'Pendente';
       case 'cancelled': return 'Cancelado';
       case 'completed': return 'Concluído';
-      default: return 'Desconhecido';
+      case 'pending': return 'Pendente';
+      default: return status;
     }
   };  const handleAddAppointment = () => {
     router.push('/(barbertabs)/new-appointment' as any);
@@ -132,9 +230,8 @@ export default function BarberAgenda() {
     if (!newWeekDays.includes(selectedDate)) {
       setSelectedDate(newWeekDays[0]);
     }
-  };
-
-  const getAppointmentsForDate = (date: string) => {
+  };  const getAppointmentsForDate = (date: string) => {
+    // Use only real appointments - no mock data
     return appointments.filter(appointment => appointment.date === date);
   };
 
@@ -156,8 +253,7 @@ export default function BarberAgenda() {
   const closeModal = () => {
     setModalVisible(false);
     setSelectedAppointment(null);
-  };
-  const handleUpdateStatus = (newStatus: 'confirmed' | 'cancelled' | 'completed') => {
+  };  const handleUpdateStatus = async (newStatus: 'confirmed' | 'cancelled' | 'completed') => {
     if (!selectedAppointment) return;
 
     let title = '';
@@ -170,7 +266,7 @@ export default function BarberAgenda() {
         break;
       case 'cancelled':
         title = 'Cancelar Agendamento';
-        message = `Tem certeza que deseja cancelar o agendamento de ${selectedAppointment.client}?\n\nEsta ação não pode ser desfeita.`;
+        message = `Tem certeza que deseja cancelar o agendamento de ${selectedAppointment.client}?\n\nO cliente será notificado automaticamente.`;
         break;
       case 'completed':
         title = 'Concluir Agendamento';
@@ -188,12 +284,44 @@ export default function BarberAgenda() {
         },
         {
           text: 'Sim',
-          onPress: () => {
-            // Aqui você atualizaria o status no banco de dados
-            Alert.alert(
-              'Sucesso',
-              `Agendamento ${getStatusText(newStatus).toLowerCase()} com sucesso!`
-            );
+          onPress: async () => {
+            try {
+              // Extract booking ID from appointment ID if it exists
+              let bookingId = selectedAppointment.id;
+              if (bookingId.startsWith('booking_')) {
+                bookingId = bookingId.replace('booking_', '');
+              }
+              
+              // Update booking status with bidirectional sync
+              const success = await updateBookingStatus(
+                bookingId, 
+                newStatus === 'confirmed' ? 'confirmed' : 
+                newStatus === 'cancelled' ? 'cancelled' : 'completed',
+                'barber'
+              );
+              
+              if (success) {
+                // Update local state
+                setAppointments(prev => 
+                  prev.map(apt => 
+                    apt.id === selectedAppointment.id 
+                      ? { ...apt, status: newStatus }
+                      : apt
+                  )
+                );
+                
+                Alert.alert(
+                  'Sucesso',
+                  `Agendamento ${getStatusText(newStatus).toLowerCase()} com sucesso! O cliente foi notificado.`
+                );
+              } else {
+                Alert.alert('Erro', 'Não foi possível atualizar o agendamento. Tente novamente.');
+              }
+            } catch (error) {
+              console.error('Error updating appointment status:', error);
+              Alert.alert('Erro', 'Ocorreu um erro ao atualizar o agendamento.');
+            }
+            
             closeModal();
           }
         }
@@ -407,16 +535,16 @@ export default function BarberAgenda() {
               onPress={() => openAppointmentDetails(appointment)}
             >
               <View style={styles.timeColumn}>
-                <Text style={styles.appointmentTime}>{String(appointment.time ?? '')}</Text>
+                <Text style={styles.appointmentTime}>{appointment.time}</Text>
                 <View style={styles.durationContainer}>
                   <Clock size={12} color="#6B7280" />
-                  <Text style={styles.durationText}>{String(appointment.duration ?? '')}min</Text>
+                  <Text style={styles.durationText}>{appointment.duration}min</Text>
                 </View>
               </View>
 
               <View style={styles.appointmentDetails}>
-                <Text style={styles.clientName}>{String(appointment.client ?? '')}</Text>
-                <Text style={styles.serviceText}>{String(appointment.service ?? '')}</Text>
+                <Text style={styles.clientName}>{appointment.client}</Text>
+                <Text style={styles.serviceText}>{appointment.service}</Text>
                 <View style={styles.statusContainer}>
                   <View style={[
                     styles.statusDot, 
@@ -519,7 +647,7 @@ export default function BarberAgenda() {
                       <View style={styles.contactInfo}>
                         <View style={styles.infoRow}>
                           <Phone size={18} color="#6B7280" />
-                          <Text style={styles.infoText}>{String(selectedAppointment.phone ?? '')}</Text>
+                          <Text style={styles.infoText}>{selectedAppointment.phone}</Text>
                           <TouchableOpacity onPress={handleCallClient} style={styles.callButton}>
                             <Phone size={14} color="#FFFFFF" />
                             <Text style={styles.callButtonText}>Ligar</Text>
@@ -528,7 +656,7 @@ export default function BarberAgenda() {
                         {selectedAppointment.email && (
                           <View style={styles.infoRow}>
                             <MessageSquare size={18} color="#6B7280" />
-                            <Text style={styles.infoText}>{String(selectedAppointment.email ?? '')}</Text>
+                            <Text style={styles.infoText}>{selectedAppointment.email}</Text>
                           </View>
                         )}
                       </View>
@@ -543,18 +671,18 @@ export default function BarberAgenda() {
                         <Text style={styles.serviceName}>{selectedAppointment.service}</Text>
                         <View style={styles.priceTag}>
                           <DollarSign size={16} color="#059669" />
-                          <Text style={styles.priceText}>R$ {String(selectedAppointment.price ?? '')}</Text>
+                          <Text style={styles.priceText}>R$ {selectedAppointment.price.toFixed(2)}</Text>
                         </View>
                       </View>
                       
                       <View style={styles.timeDetails}>
                         <View style={styles.timeItem}>
                           <Clock size={16} color="#6B7280" />
-                          <Text style={styles.timeText}>Horário: {String(selectedAppointment.time ?? '')}</Text>
+                          <Text style={styles.timeText}>Horário: {selectedAppointment.time}</Text>
                         </View>
                         <View style={styles.timeItem}>
                           <CalendarIcon size={16} color="#6B7280" />
-                          <Text style={styles.timeText}>Duração: {String(selectedAppointment.duration ?? '')} min</Text>
+                          <Text style={styles.timeText}>Duração: {selectedAppointment.duration} min</Text>
                         </View>
                       </View>
                     </View>
@@ -565,7 +693,7 @@ export default function BarberAgenda() {
                       <Text style={styles.sectionTitle}>Observações</Text>
                       <View style={styles.notesCard}>
                         <MessageSquare size={18} color="#F59E0B" />
-                        <Text style={[styles.notesText, { marginLeft: 8, flex: 1 }]}>{String(selectedAppointment.notes ?? '')}</Text>
+                        <Text style={[styles.notesText, { marginLeft: 8, flex: 1 }]}>{selectedAppointment.notes}</Text>
                       </View>
                     </View>
                   )}

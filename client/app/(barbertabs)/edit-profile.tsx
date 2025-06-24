@@ -16,29 +16,42 @@ import {
   ArrowLeft,
   Save,
   Clock,
+  MapPin,
+  Phone,
+  Mail,
+  Building,
   Users,
   Plus,
   Edit,
+  Trash2,
 } from 'lucide-react-native';
 import {
+  getCurrentUser,
+  getBarbershopByOwnerId,
+  updateBarbershop,
+  createBarbershop,
   getDefaultWorkingHours,
+  getBarbersByBarbershopId,
+  createBarberProfile,
+  updateUser,
+  updateBarberProfile,
+  getUserById,
+  registerUser,
+  updateBarberWorkingHours,
   validateBarberWorkingHours,
+  getEffectiveBarberWorkingHours,
   User,
   Barbershop,
   WorkingHours,
   DaySchedule,
   BarberProfile,
 } from '../../services/database';
-import { getCurrentUser } from '../../services/auth';
-import axios from 'axios';
-import * as ImagePicker from 'expo-image-picker';
 
 export default function EditProfile() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [barbershop, setBarbershop] = useState<Barbershop | null>(null);
-  const [workingHours, setWorkingHours] = useState<WorkingHours>(getDefaultWorkingHours());
-  const [modalVisible, setModalVisible] = useState(false);
+  const [workingHours, setWorkingHours] = useState<WorkingHours>(getDefaultWorkingHours());  const [modalVisible, setModalVisible] = useState(false);
   const [editingDay, setEditingDay] = useState<string>('');
   const [barbersModalVisible, setBarbersModalVisible] = useState(false);
   const [newBarberModalVisible, setNewBarberModalVisible] = useState(false);
@@ -48,33 +61,25 @@ export default function EditProfile() {
   const [barbers, setBarbers] = useState<BarberProfile[]>([]);
   const [barbersDetails, setBarbersDetails] = useState<{[key: number]: User}>({});
   const [editingBarber, setEditingBarber] = useState<BarberProfile | null>(null);
-  type FormData = {
-    name: string;
-    email: string;
-    phone: string;
-    barbershopName: string;
-    barbershopDescription: string;
-    barbershopAddress: string;
-    barbershopPhone: string;
-    barbershopEmail: string;
-  };
-
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    email: '',
-    phone: '',
-    barbershopName: '',
-    barbershopDescription: '',
-    barbershopAddress: '',
-    barbershopPhone: '',
-    barbershopEmail: '',
-  });
-
   const [newBarberData, setNewBarberData] = useState({
     name: '',
     email: '',
     phone: '',
     specialties: '',
+  });
+
+  // Form data
+  const [formData, setFormData] = useState({
+    // Barbeiro
+    name: '',
+    email: '',
+    phone: '',
+    // Barbearia
+    barbershopName: '',
+    barbershopDescription: '',
+    barbershopAddress: '',
+    barbershopPhone: '',
+    barbershopEmail: '',
   });
 
   useEffect(() => {
@@ -83,79 +88,96 @@ export default function EditProfile() {
 
   const loadData = async () => {
     try {
-      // Buscar usuário logado (ajustar para buscar do backend se necessário)
       const user = await getCurrentUser();
       if (user) {
         setCurrentUser(user);
-        setFormData((prev) => ({
+        setFormData(prev => ({
           ...prev,
           name: user.name,
           email: user.email,
           phone: user.phone,
         }));
 
-        // Carregar barbearia do usuário (se existir)
-        const barbershopData = await axios.get(`http://localhost:5000/barbershop/user/${user.id}`);
-        setBarbershop(barbershopData.data);
-
-        // Carregar horários de trabalho padrão
-        setWorkingHours(getDefaultWorkingHours());
-
-        // Carregar barbeiros da barbearia
-        const barbersData = await axios.get(`http://localhost:5000/barber/barbershop/${barbershopData.data.id}`);
-        setBarbers(barbersData.data);
-
-        // Carregar detalhes dos barbeiros (usuários)
-        const barberUserIds = barbersData.data.map((barber: BarberProfile) => barber.userId);
-        const usersData = await axios.post('http://localhost:5000/user/batch', { ids: barberUserIds });
-        const usersMap = Object.fromEntries(usersData.data.map((user: User) => [user.id, user]));
-        setBarbersDetails(usersMap);
+        // Buscar barbearia do usuário
+        const shop = await getBarbershopByOwnerId(user.id!);
+        if (shop) {
+          setBarbershop(shop);
+          setWorkingHours(shop.workingHours);
+          setFormData(prev => ({
+            ...prev,
+            barbershopName: shop.name,
+            barbershopDescription: shop.description || '',
+            barbershopAddress: shop.address,
+            barbershopPhone: shop.phone,
+            barbershopEmail: shop.email,
+          }));          // Buscar barbeiros da barbearia
+          const shopBarbers = await getBarbersByBarbershopId(shop.id);
+          setBarbers(shopBarbers);
+          
+          // Buscar detalhes dos usuários barbeiros
+          const barbersDetailsMap: {[key: number]: User} = {};
+          for (const barber of shopBarbers) {
+            const userDetails = await getUserById(barber.userId);
+            if (userDetails) {
+              barbersDetailsMap[barber.userId] = userDetails;
+            }
+          }
+          setBarbersDetails(barbersDetailsMap);
+        }
       }
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
     }
   };
-
   const handleSave = async () => {
     try {
-      // Validar dados do formulário
-      if (!formData.name || !formData.email || !formData.phone) {
-        Alert.alert('Erro', 'Preencha todos os campos obrigatórios.');
+      if (!currentUser) return;
+
+      // Atualizar dados do usuário
+      const userData: User = {
+        ...currentUser,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+      };
+
+      const userUpdateSuccess = await updateUser(userData);
+      if (!userUpdateSuccess) {
+        Alert.alert('Erro', 'Não foi possível atualizar seus dados pessoais.');
         return;
       }
 
-      // Salvar informações do barbeiro
-      const user = currentUser;
-      if (user) {
-        await axios.put(`http://localhost:5000/user/${user.id}`, {
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-        });
-      }
-
-      // Salvar informações da barbearia
-      if (!currentUser) {
-        Alert.alert('Erro', 'Usuário não encontrado.');
-        return;
-      }
       const barbershopData = {
+        name: formData.barbershopName,
         description: formData.barbershopDescription,
         address: formData.barbershopAddress,
         phone: formData.barbershopPhone,
         email: formData.barbershopEmail,
         workingHours,
-        ownerId: currentUser.id,
+        ownerId: currentUser.id!,
         services: barbershop?.services || [],
       };
+
+      let success = false;
       if (barbershop) {
-        await axios.put(`http://localhost:5000/barbershop/${barbershop.id}`, barbershopData);
+        // Atualizar barbearia existente
+        success = await updateBarbershop({ ...barbershop, ...barbershopData });
       } else {
-        await axios.post('http://localhost:5000/barbershop', barbershopData);
+        // Criar nova barbearia
+        const newBarbershop = await createBarbershop(barbershopData);
+        success = !!newBarbershop;
+        if (newBarbershop) {
+          setBarbershop(newBarbershop);
+        }
       }
 
-      await loadData();
-      Alert.alert('Sucesso', 'Perfil atualizado com sucesso!');
+      if (success) {
+        // Recarregar dados atualizados
+        await loadData();
+        Alert.alert('Sucesso', 'Perfil atualizado com sucesso!');
+      } else {
+        Alert.alert('Erro', 'Não foi possível salvar as alterações da barbearia.');
+      }
     } catch (error) {
       console.error('Erro ao salvar:', error);
       Alert.alert('Erro', 'Ocorreu um erro ao salvar.');
@@ -174,39 +196,52 @@ export default function EditProfile() {
     }));
     setModalVisible(false);
   };
-  // handleAddBarber
   const handleAddBarber = async () => {
     try {
       if (!barbershop || !newBarberData.name || !newBarberData.email) {
         Alert.alert('Erro', 'Preencha todos os campos obrigatórios.');
         return;
       }
-      // Criar usuário barbeiro
-      const userRes = await axios.post('http://localhost:5000/user/register', {
+
+      // Criar um usuário barbeiro
+      const newUser: User = {
         name: newBarberData.name,
         email: newBarberData.email,
         phone: newBarberData.phone,
-        password: 'barbeiro123',
+        password: 'barbeiro123', // Senha padrão que deve ser alterada no primeiro login
         userType: 'barber',
         barbershopId: barbershop.id,
-      });
-      const userId = userRes.data?.id;
-      if (!userId) {
-        Alert.alert('Erro', 'Não foi possível criar o usuário barbeiro.');
+      };
+
+      const userCreated = await registerUser(newUser);
+      if (!userCreated) {
+        Alert.alert('Erro', 'Não foi possível criar o usuário barbeiro. Verifique se o e-mail não está em uso.');
         return;
       }
-      // Criar perfil do barbeiro
-      const newProfile = {
-        userId,
+
+      // Buscar o usuário criado para pegar o ID
+      // Como não temos uma função para buscar por email, vamos usar um ID baseado no tempo
+      const userId = Date.now();
+
+      // Criar o perfil do barbeiro
+      const newProfile: Omit<BarberProfile, 'id' | 'joinedAt'> = {
+        userId: userId,
         barbershopId: barbershop.id,
         specialties: newBarberData.specialties.split(',').map(s => s.trim()).filter(s => s.length > 0),
         workingDays: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'],
         isActive: true,
       };
-      await axios.post('http://localhost:5000/barber', newProfile);
-      await loadData();
-      setNewBarberModalVisible(false);
-      setNewBarberData({ name: '', email: '', phone: '', specialties: '' });
+
+      const createdProfile = await createBarberProfile(newProfile);
+      if (createdProfile) {
+        await loadData(); // Recarregar dados
+        setNewBarberModalVisible(false);
+        setNewBarberData({ name: '', email: '', phone: '', specialties: '' });
+        Alert.alert(
+          'Sucesso', 
+          `Barbeiro ${newBarberData.name} adicionado com sucesso!\n\nE-mail: ${newBarberData.email}\nSenha padrão: barbeiro123\n\nO barbeiro deve alterar a senha no primeiro acesso.`
+        );
+      }
     } catch (error) {
       console.error('Erro ao adicionar barbeiro:', error);
       Alert.alert('Erro', 'Não foi possível adicionar o barbeiro.');
@@ -233,27 +268,46 @@ export default function EditProfile() {
     setBarberWorkingHoursModalVisible(true);
   };
 
-  // handleUpdateBarber
   const handleUpdateBarber = async () => {
     try {
-      if (!editingBarber || !newBarberData.name || !newBarberData.email) return;
+      if (!editingBarber || !newBarberData.name || !newBarberData.email) {
+        Alert.alert('Erro', 'Preencha todos os campos obrigatórios.');
+        return;
+      }
+
       // Atualizar dados do usuário
       const userDetails = barbersDetails[editingBarber.userId];
       if (userDetails) {
-        await axios.put(`http://localhost:5000/user/${editingBarber.userId}`, {
+        const updatedUser: User = {
+          ...userDetails,
           name: newBarberData.name,
           email: newBarberData.email,
           phone: newBarberData.phone,
-        });
+        };
+
+        const userUpdateSuccess = await updateUser(updatedUser);
+        if (!userUpdateSuccess) {
+          Alert.alert('Erro', 'Não foi possível atualizar os dados do barbeiro.');
+          return;
+        }
       }
+
       // Atualizar perfil do barbeiro
-      const updatedProfile = {
+      const updatedProfile: BarberProfile = {
         ...editingBarber,
         specialties: newBarberData.specialties.split(',').map(s => s.trim()).filter(s => s.length > 0),
       };
-      await axios.put(`http://localhost:5000/barber/${editingBarber.id}`, updatedProfile);
-      await loadData();
-      setEditBarberModalVisible(false);
+
+      const profileUpdateSuccess = await updateBarberProfile(updatedProfile);
+      if (profileUpdateSuccess) {
+        await loadData(); // Recarregar dados
+        setEditBarberModalVisible(false);
+        setEditingBarber(null);
+        setNewBarberData({ name: '', email: '', phone: '', specialties: '' });
+        Alert.alert('Sucesso', 'Barbeiro atualizado com sucesso!');
+      } else {
+        Alert.alert('Erro', 'Não foi possível atualizar o perfil do barbeiro.');
+      }
     } catch (error) {
       console.error('Erro ao atualizar barbeiro:', error);
       Alert.alert('Erro', 'Não foi possível atualizar o barbeiro.');
@@ -263,30 +317,41 @@ export default function EditProfile() {
   const handleSaveBarberWorkingHours = async () => {
     try {
       if (!editingBarber || !editingBarberWorkingHours) return;
-      // Validação pode ser feita usando validateBarberWorkingHours utilitário
-      // Atualizar perfil do barbeiro com novos horários customizados
-      const updatedProfile = {
-        ...editingBarber,
-        customWorkingHours: editingBarberWorkingHours,
-      };
-      await axios.put(`http://localhost:5000/barber/${editingBarber.id}`, updatedProfile);
-      await loadData();
-      setBarberWorkingHoursModalVisible(false);
+
+      const result = await updateBarberWorkingHours(editingBarber.userId, editingBarberWorkingHours);
+      
+      if (result.success) {
+        Alert.alert('Sucesso', 'Horários do barbeiro atualizados com sucesso!');
+        setBarberWorkingHoursModalVisible(false);
+        setEditingBarber(null);
+        setEditingBarberWorkingHours(null);
+        loadData(); // Recarregar lista de barbeiros
+      } else {
+        Alert.alert('Erro', result.errors?.join('\n') || 'Erro ao atualizar horários');
+      }
     } catch (error) {
       console.error('Error saving barber working hours:', error);
       Alert.alert('Erro', 'Erro interno ao salvar horários');
     }
   };
 
-  // handleToggleBarberStatus
   const handleToggleBarberStatus = async (barber: BarberProfile) => {
     try {
-      const updatedProfile = {
+      const updatedProfile: BarberProfile = {
         ...barber,
         isActive: !barber.isActive,
       };
-      await axios.put(`http://localhost:5000/barber/${barber.id}`, updatedProfile);
-      await loadData();
+
+      const success = await updateBarberProfile(updatedProfile);
+      if (success) {
+        await loadData(); // Recarregar dados
+        Alert.alert(
+          'Sucesso', 
+          `Barbeiro ${barber.isActive ? 'desativado' : 'ativado'} com sucesso!`
+        );
+      } else {
+        Alert.alert('Erro', 'Não foi possível alterar o status do barbeiro.');
+      }
     } catch (error) {
       console.error('Erro ao alterar status do barbeiro:', error);
       Alert.alert('Erro', 'Não foi possível alterar o status do barbeiro.');
@@ -307,20 +372,6 @@ export default function EditProfile() {
   };
 
   const currentDaySchedule = editingDay ? workingHours[editingDay as keyof WorkingHours] : null;
-
-  // Função para selecionar imagem da galeria e atualizar avatar
-  const pickAvatar = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-    if (!result.canceled) {
-      // Envie a imagem para o backend e atualize o avatar
-      // Exemplo: result.assets[0].uri
-    }
-  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -347,6 +398,17 @@ export default function EditProfile() {
                 value={formData.name}
                 onChangeText={(text) => setFormData(prev => ({ ...prev, name: text }))}
                 placeholder="Seu nome completo"
+              />
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>E-mail</Text>
+              <TextInput
+                style={styles.input}
+                value={formData.email}
+                onChangeText={(text) => setFormData(prev => ({ ...prev, email: text }))}
+                placeholder="seu@email.com"
+                keyboardType="email-address"
               />
             </View>
             
@@ -1188,6 +1250,10 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
+    width: '100%',
+    maxHeight: '80%',
+  },
+  modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -1340,11 +1406,5 @@ const styles = StyleSheet.create({
     color: '#F59E0B',
     marginTop: 8,
     textAlign: 'center',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
   },
 });

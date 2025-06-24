@@ -10,8 +10,7 @@ import {
 import { useState } from 'react';
 import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import { User, Mail, Lock, Eye, EyeOff, Phone, ArrowLeft } from 'lucide-react-native';
-import axios from 'axios';
-import { API_ENDPOINTS } from '../../services/config';
+import { registerAndLoginUser } from '@/services/database';
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
@@ -29,6 +28,7 @@ export default function RegisterScreen() {
   };
 
   const handleRegister = async () => {
+    // Se for barbeiro, redirecionar para o onboarding completo
     if (userType === 'barber') {
       router.push('/(auth)/barber-onboarding');
       return;
@@ -43,24 +43,31 @@ export default function RegisterScreen() {
       return;
     }
 
-    setLoading(true);
-      try {
-      // Cadastro real via backend
-      const res = await axios.post(API_ENDPOINTS.AUTH.REGISTER, {
+    if (password.length < 6) {
+      Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres');
+      return;
+    }    setLoading(true);
+    
+    try {      const loggedInUser = await registerAndLoginUser({
         name,
         email,
-        phone: Number(phone),
+        phone,
         password,
-        isBarber: false, // Cliente sempre isBarber: false
+        userType
       });
-      if (res.status === 201) {
-        Alert.alert('Sucesso', 'Cadastro realizado com sucesso!');
-        router.replace('/(auth)/login?userType=client');
+      
+      if (loggedInUser) {        Alert.alert('Bem-vindo!', 'Conta criada com sucesso! Você já está logado.', [
+          { 
+            text: 'Começar', 
+            onPress: () => router.replace('/(tabs)')
+          },
+        ]);
       } else {
-        Alert.alert('Erro', res.data?.message || 'Erro ao cadastrar');
+        Alert.alert('Erro', 'Ocorreu um erro ao criar sua conta. O email já pode estar em uso.');
       }
-    } catch (err: any) {
-      Alert.alert('Erro', err?.response?.data?.message || 'Erro ao cadastrar');
+    } catch (error) {
+      console.error('Error during registration:', error);
+      Alert.alert('Erro', 'Ocorreu um erro ao criar sua conta. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -78,11 +85,11 @@ export default function RegisterScreen() {
         
         <View style={styles.header}>
           <Text style={styles.title}>
-            {userType === 'barber' ? 'Criar Conta Barbeiro' : 'Criar Conta Cliente'}
+            Criar Conta {userType === 'barber' ? 'Barbeiro' : 'Cliente'}
           </Text>
           <Text style={styles.subtitle}>
-            {userType === 'barber'
-              ? 'Cadastre sua barbearia na plataforma'
+            {userType === 'barber' 
+              ? 'Cadastre sua barbearia na plataforma' 
               : 'Preencha os dados para começar'}
           </Text>
         </View>
@@ -183,12 +190,12 @@ export default function RegisterScreen() {
         </View>
 
         <View style={styles.footer}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={styles.footerText}>Já tem uma conta? </Text>
+          <Text style={styles.footerText}>
+            Já tem uma conta?{' '}
             <Link href={`/(auth)/login?userType=${userType}`} asChild>
               <Text style={styles.footerLink}>Faça login</Text>
             </Link>
-          </View>
+          </Text>
         </View>
       </View>
     </SafeAreaView>

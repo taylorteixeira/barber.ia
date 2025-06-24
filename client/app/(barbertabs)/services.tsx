@@ -22,20 +22,22 @@ import {
   Save,
   X,
 } from 'lucide-react-native';
-import axios from 'axios';
 
-interface Service {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  duration: number; // em minutos
-  category: string;
-}
+import {
+  getServices,
+  createService,
+  updateService,
+  deleteService,
+  Service,
+  getCurrentUser,
+  getBarbershopByOwnerId,
+  updateBarbershopServices
+} from '@/services/database';
 
 export default function ServicesManagement() {
   const router = useRouter();
   const [services, setServices] = useState<Service[]>([]);
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
@@ -48,6 +50,38 @@ export default function ServicesManagement() {
   });
 
   const categories = ['Corte', 'Barba', 'Estética', 'Combo', 'Outros'];
+
+  // Load services from database
+  useEffect(() => {
+    loadServices();
+  }, []);
+
+  const loadServices = async () => {
+    try {
+      const data = await getServices();
+      const activeServices = data.filter(s => s.isActive);
+      setServices(activeServices);
+    } catch (error) {
+      console.error('Error loading services:', error);
+      Alert.alert('Erro', 'Não foi possível carregar os serviços');
+    }
+  };
+
+  const syncWithBarbershop = async () => {
+    try {
+      const currentUser = await getCurrentUser();
+      if (currentUser && currentUser.userType === 'barber') {
+        const barbershop = await getBarbershopByOwnerId(currentUser.id!);
+        if (barbershop) {
+          // Update barbershop services to sync with client views
+          await updateBarbershopServices(barbershop.id, services);
+          console.log('✅ Services synced with barbershop - clients will see updates immediately');
+        }
+      }
+    } catch (error) {
+      console.error('Error syncing with barbershop:', error);
+    }
+  };
 
   const filteredServices = services.filter(service =>
     service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -65,45 +99,55 @@ export default function ServicesManagement() {
     });
     setModalVisible(true);
   };
-
   const openEditModal = (service: Service) => {
     setEditingService(service);
     setFormData({
       name: service.name,
-      description: service.description,
+      description: service.description || '',
       price: service.price.toString(),
       duration: service.duration.toString(),
       category: service.category,
     });
     setModalVisible(true);
   };
-
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.name || !formData.price || !formData.duration) {
       Alert.alert('Erro', 'Preencha todos os campos obrigatórios');
       return;
     }
 
-    const serviceData: Service = {
-      id: editingService?.id || Date.now().toString(),
-      name: formData.name,
-      description: formData.description,
-      price: parseFloat(formData.price),
-      duration: parseInt(formData.duration),
-      category: formData.category,
-    };
+    try {
+      const serviceData = {
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        duration: parseInt(formData.duration),
+        category: formData.category,
+        isActive: true,
+      };
 
-    if (editingService) {
-      setServices(services.map(s => s.id === editingService.id ? serviceData : s));
-    } else {
-      setServices([...services, serviceData]);
+      if (editingService) {
+        // Update existing service
+        const updatedService = { ...editingService, ...serviceData };
+        await updateService(updatedService);
+        setServices(services.map(s => s.id === editingService.id ? updatedService : s));
+      } else {
+        // Create new service
+        const newService = await createService(serviceData);
+        setServices([...services, newService]);
+      }
+
+      // Sync with barbershop for real-time client updates
+      await syncWithBarbershop();
+
+      setModalVisible(false);
+      Alert.alert('Sucesso', editingService ? 'Serviço atualizado!' : 'Serviço adicionado!');
+    } catch (error) {
+      console.error('Error saving service:', error);
+      Alert.alert('Erro', 'Não foi possível salvar o serviço');
     }
-
-    setModalVisible(false);
-    Alert.alert('Sucesso', editingService ? 'Serviço atualizado!' : 'Serviço adicionado!');
   };
-
-  const handleDelete = (service: Service) => {
+  const handleDelete = async (service: Service) => {
     Alert.alert(
       'Confirmar Exclusão',
       `Deseja excluir o serviço "${service.name}"?`,
@@ -112,20 +156,24 @@ export default function ServicesManagement() {
         {
           text: 'Excluir',
           style: 'destructive',
-          onPress: () => {
-            setServices(services.filter(s => s.id !== service.id));
-            Alert.alert('Sucesso', 'Serviço excluído!');
+          onPress: async () => {
+            try {
+              await deleteService(service.id);
+              setServices(services.filter(s => s.id !== service.id));
+              
+              // Sync with barbershop for real-time client updates
+              await syncWithBarbershop();
+              
+              Alert.alert('Sucesso', 'Serviço excluído!');
+            } catch (error) {
+              console.error('Error deleting service:', error);
+              Alert.alert('Erro', 'Não foi possível excluir o serviço');
+            }
           },
         },
       ]
     );
   };
-
-  useEffect(() => {
-    axios.get('http://localhost:5000/service')
-      .then((res: any) => setServices(res.data))
-      .catch(() => setServices([]));
-  }, []);
 
   return (
     <SafeAreaView style={styles.container}>

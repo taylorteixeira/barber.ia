@@ -17,7 +17,6 @@
     "@react-navigation/native": "^7.0.14",
     "@types/bcryptjs": "^3.0.0",
     "@types/react-native-sqlite-storage": "^6.0.5",
-    "axios": "^1.10.0",
     "bcryptjs": "^3.0.2",
     "expo": "53.0.11",
     "expo-blur": "~14.1.5",
@@ -55,8 +54,7 @@
     "react-native-svg": "15.11.2",
     "react-native-url-polyfill": "^2.0.0",
     "react-native-web": "^0.20.0",
-    "react-native-webview": "13.13.5",
-    "expo-image-picker": "~16.1.4"
+    "react-native-webview": "13.13.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

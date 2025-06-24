@@ -7,41 +7,20 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Calendar as CalendarIcon, Clock, Plus, Filter } from 'lucide-react-native';
-import axios from 'axios';
-
-interface AppointmentDetail {
-  id: string;
-  time: string;
-  client: string;
-  service: string;
-  duration: number;
-  status: 'confirmed' | 'pending' | 'cancelled' | 'completed';
-}
 
 export default function BarberAgenda() {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-  const [appointments, setAppointments] = useState<AppointmentDetail[]>([]);
-
-  useEffect(() => {
-    axios.get('http://localhost:5000/booking')
-      .then(res => {
-        // Força o tipo e filtra apenas objetos válidos
-        const data = Array.isArray(res.data)
-          ? res.data.filter((item): item is AppointmentDetail =>
-              item && typeof item === 'object' &&
-              typeof item.id === 'string' &&
-              typeof item.time === 'string' &&
-              typeof item.client === 'string' &&
-              typeof item.service === 'string' &&
-              typeof item.duration === 'number' &&
-              typeof item.status === 'string')
-          : [];
-        setAppointments(data);
-      })
-      .catch(() => setAppointments([]));
-  }, []);
+  
+  const appointments = [
+    { id: '1', time: '09:00', client: 'João Silva', service: 'Corte + Barba', duration: 60, status: 'confirmed' },
+    { id: '2', time: '10:30', client: 'Pedro Santos', service: 'Corte', duration: 30, status: 'confirmed' },
+    { id: '3', time: '11:45', client: 'Carlos Lima', service: 'Barba', duration: 30, status: 'confirmed' },
+    { id: '4', time: '14:30', client: 'Ana Costa', service: 'Corte', duration: 45, status: 'pending' },
+    { id: '5', time: '15:45', client: 'Rafael Oliveira', service: 'Corte + Barba', duration: 60, status: 'confirmed' },
+    { id: '6', time: '17:00', client: 'Lucas Ferreira', service: 'Corte', duration: 30, status: 'confirmed' },
+  ];
 
   const getStatusColor = (status: string) => {
     switch (status) {

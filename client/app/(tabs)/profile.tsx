@@ -8,8 +8,9 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   User,
   Calendar,
@@ -19,41 +20,63 @@ import {
   CircleHelp as HelpCircle,
   LogOut,
   ChevronRight,
-  CreditCard as Edit,
+  Edit,
 } from 'lucide-react-native';
-import axios from 'axios';
+import {
+  logoutUser,
+  getCurrentUser,
+  getBookings,
+  Booking,
+  initBookingsDatabase,
+} from '@/services/database';
 
 export default function ProfileScreen() {
   const [user, setUser] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    avatar: '',
+    name: 'Carregando...',
+    email: 'Carregando...',
+    phone: 'Carregando...',
+    avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
     totalBookings: 0,
     reviewsGiven: 0,
     avgRating: 0,
   });
-
   const router = useRouter();
 
-  useEffect(() => {
-    axios
-      .get('http://localhost:5000/user/me')
-      .then((res: any) => setUser(res.data))
-      .catch(() =>
-        setUser({
-          name: '',
-          email: '',
-          phone: '',
-          avatar: '',
-          totalBookings: 0,
-          reviewsGiven: 0,
-          avgRating: 0,
-        })
+  const loadUserData = async () => {
+    await initBookingsDatabase();
+    const userData = await getCurrentUser();
+    if (userData) {
+      // fetch user stats
+      const bookings: Booking[] = await getBookings();
+      const userBookings = bookings.filter((b) => b.status !== 'cancelled');
+      const total = userBookings.length;
+      const completedBookings = userBookings.filter(
+        (b) => b.status === 'completed'
       );
+      // placeholder avg rating
+      const avgRating = completedBookings.length > 0 ? 4.5 : 0;
+      setUser({
+        ...user,
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone || 'Não informado',
+        totalBookings: total,
+        avgRating,
+        reviewsGiven: completedBookings.length,
+      });
+    }
+  };
+
+  useEffect(() => {
+    loadUserData();
   }, []);
 
-  const menuItems = [
+  // Reload user data when screen is focused (useful after editing profile)
+  useFocusEffect(
+    React.useCallback(() => {
+      loadUserData();
+    }, [])
+  );  const menuItems = [
     {
       id: 'bookings-history',
       title: 'Histórico de Agendamentos',
@@ -69,9 +92,7 @@ export default function ProfileScreen() {
       onPress: () => {
         Alert.alert(
           'Minhas Avaliações',
-          `Você avaliou ${String(user.reviewsGiven ?? 0)} serviços com uma média de ${String(
-            user.avgRating ?? 0
-          )} estrelas.`,
+          `Você avaliou ${user.reviewsGiven} serviços com uma média de ${user.avgRating} estrelas.`,
           [{ text: 'OK' }]
         );
       },
@@ -116,7 +137,7 @@ export default function ProfileScreen() {
         text: 'Sair',
         style: 'destructive',
         onPress: async () => {
-          await axios.post('http://localhost:5000/user/logout');
+          await logoutUser();
           router.replace('/(auth)/login');
         },
       },
@@ -131,15 +152,21 @@ export default function ProfileScreen() {
       >
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Meu Perfil</Text>
-        </View>
-
-        <View style={styles.profileSection}>
+        </View>        <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
             <Image source={{ uri: user.avatar }} style={styles.avatar} />
           </View>
-          <Text style={styles.userName}>{String(user.name ?? '')}</Text>
-          <Text style={styles.userEmail}>{String(user.email ?? '')}</Text>
-          <Text style={styles.userPhone}>{String(user.phone ?? '')}</Text>
+          <Text style={styles.userName}>{user.name}</Text>
+          <Text style={styles.userEmail}>{user.email}</Text>
+          <Text style={styles.userPhone}>{user.phone}</Text>
+            {/* Edit Profile Button */}
+          <TouchableOpacity 
+            style={styles.editProfileButton}
+            onPress={() => router.push('/(tabs)/edit-profile')}
+          >
+            <Edit size={16} color="#FFFFFF" />
+            <Text style={styles.editProfileText}>Editar Perfil</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.statsSection}>
@@ -255,9 +282,30 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   userPhone: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: 'Inter-Regular',
     color: '#6B7280',
+    marginBottom: 8,
+  },  editProfileButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#4285F4',
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    marginTop: 20,
+    shadowColor: '#4285F4',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  editProfileText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginLeft: 6,
   },
   statsSection: {
     flexDirection: 'row',

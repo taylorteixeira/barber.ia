@@ -24,7 +24,6 @@ import {
   Percent,
   Tag,
 } from 'lucide-react-native';
-import axios from 'axios';
 
 interface PriceRule {
   id: string;
@@ -41,7 +40,34 @@ interface PriceRule {
 
 export default function PricingManagement() {
   const router = useRouter();
-  const [priceRules, setPriceRules] = useState<PriceRule[]>([]);
+  const [priceRules, setPriceRules] = useState<PriceRule[]>([
+    {
+      id: '1',
+      name: 'Desconto Cliente Fiel',
+      description: 'Desconto para clientes com mais de 10 visitas',
+      type: 'percentage',
+      value: 10,
+      isActive: true,
+    },
+    {
+      id: '2',
+      name: 'Happy Hour',
+      description: 'Desconto para horários de menor movimento',
+      type: 'percentage',
+      value: 15,
+      daysOfWeek: ['Segunda', 'Terça'],
+      isActive: true,
+    },
+    {
+      id: '3',
+      name: 'Taxa Adicional Feriado',
+      description: 'Taxa extra para atendimentos em feriados',
+      type: 'fixed',
+      value: 10,
+      isActive: false,
+    },
+  ]);
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [editingRule, setEditingRule] = useState<PriceRule | null>(null);
@@ -156,12 +182,6 @@ export default function PricingManagement() {
     
     setFormData({...formData, daysOfWeek: newDays});
   };
-
-  useEffect(() => {
-    axios.get('http://localhost:5000/pricing')
-      .then((res: any) => setPriceRules(res.data))
-      .catch(() => setPriceRules([]));
-  }, []);
 
   return (
     <SafeAreaView style={styles.container}>

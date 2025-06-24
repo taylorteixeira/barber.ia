@@ -1,4 +1,3 @@
-import axios from 'axios';
 import {
   View,
   Text,
@@ -12,20 +11,33 @@ import {
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { Calendar, Clock, MapPin, Phone, X, Star } from 'lucide-react-native';
+import { getBookings, updateBooking, Booking, getBookingsByUserId, getCurrentUser, updateBookingStatus } from '@/services/database';
 
 type BookingStatus = 'confirmed' | 'completed' | 'cancelled';
 
 export default function BookingsScreen() {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
-  const [bookings, setBookings] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const router = useRouter();
-
   // Load bookings from database
   useEffect(() => {
-    axios
-      .get('http://localhost:5000/booking')
-      .then((res: any) => setBookings(res.data))
-      .catch(() => setBookings([]));
+    const load = async () => {
+      try {
+        const currentUser = await getCurrentUser();
+        if (currentUser && currentUser.id) {
+          // Load only bookings for the current user
+          const data = await getBookingsByUserId(currentUser.id);
+          setBookings(data);
+        } else {
+          // If no user is logged in, show all bookings (fallback)
+          const data = await getBookings();
+          setBookings(data);
+        }
+      } catch (err) {
+        console.error('Failed to load bookings:', err);
+      }
+    };
+    load();
   }, []);
 
   const upcomingBookings = bookings.filter((b) => b.status === 'confirmed');
@@ -58,8 +70,7 @@ export default function BookingsScreen() {
         return status;
     }
   };
-
-  const handleCancelBooking = (bookingId: string) => {
+  const handleCancelBooking = async (bookingId: string) => {
     Alert.alert(
       'Cancelar Agendamento',
       'Tem certeza que deseja cancelar este agendamento?',
@@ -68,29 +79,27 @@ export default function BookingsScreen() {
         {
           text: 'Sim, cancelar',
           style: 'destructive',
-          onPress: () => {
-            // update status and persist
-            const updated = bookings.find((b) => b.id === bookingId);
-            if (updated) {
-              const changed = { ...updated, status: 'cancelled' as const };
-              // Chamada axios para atualizar o agendamento no backend
-              axios
-                .put(`http://localhost:5000/booking/${bookingId}`, changed)
-                .then(() => {
-                  setBookings((prev) =>
-                    prev.map((b) => (b.id === bookingId ? changed : b))
-                  );
-                  Alert.alert(
-                    'Agendamento cancelado',
-                    'Seu agendamento foi cancelado com sucesso'
-                  );
-                })
-                .catch(() => {
-                  Alert.alert(
-                    'Erro',
-                    'Ocorreu um erro ao cancelar o agendamento. Tente novamente mais tarde.'
-                  );
-                });
+          onPress: async () => {
+            try {
+              // Update status with bidirectional sync
+              const success = await updateBookingStatus(bookingId, 'cancelled', 'client');
+              
+              if (success) {
+                // Update local state
+                setBookings((prev) =>
+                  prev.map((b) => (b.id === bookingId ? { ...b, status: 'cancelled' as const } : b))
+                );
+                
+                Alert.alert(
+                  'Agendamento cancelado',
+                  'Seu agendamento foi cancelado com sucesso. O barbeiro será notificado.'
+                );
+              } else {
+                Alert.alert('Erro', 'Não foi possível cancelar o agendamento. Tente novamente.');
+              }
+            } catch (error) {
+              console.error('Error cancelling booking:', error);
+              Alert.alert('Erro', 'Ocorreu um erro ao cancelar o agendamento.');
             }
           },
         },
@@ -103,17 +112,53 @@ export default function BookingsScreen() {
     router.push(`/review/${bookingId}`);
   };
 
-  const renderBookingCard = (booking: any) => (
+  const handleCompleteBooking = async (bookingId: string) => {
+    Alert.alert(
+      'Marcar como Concluído',
+      'Confirma que este serviço foi realizado?',
+      [
+        { text: 'Não', style: 'cancel' },
+        {
+          text: 'Sim, concluído',
+          onPress: async () => {
+            try {
+              // Update status with bidirectional sync
+              const success = await updateBookingStatus(bookingId, 'completed', 'client');
+              
+              if (success) {
+                // Update local state
+                setBookings((prev) =>
+                  prev.map((b) => (b.id === bookingId ? { ...b, status: 'completed' as const } : b))
+                );
+                
+                Alert.alert(
+                  'Serviço concluído',
+                  'Obrigado! Esperamos vê-lo novamente em breve.'
+                );
+              } else {
+                Alert.alert('Erro', 'Não foi possível atualizar o status. Tente novamente.');
+              }
+            } catch (error) {
+              console.error('Error completing booking:', error);
+              Alert.alert('Erro', 'Ocorreu um erro ao atualizar o status.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const renderBookingCard = (booking: Booking) => (
     // @ts-ignore: suppress key prop error
-    <View key={String(booking.id)} style={styles.bookingCard}>
+    <View key={booking.id} style={styles.bookingCard}>
       <View style={styles.bookingHeader}>
         <Image
-          source={{ uri: String(booking.barberImage ?? '') }}
+          source={{ uri: booking.barberImage }}
           style={styles.barberImage}
         />
         <View style={styles.bookingInfo}>
-          <Text style={styles.barberName}>{String(booking.barberName ?? '')}</Text>
-          <Text style={styles.serviceText}>{String(booking.service ?? '')}</Text>
+          <Text style={styles.barberName}>{booking.barberName}</Text>
+          <Text style={styles.serviceName}>{booking.service}</Text>
           <View style={styles.statusContainer}>
             <View
               style={[
@@ -127,36 +172,41 @@ export default function BookingsScreen() {
             </View>
           </View>
         </View>
-        <Text style={styles.priceText}>R$ {String(booking.price ?? '')}</Text>
+        <Text style={styles.priceText}>R$ {booking.price}</Text>
       </View>
 
       <View style={styles.bookingDetails}>
         <View style={styles.detailRow}>
           <Calendar size={16} color="#6B7280" />
           <Text style={styles.detailText}>
-            {String(new Date(booking.date).toLocaleDateString('pt-BR'))} às{' '}
-            {String(booking.time ?? '')}
+            {new Date(booking.date).toLocaleDateString('pt-BR')} às{' '}
+            {booking.time}
           </Text>
         </View>
         <View style={styles.detailRow}>
           <MapPin size={16} color="#6B7280" />
-          <Text style={styles.detailText}>{String(booking.address ?? '')}</Text>
+          <Text style={styles.detailText}>{booking.address}</Text>
         </View>
         <View style={styles.detailRow}>
           <Phone size={16} color="#6B7280" />
-          <Text style={styles.detailText}>{String(booking.phone ?? '')}</Text>
+          <Text style={styles.detailText}>{booking.phone}</Text>
         </View>
-      </View>
-
-      <View style={styles.bookingActions}>
+      </View>      <View style={styles.bookingActions}>
         {booking.status === 'confirmed' && (
           <>
             <TouchableOpacity
               style={styles.cancelButton}
-              onPress={() => handleCancelBooking(String(booking.id))}
+              onPress={() => handleCancelBooking(booking.id)}
             >
               <X size={16} color="#EF4444" />
               <Text style={styles.cancelButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.completeButton}
+              onPress={() => handleCompleteBooking(booking.id)}
+            >
+              <Clock size={16} color="#10B981" />
+              <Text style={styles.completeButtonText}>Concluído</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.contactButton}>
               <Phone size={16} color="#2563EB" />
@@ -167,7 +217,7 @@ export default function BookingsScreen() {
         {booking.status === 'completed' && (
           <TouchableOpacity
             style={styles.rateButton}
-            onPress={() => handleRateService(String(booking.id))}
+            onPress={() => handleRateService(booking.id)}
           >
             <Star size={16} color="#F59E0B" />
             <Text style={styles.rateButtonText}>Avaliar</Text>
@@ -242,8 +292,9 @@ export default function BookingsScreen() {
           <View style={styles.emptyState}>
             <Clock size={48} color="#6B7280" />
             <Text style={styles.emptyStateTitle}>Nenhum histórico ainda</Text>
-            {/* Corrigido: garantir que não há texto solto aqui */}
-            {/* Se quiser adicionar texto, sempre dentro de <Text> */}
+            <Text style={styles.emptyStateText}>
+              Seus agendamentos concluídos aparecerão aqui
+            </Text>
           </View>
         )}
       </ScrollView>
@@ -333,7 +384,7 @@ const styles = StyleSheet.create({
     color: '#111827',
     marginBottom: 4,
   },
-  serviceText: {
+  serviceName: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
     color: '#6B7280',
@@ -413,6 +464,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter-Medium',
     color: '#D97706',
+    marginLeft: 4,
+  },
+  completeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginRight: 12,
+    backgroundColor: '#ECFDF5',
+    borderRadius: 6,
+  },
+  completeButtonText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: '#10B981',
     marginLeft: 4,
   },
   emptyState: {

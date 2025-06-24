@@ -13,17 +13,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { Search, Star, Navigation, Filter } from 'lucide-react-native';
 import * as Location from 'expo-location';
-import axios from 'axios';
-
-interface Barber {
-  id: string;
-  name: string;
-  image: string;
-  rating: number;
-  reviews: number;
-  price: number;
-  distance: number;
-}
+import { getBarbers, initBarbersDatabase, Barber } from '@/services/database';
 
 export default function HomeScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(
@@ -46,13 +36,13 @@ export default function HomeScreen() {
   // Load barbers from database
   useEffect(() => {
     const loadBarbers = async () => {
+      await initBarbersDatabase();
       try {
-        const res = await axios.get('http://localhost:5000/barber');
-        setNearbyBarbers(res.data);
-        setFilteredBarbers(res.data);
-      } catch {
-        setNearbyBarbers([]);
-        setFilteredBarbers([]);
+        const data = await getBarbers();
+        setNearbyBarbers(data);
+        setFilteredBarbers(data);
+      } catch (err) {
+        console.error('Failed to load barbers:', err);
       }
     };
     loadBarbers();
@@ -109,22 +99,22 @@ export default function HomeScreen() {
 
   const renderBarberCard = (barber: Barber) => (
     <TouchableOpacity
-      key={String(barber.id)}
+      key={barber.id}
       style={styles.barberCard}
-      onPress={() => handleBarberPress(String(barber.id))}
+      onPress={() => handleBarberPress(barber.id)}
     >
-      <Image source={{ uri: String(barber.image ?? '') }} style={styles.barberImage} />
+      <Image source={{ uri: barber.image }} style={styles.barberImage} />
       <View style={styles.barberInfo}>
-        <Text style={styles.barberName}>{String(barber.name ?? '')}</Text>
+        <Text style={styles.barberName}>{barber.name}</Text>
         <View style={styles.barberStats}>
           <View style={styles.ratingContainer}>
             <Star size={14} color="#F59E0B" fill="#F59E0B" />
-            <Text style={styles.ratingText}>{String(barber.rating ?? '')}</Text>
-            <Text style={styles.reviewsText}>({String(barber.reviews ?? 0)})</Text>
+            <Text style={styles.ratingText}>{barber.rating}</Text>
+            <Text style={styles.reviewsText}>({barber.reviews})</Text>
           </View>
-          <Text style={styles.distanceText}>{String(barber.distance ?? 0)}km</Text>
+          <Text style={styles.distanceText}>{barber.distance}km</Text>
         </View>
-        <Text style={styles.priceText}>A partir de R$ {String(barber.price ?? '')}</Text>
+        <Text style={styles.priceText}>A partir de R$ {barber.price}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -183,7 +173,7 @@ export default function HomeScreen() {
                   )
                 }
               >
-                <Text style={styles.categoryEmoji}>{String(category.icon ?? '')}</Text>
+                <Text style={styles.categoryEmoji}>{category.icon}</Text>
                 <Text
                   style={[
                     styles.categoryText,
@@ -191,7 +181,7 @@ export default function HomeScreen() {
                       styles.categoryTextSelected,
                   ]}
                 >
-                  {String(category.name ?? '')}
+                  {category.name}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -201,7 +191,7 @@ export default function HomeScreen() {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
               {selectedCategory
-                ? `Categoria: ${String(categories.find((c) => c.id === selectedCategory)?.name ?? '')}`
+                ? `Categoria: ${categories.find((c) => c.id === selectedCategory)?.name}`
                 : 'Barbeiros próximos'}
             </Text>
             <TouchableOpacity>
