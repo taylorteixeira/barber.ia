@@ -68,7 +68,7 @@ npm install
 
 **Iniciar desenvolvimento:**
 ```bash
-npx expo start
+npx expo start --offline
 ```
 
 ### 👤 **Fluxo do Cliente:**
