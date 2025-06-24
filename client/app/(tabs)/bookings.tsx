@@ -109,7 +109,44 @@ export default function BookingsScreen() {
 
   const handleRateService = (bookingId: string) => {
     // @ts-ignore: suppress routing type error
-    router.push(`/review/${bookingId}`);  };
+    router.push(`/review/${bookingId}`);
+  };
+
+  const handleCompleteBooking = async (bookingId: string) => {
+    Alert.alert(
+      'Marcar como Concluído',
+      'Confirma que este serviço foi realizado?',
+      [
+        { text: 'Não', style: 'cancel' },
+        {
+          text: 'Sim, concluído',
+          onPress: async () => {
+            try {
+              // Update status with bidirectional sync
+              const success = await updateBookingStatus(bookingId, 'completed', 'client');
+              
+              if (success) {
+                // Update local state
+                setBookings((prev) =>
+                  prev.map((b) => (b.id === bookingId ? { ...b, status: 'completed' as const } : b))
+                );
+                
+                Alert.alert(
+                  'Serviço concluído',
+                  'Obrigado! Esperamos vê-lo novamente em breve.'
+                );
+              } else {
+                Alert.alert('Erro', 'Não foi possível atualizar o status. Tente novamente.');
+              }
+            } catch (error) {
+              console.error('Error completing booking:', error);
+              Alert.alert('Erro', 'Ocorreu um erro ao atualizar o status.');
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const renderBookingCard = (booking: Booking) => (
     // @ts-ignore: suppress key prop error
@@ -163,6 +200,13 @@ export default function BookingsScreen() {
             >
               <X size={16} color="#EF4444" />
               <Text style={styles.cancelButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.completeButton}
+              onPress={() => handleCompleteBooking(booking.id)}
+            >
+              <Clock size={16} color="#10B981" />
+              <Text style={styles.completeButtonText}>Concluído</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.contactButton}>
               <Phone size={16} color="#2563EB" />

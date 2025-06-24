@@ -1494,11 +1494,10 @@ export const updateBarbershopServices = async (
     const success = await updateBarbershop(updatedBarbershop);
     
     if (success) {
-      console.log(`✅ Barbershop ${barbershopId} services updated:`);
-      services.forEach(service => {
-        console.log(`   - ${service.name}: R$ ${service.price} (${service.duration}min)`);
-      });
-      console.log('🔄 Changes will be visible to clients immediately!');
+      console.log(`Barbershop ${barbershopId} services updated - will be visible to clients immediately`);
+      
+      // Optionally, you could add notification logic here
+      // await notifyClientsOfServiceUpdate(barbershopId, services);
     }
     
     return success;

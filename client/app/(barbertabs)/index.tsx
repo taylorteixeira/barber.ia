@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Linking,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
@@ -22,6 +23,7 @@ import {
   PieChart,
   Activity,
   TrendingDown,
+  Camera,
 } from 'lucide-react-native';
 import { getCurrentUser } from '../../services/database';
 
@@ -66,17 +68,15 @@ export default function BarberDashboard() {
 
   useEffect(() => {
     const loadBarberData = async () => {
-      const userData = await getCurrentUser();
-      if (userData) {
+      const userData = await getCurrentUser();      if (userData) {
         setBarberData({
           name: userData.name,
-          barbershopName: userData.barbershopName || 'Minha Barbearia',
+          barbershopName: 'Minha Barbearia', // Default name for now
         });
       }
     };
     loadBarberData();
-  }, []);
-  const handleQuickAction = (action: string) => {
+  }, []);  const handleQuickAction = (action: string) => {
     switch (action) {
       case 'new-appointment':
         router.push('/(barbertabs)/new-appointment' as any);
@@ -90,8 +90,39 @@ export default function BarberDashboard() {
       case 'manage-clients':
         router.push('/(barbertabs)/clients');
         break;
+      case 'facecut':
+        handleOpenFaceCut();
+        break;
       default:
         Alert.alert('Ação', 'Funcionalidade será implementada');
+    }
+  };
+
+  const handleOpenFaceCut = async () => {
+    const url = 'https://facecut-suggestion.vercel.app';
+    
+    try {
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert(
+          'Erro',
+          'Não foi possível abrir o FaceCut. Verifique se você tem um navegador instalado.',
+          [
+            { text: 'OK' }
+          ]
+        );
+      }
+    } catch (error) {
+      console.error('Error opening FaceCut:', error);
+      Alert.alert(
+        'Erro',
+        'Ocorreu um erro ao tentar abrir o FaceCut. Tente novamente.',
+        [
+          { text: 'OK' }
+        ]
+      );
     }
   };
   return (
@@ -176,14 +207,22 @@ export default function BarberDashboard() {
                 <Settings size={24} color="#F59E0B" />
               </View>
               <Text style={styles.actionText}>Gerenciar Serviços</Text>
+            </TouchableOpacity>            <TouchableOpacity 
+              style={styles.actionCard}
+              onPress={() => handleQuickAction('facecut')}
+            >
+              <View style={[styles.actionIcon, { backgroundColor: '#F3E8FF' }]}>
+                <Camera size={24} color="#8B5CF6" />
+              </View>
+              <Text style={styles.actionText}>FaceCut</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
               style={styles.actionCard}
               onPress={() => handleQuickAction('manage-clients')}
             >
-              <View style={[styles.actionIcon, { backgroundColor: '#F3E8FF' }]}>
-                <Users size={24} color="#8B5CF6" />
+              <View style={[styles.actionIcon, { backgroundColor: '#FEE2E2' }]}>
+                <Users size={24} color="#EF4444" />
               </View>
               <Text style={styles.actionText}>Clientes</Text>
             </TouchableOpacity>

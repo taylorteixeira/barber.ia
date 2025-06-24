@@ -10,8 +10,7 @@ import {
   TextInput,
 } from 'react-native';
 import { useState, useEffect } from 'react';
-import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { 
   Calendar, 
   Clock, 
@@ -286,13 +285,6 @@ export default function BookingScreen() {
       Alert.alert('Erro', 'Ocorreu um erro ao criar o agendamento. Tente novamente.');
     }
   };
-
-  // Reload data whenever screen is focused (to get latest service prices/updates)
-  useFocusEffect(
-    useCallback(() => {
-      loadBarbershopData();
-    }, [barberId])
-  );
 
   return (
     <SafeAreaView style={styles.container}>
