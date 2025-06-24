@@ -45,11 +45,34 @@ export default function ClientsManagementScreen() {
     phone: '',
     email: '',
   });
-
   // Load clients
   useEffect(() => {
-    loadClients();
+    let isMounted = true; // Track if component is still mounted
+    
+    const loadClientsData = async () => {
+      try {
+        if (!isMounted) return;
+        // Load real clients from bookings (includes both booked clients and manually added ones)
+        const data = await getClientsFromBookings();
+        if (isMounted) {
+          setClients(data);
+        }
+      } catch (error) {
+        console.error('Error loading clients:', error);
+        if (isMounted) {
+          Alert.alert('Erro', 'Não foi possível carregar os clientes');
+        }
+      }
+    };
+
+    loadClientsData();
+    
+    // Cleanup function to prevent state updates on unmounted component
+    return () => {
+      isMounted = false;
+    };
   }, []);
+  
   const loadClients = async () => {
     try {
       // Load real clients from bookings (includes both booked clients and manually added ones)
@@ -81,7 +104,6 @@ export default function ClientsManagementScreen() {
     });
     setShowModal(true);
   };
-
   const handleSaveClient = async () => {
     if (!clientForm.name || !clientForm.phone) {
       Alert.alert('Erro', 'Nome e telefone são obrigatórios');

@@ -589,13 +589,11 @@ export const getAppointmentsForCurrentBarber = async (): Promise<Appointment[]> 
     const barbershop = await getBarbershopByOwnerId(currentUser.id!);
     if (!barbershop) {
       return [];
-    }
-
-    // Get all appointments and bookings for this barbershop
-    const allAppointments = await getAppointments();
+    }    // Get ONLY bookings for this specific barbershop - no mixing with other barbershops
+    // This ensures new barbers start with empty data
     const barbershopBookings = await getBookingsByBarbershopId(barbershop.id);
     
-    // Convert recent bookings to appointments if not already synced
+    // Convert bookings to appointments format
     const bookingAppointments: Appointment[] = barbershopBookings.map(booking => ({
       id: `booking_${booking.id}`,
       clientId: booking.userId?.toString() || booking.id,
@@ -607,13 +605,7 @@ export const getAppointmentsForCurrentBarber = async (): Promise<Appointment[]> 
       createdAt: new Date().toISOString()
     }));
 
-    // Combine and deduplicate
-    const combinedAppointments = [...allAppointments, ...bookingAppointments];
-    const uniqueAppointments = combinedAppointments.filter((appointment, index, self) => 
-      index === self.findIndex(a => a.clientId === appointment.clientId && a.date === appointment.date && a.time === appointment.time)
-    );
-
-    return uniqueAppointments;
+    return bookingAppointments;
   } catch (error) {
     console.error('Error getting barber appointments:', error);
     return [];
@@ -751,13 +743,14 @@ export const createOrUpdateClientFromBooking = async (booking: Booking): Promise
   }
 };
 
-// Get clients from actual bookings (real clients who booked)
+// Get clients from actual bookings (real clients who booked) - ONLY for current barbershop
 export const getClientsFromBookings = async (): Promise<Client[]> => {
   try {
-    const bookings = await getBookings();
+    // Get bookings ONLY for current barbershop, not all bookings
+    const bookings = await getBookingsForCurrentBarbershop();
     const clientsMap = new Map<string, Client>();
     
-    // Extract unique clients from bookings
+    // Extract unique clients from bookings for this barbershop only
     bookings.forEach(booking => {
       if (booking.clientName && booking.phone) {
         const clientKey = booking.phone; // Use phone as unique key
@@ -774,13 +767,18 @@ export const getClientsFromBookings = async (): Promise<Client[]> => {
       }
     });
     
-    // Merge with manually created clients
-    const manualClients = await getClients();
-    manualClients.forEach(client => {
-      if (!clientsMap.has(client.phone)) {
-        clientsMap.set(client.phone, client);
-      }
-    });
+    // Merge with manually created clients for this barbershop
+    const currentUser = await getCurrentUser();
+    if (currentUser && currentUser.userType === 'barber') {
+      const manualClients = await getClients();
+      // Filter manual clients by barbershop if we had that relationship
+      // For now, add all manual clients (they are created by current barber)
+      manualClients.forEach(client => {
+        if (!clientsMap.has(client.phone)) {
+          clientsMap.set(client.phone, client);
+        }
+      });
+    }
     
     return Array.from(clientsMap.values()).sort((a, b) => a.name.localeCompare(b.name));
   } catch (error) {
@@ -946,38 +944,87 @@ const initBarberManagement = async () => {
   }
 };
 
-// Client functions
+// Client functions - Now barbershop-specific
 export const getClients = async (): Promise<Client[]> => {
   await initBarberManagement();
-  const json = await AsyncStorage.getItem(CLIENTS_STORAGE_KEY);
+  
+  // Get current barbershop to make clients specific to this barbershop
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.userType !== 'barber') {
+    return [];
+  }
+
+  const barbershop = await getBarbershopByOwnerId(currentUser.id!);
+  if (!barbershop) {
+    return [];
+  }
+
+  // Use barbershop-specific storage key
+  const barbershopClientsKey = `${CLIENTS_STORAGE_KEY}_${barbershop.id}`;
+  const json = await AsyncStorage.getItem(barbershopClientsKey);
   return json ? JSON.parse(json) : [];
 };
 
 export const createClient = async (client: Omit<Client, 'id' | 'createdAt'>): Promise<Client> => {
-  const clients = await getClients();
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.userType !== 'barber') {
+    throw new Error('Only barbers can create clients');
+  }
+
+  const barbershop = await getBarbershopByOwnerId(currentUser.id!);
+  if (!barbershop) {
+    throw new Error('Barbershop not found');
+  }
+
+  const clients = await getClients(); // This now gets barbershop-specific clients
   const newClient: Client = {
     ...client,
     id: Date.now().toString(),
     createdAt: new Date().toISOString()
   };
   clients.push(newClient);
-  await AsyncStorage.setItem(CLIENTS_STORAGE_KEY, JSON.stringify(clients));
+  
+  // Save to barbershop-specific storage
+  const barbershopClientsKey = `${CLIENTS_STORAGE_KEY}_${barbershop.id}`;
+  await AsyncStorage.setItem(barbershopClientsKey, JSON.stringify(clients));
   return newClient;
 };
 
 export const updateClient = async (client: Client): Promise<void> => {
-  const clients = await getClients();
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.userType !== 'barber') {
+    throw new Error('Only barbers can update clients');
+  }
+
+  const barbershop = await getBarbershopByOwnerId(currentUser.id!);
+  if (!barbershop) {
+    throw new Error('Barbershop not found');
+  }
+
+  const clients = await getClients(); // This now gets barbershop-specific clients
   const index = clients.findIndex(c => c.id === client.id);
   if (index !== -1) {
     clients[index] = client;
-    await AsyncStorage.setItem(CLIENTS_STORAGE_KEY, JSON.stringify(clients));
+    const barbershopClientsKey = `${CLIENTS_STORAGE_KEY}_${barbershop.id}`;
+    await AsyncStorage.setItem(barbershopClientsKey, JSON.stringify(clients));
   }
 };
 
 export const deleteClient = async (clientId: string): Promise<void> => {
-  const clients = await getClients();
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.userType !== 'barber') {
+    throw new Error('Only barbers can delete clients');
+  }
+
+  const barbershop = await getBarbershopByOwnerId(currentUser.id!);
+  if (!barbershop) {
+    throw new Error('Barbershop not found');
+  }
+
+  const clients = await getClients(); // This now gets barbershop-specific clients
   const filtered = clients.filter(c => c.id !== clientId);
-  await AsyncStorage.setItem(CLIENTS_STORAGE_KEY, JSON.stringify(filtered));
+  const barbershopClientsKey = `${CLIENTS_STORAGE_KEY}_${barbershop.id}`;
+  await AsyncStorage.setItem(barbershopClientsKey, JSON.stringify(filtered));
 };
 
 // Service functions

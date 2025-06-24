@@ -73,11 +73,71 @@ export default function BarberAgenda() {
     const monday = new Date(today);
     monday.setDate(today.getDate() + mondayOffset);
     return monday;  });
-
   // Load appointments from database
   useEffect(() => {
-    loadAppointments();
+    let isMounted = true; // Track if component is still mounted
+    
+    const loadAppointmentsData = async () => {
+      try {
+        if (!isMounted) return;
+        setLoading(true);
+        // Get appointments specific to current barber/barbershop
+        const data = await getAppointmentsForCurrentBarber();
+        
+        if (!isMounted) return; // Check again after async operation
+        
+        // Convert appointments to AppointmentDetail format
+        const formattedAppointments: AppointmentDetail[] = data.map(apt => {
+          const clientName = apt.notes?.includes('Cliente:') ? 
+            apt.notes.split('Cliente: ')[1].split(' (')[0] : 'Cliente';
+          const phone = apt.notes?.includes('Cliente:') && apt.notes.includes('(') ? 
+            apt.notes.split('(')[1].split(')')[0] : '';
+          const service = apt.notes?.includes('Serviço:') ? 
+            apt.notes.split('Serviço: ')[1].split(' -')[0] : 'Serviço';
+          const price = apt.notes?.includes('Valor: R$ ') ? 
+            parseInt(apt.notes.split('Valor: R$ ')[1].split(' ')[0]) || 0 : 0;
+          const email = apt.notes?.includes('Email:') ? 
+            apt.notes.split('Email: ')[1].trim() : '';
+
+          return {
+            id: apt.id,
+            time: apt.time,
+            client: clientName,
+            service: service,
+            duration: 30, // Default duration
+            status: apt.status as any,
+            phone: phone,
+            email: email,
+            price: price,
+            notes: apt.notes || '',
+            createdAt: apt.createdAt,
+            date: apt.date
+          };
+        });
+        
+        if (isMounted) {
+          setAppointments(formattedAppointments);
+        }
+      } catch (error) {
+        console.error('Error loading appointments:', error);
+        if (isMounted) {
+          Alert.alert('Erro', 'Erro ao carregar agendamentos');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadAppointmentsData();
+    
+    // Cleanup function to prevent state updates on unmounted component
+    return () => {
+      isMounted = false;
+    };
   }, []);
+  
   const loadAppointments = async () => {
     try {
       setLoading(true);

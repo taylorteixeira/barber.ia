@@ -946,8 +946,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter-Medium',
     color: '#1F2937',
-    marginBottom: 2,
-  },
+    marginBottom: 2,  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -960,39 +959,3 @@ const styles = StyleSheet.create({
     color: '#6B7280',
   },
 });
-
-// Interfaces for dashboard data
-interface TopService {
-  name: string;
-  count: number;
-  revenue: number;
-}
-
-interface BusyHour {
-  hour: string;
-  appointments: number;
-}
-
-interface DashboardStats {
-  todayAppointments: number;
-  weekRevenue: number;
-  totalClients: number;
-  averageRating: number;
-  pendingAppointments: number;
-  monthlyGrowth: number;
-}
-
-interface DashboardData {
-  weeklyComparison: {
-    thisWeek: number;
-    lastWeek: number;
-    growth: number;
-  };
-  topServices: TopService[];
-  clientRetention: {
-    returning: number;
-    new: number;
-  };
-  dailyRevenue: number[];
-  busyHours: BusyHour[];
-}
