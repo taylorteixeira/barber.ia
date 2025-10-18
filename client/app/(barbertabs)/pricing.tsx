@@ -67,7 +67,7 @@ export default function PricingManagement() {
       isActive: false,
     },
   ]);
-  
+
   const [searchQuery, setSearchQuery] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [editingRule, setEditingRule] = useState<PriceRule | null>(null);
@@ -83,11 +83,20 @@ export default function PricingManagement() {
     isActive: true,
   });
 
-  const daysOfWeek = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+  const daysOfWeek = [
+    'Segunda',
+    'Terça',
+    'Quarta',
+    'Quinta',
+    'Sexta',
+    'Sábado',
+    'Domingo',
+  ];
 
-  const filteredRules = priceRules.filter(rule =>
-    rule.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    rule.description.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredRules = priceRules.filter(
+    (rule) =>
+      rule.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      rule.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const openAddModal = () => {
@@ -137,18 +146,24 @@ export default function PricingManagement() {
       minValue: formData.minValue ? parseFloat(formData.minValue) : undefined,
       validFrom: formData.validFrom || undefined,
       validTo: formData.validTo || undefined,
-      daysOfWeek: formData.daysOfWeek.length > 0 ? formData.daysOfWeek : undefined,
+      daysOfWeek:
+        formData.daysOfWeek.length > 0 ? formData.daysOfWeek : undefined,
       isActive: formData.isActive,
     };
 
     if (editingRule) {
-      setPriceRules(priceRules.map(r => r.id === editingRule.id ? ruleData : r));
+      setPriceRules(
+        priceRules.map((r) => (r.id === editingRule.id ? ruleData : r))
+      );
     } else {
       setPriceRules([...priceRules, ruleData]);
     }
 
     setModalVisible(false);
-    Alert.alert('Sucesso', editingRule ? 'Regra atualizada!' : 'Regra adicionada!');
+    Alert.alert(
+      'Sucesso',
+      editingRule ? 'Regra atualizada!' : 'Regra adicionada!'
+    );
   };
 
   const handleDelete = (rule: PriceRule) => {
@@ -161,7 +176,7 @@ export default function PricingManagement() {
           text: 'Excluir',
           style: 'destructive',
           onPress: () => {
-            setPriceRules(priceRules.filter(r => r.id !== rule.id));
+            setPriceRules(priceRules.filter((r) => r.id !== rule.id));
             Alert.alert('Sucesso', 'Regra excluída!');
           },
         },
@@ -170,24 +185,29 @@ export default function PricingManagement() {
   };
 
   const toggleRuleStatus = (rule: PriceRule) => {
-    setPriceRules(priceRules.map(r => 
-      r.id === rule.id ? { ...r, isActive: !r.isActive } : r
-    ));
+    setPriceRules(
+      priceRules.map((r) =>
+        r.id === rule.id ? { ...r, isActive: !r.isActive } : r
+      )
+    );
   };
 
   const toggleDaySelection = (day: string) => {
     const newDays = formData.daysOfWeek.includes(day)
-      ? formData.daysOfWeek.filter(d => d !== day)
+      ? formData.daysOfWeek.filter((d) => d !== day)
       : [...formData.daysOfWeek, day];
-    
-    setFormData({...formData, daysOfWeek: newDays});
+
+    setFormData({ ...formData, daysOfWeek: newDays });
   };
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
           <ArrowLeft size={24} color="#374151" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Regras de Preço</Text>
@@ -216,18 +236,28 @@ export default function PricingManagement() {
                 <Text style={styles.ruleName}>{rule.name}</Text>
                 <TouchableOpacity
                   onPress={() => toggleRuleStatus(rule)}
-                  style={[styles.statusBadge, rule.isActive ? styles.statusActive : styles.statusInactive]}
+                  style={[
+                    styles.statusBadge,
+                    rule.isActive ? styles.statusActive : styles.statusInactive,
+                  ]}
                 >
-                  <Text style={[styles.statusText, rule.isActive ? styles.statusTextActive : styles.statusTextInactive]}>
+                  <Text
+                    style={[
+                      styles.statusText,
+                      rule.isActive
+                        ? styles.statusTextActive
+                        : styles.statusTextInactive,
+                    ]}
+                  >
                     {rule.isActive ? 'Ativa' : 'Inativa'}
                   </Text>
                 </TouchableOpacity>
               </View>
-              
+
               {rule.description ? (
                 <Text style={styles.ruleDescription}>{rule.description}</Text>
               ) : null}
-              
+
               <View style={styles.ruleDetails}>
                 <View style={styles.detailItem}>
                   {rule.type === 'percentage' ? (
@@ -236,7 +266,9 @@ export default function PricingManagement() {
                     <DollarSign size={16} color="#10B981" />
                   )}
                   <Text style={styles.valueText}>
-                    {rule.type === 'percentage' ? `${rule.value}%` : `R$ ${rule.value.toFixed(2)}`}
+                    {rule.type === 'percentage'
+                      ? `${rule.value}%`
+                      : `R$ ${rule.value.toFixed(2)}`}
                   </Text>
                   <View style={styles.typeBadge}>
                     <Text style={styles.typeText}>
@@ -255,7 +287,7 @@ export default function PricingManagement() {
                 </View>
               )}
             </View>
-            
+
             <View style={styles.ruleActions}>
               <TouchableOpacity
                 onPress={() => openEditModal(rule)}
@@ -272,7 +304,7 @@ export default function PricingManagement() {
             </View>
           </View>
         ))}
-        
+
         {filteredRules.length === 0 && (
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>Nenhuma regra encontrada</Text>
@@ -309,7 +341,9 @@ export default function PricingManagement() {
               <TextInput
                 style={styles.input}
                 value={formData.name}
-                onChangeText={(text) => setFormData({...formData, name: text})}
+                onChangeText={(text) =>
+                  setFormData({ ...formData, name: text })
+                }
                 placeholder="Ex: Desconto Cliente Fiel"
               />
             </View>
@@ -319,7 +353,9 @@ export default function PricingManagement() {
               <TextInput
                 style={[styles.input, styles.textArea]}
                 value={formData.description}
-                onChangeText={(text) => setFormData({...formData, description: text})}
+                onChangeText={(text) =>
+                  setFormData({ ...formData, description: text })
+                }
                 placeholder="Descrição da regra..."
                 multiline
                 numberOfLines={3}
@@ -330,33 +366,49 @@ export default function PricingManagement() {
               <Text style={styles.label}>Tipo de Regra</Text>
               <View style={styles.typeSelector}>
                 <TouchableOpacity
-                  onPress={() => setFormData({...formData, type: 'percentage'})}
+                  onPress={() =>
+                    setFormData({ ...formData, type: 'percentage' })
+                  }
                   style={[
                     styles.typeOption,
-                    formData.type === 'percentage' && styles.typeOptionSelected
+                    formData.type === 'percentage' && styles.typeOptionSelected,
                   ]}
                 >
-                  <Percent size={16} color={formData.type === 'percentage' ? '#FFFFFF' : '#6B7280'} />
-                  <Text style={[
-                    styles.typeOptionText,
-                    formData.type === 'percentage' && styles.typeOptionTextSelected
-                  ]}>
+                  <Percent
+                    size={16}
+                    color={
+                      formData.type === 'percentage' ? '#FFFFFF' : '#6B7280'
+                    }
+                  />
+                  <Text
+                    style={[
+                      styles.typeOptionText,
+                      formData.type === 'percentage' &&
+                        styles.typeOptionTextSelected,
+                    ]}
+                  >
                     Percentual
                   </Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
-                  onPress={() => setFormData({...formData, type: 'fixed'})}
+                  onPress={() => setFormData({ ...formData, type: 'fixed' })}
                   style={[
                     styles.typeOption,
-                    formData.type === 'fixed' && styles.typeOptionSelected
+                    formData.type === 'fixed' && styles.typeOptionSelected,
                   ]}
                 >
-                  <DollarSign size={16} color={formData.type === 'fixed' ? '#FFFFFF' : '#6B7280'} />
-                  <Text style={[
-                    styles.typeOptionText,
-                    formData.type === 'fixed' && styles.typeOptionTextSelected
-                  ]}>
+                  <DollarSign
+                    size={16}
+                    color={formData.type === 'fixed' ? '#FFFFFF' : '#6B7280'}
+                  />
+                  <Text
+                    style={[
+                      styles.typeOptionText,
+                      formData.type === 'fixed' &&
+                        styles.typeOptionTextSelected,
+                    ]}
+                  >
                     Valor Fixo
                   </Text>
                 </TouchableOpacity>
@@ -366,12 +418,17 @@ export default function PricingManagement() {
             <View style={styles.formRow}>
               <View style={[styles.formGroup, styles.halfWidth]}>
                 <Text style={styles.label}>
-                  {formData.type === 'percentage' ? 'Percentual (%)' : 'Valor (R$)'} *
+                  {formData.type === 'percentage'
+                    ? 'Percentual (%)'
+                    : 'Valor (R$)'}{' '}
+                  *
                 </Text>
                 <TextInput
                   style={styles.input}
                   value={formData.value}
-                  onChangeText={(text) => setFormData({...formData, value: text})}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, value: text })
+                  }
                   placeholder={formData.type === 'percentage' ? '10' : '10.00'}
                   keyboardType="numeric"
                 />
@@ -382,7 +439,9 @@ export default function PricingManagement() {
                 <TextInput
                   style={styles.input}
                   value={formData.minValue}
-                  onChangeText={(text) => setFormData({...formData, minValue: text})}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, minValue: text })
+                  }
                   placeholder="50.00"
                   keyboardType="numeric"
                 />
@@ -391,7 +450,9 @@ export default function PricingManagement() {
 
             <View style={styles.formGroup}>
               <Text style={styles.label}>Dias da Semana (opcional)</Text>
-              <Text style={styles.subLabel}>Selecione os dias em que a regra se aplica</Text>
+              <Text style={styles.subLabel}>
+                Selecione os dias em que a regra se aplica
+              </Text>
               <View style={styles.daysSelector}>
                 {daysOfWeek.map((day) => (
                   <TouchableOpacity
@@ -399,13 +460,17 @@ export default function PricingManagement() {
                     onPress={() => toggleDaySelection(day)}
                     style={[
                       styles.dayOption,
-                      formData.daysOfWeek.includes(day) && styles.dayOptionSelected
+                      formData.daysOfWeek.includes(day) &&
+                        styles.dayOptionSelected,
                     ]}
                   >
-                    <Text style={[
-                      styles.dayOptionText,
-                      formData.daysOfWeek.includes(day) && styles.dayOptionTextSelected
-                    ]}>
+                    <Text
+                      style={[
+                        styles.dayOptionText,
+                        formData.daysOfWeek.includes(day) &&
+                          styles.dayOptionTextSelected,
+                      ]}
+                    >
                       {day.substring(0, 3)}
                     </Text>
                   </TouchableOpacity>
@@ -417,10 +482,20 @@ export default function PricingManagement() {
               <View style={styles.switchContainer}>
                 <Text style={styles.switchLabel}>Regra Ativa</Text>
                 <TouchableOpacity
-                  onPress={() => setFormData({...formData, isActive: !formData.isActive})}
-                  style={[styles.switch, formData.isActive && styles.switchActive]}
+                  onPress={() =>
+                    setFormData({ ...formData, isActive: !formData.isActive })
+                  }
+                  style={[
+                    styles.switch,
+                    formData.isActive && styles.switchActive,
+                  ]}
                 >
-                  <View style={[styles.switchThumb, formData.isActive && styles.switchThumbActive]} />
+                  <View
+                    style={[
+                      styles.switchThumb,
+                      formData.isActive && styles.switchThumbActive,
+                    ]}
+                  />
                 </TouchableOpacity>
               </View>
             </View>

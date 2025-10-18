@@ -41,7 +41,9 @@ const StepProgress = ({ currentStep, totalSteps }: StepProgressProps) => (
         key={index}
         style={[
           styles.progressDot,
-          index < currentStep ? styles.progressDotCompleted : styles.progressDotInactive,
+          index < currentStep
+            ? styles.progressDotCompleted
+            : styles.progressDotInactive,
           index === currentStep - 1 && styles.progressDotActive,
         ]}
       />
@@ -137,7 +139,7 @@ export default function BarberOnboardingScreen() {
 
   const validatePersonalData = () => {
     const { name, email, phone, password, confirmPassword } = personalData;
-    
+
     if (!name || !email || !phone || !password || !confirmPassword) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos');
       return false;
@@ -164,7 +166,7 @@ export default function BarberOnboardingScreen() {
 
   const validateBarbershopData = () => {
     const { name, address, city, state } = barbershopData;
-    
+
     if (!name || !address || !city || !state) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios');
       return false;
@@ -175,13 +177,16 @@ export default function BarberOnboardingScreen() {
 
   const validateBusinessData = () => {
     const { openTime, closeTime } = businessData;
-    
+
     if (openTime >= closeTime) {
-      Alert.alert('Erro', 'O horário de abertura deve ser anterior ao de fechamento');
+      Alert.alert(
+        'Erro',
+        'O horário de abertura deve ser anterior ao de fechamento'
+      );
       return false;
     }
 
-    const hasWorkDay = Object.values(businessData.workDays).some(day => day);
+    const hasWorkDay = Object.values(businessData.workDays).some((day) => day);
     if (!hasWorkDay) {
       Alert.alert('Erro', 'Selecione pelo menos um dia de funcionamento');
       return false;
@@ -191,8 +196,8 @@ export default function BarberOnboardingScreen() {
   };
 
   const validateServices = () => {
-    const activeServices = services.filter(service => service.enabled);
-    
+    const activeServices = services.filter((service) => service.enabled);
+
     if (activeServices.length === 0) {
       Alert.alert('Erro', 'Ative pelo menos um serviço');
       return false;
@@ -209,7 +214,7 @@ export default function BarberOnboardingScreen() {
   };
   const handleFinishOnboarding = async () => {
     setLoading(true);
-    
+
     try {
       // 1. Registrar o usuário barbeiro e fazer login automático
       const loggedInUser = await registerAndLoginUser({
@@ -217,14 +222,14 @@ export default function BarberOnboardingScreen() {
         email: personalData.email,
         phone: personalData.phone,
         password: personalData.password,
-        userType: 'barber'
+        userType: 'barber',
       });
-      
+
       if (!loggedInUser) {
         Alert.alert('Erro', 'Erro ao criar conta do usuário');
         setLoading(false);
         return;
-      }      // 2. Criar a barbearia
+      } // 2. Criar a barbearia
       const barbershopSuccess = await createBarbershop({
         name: barbershopData.name,
         description: barbershopData.description,
@@ -233,65 +238,69 @@ export default function BarberOnboardingScreen() {
         email: personalData.email, // Usar o email do usuário
         ownerId: loggedInUser.id!, // Usar o ID do usuário logado
         workingHours: {
-          monday: { 
-            isOpen: businessData.workDays.monday, 
-            openTime: businessData.openTime, 
+          monday: {
+            isOpen: businessData.workDays.monday,
+            openTime: businessData.openTime,
             closeTime: businessData.closeTime,
             breakStart: businessData.breakStart,
-            breakEnd: businessData.breakEnd
+            breakEnd: businessData.breakEnd,
           },
-          tuesday: { 
-            isOpen: businessData.workDays.tuesday, 
-            openTime: businessData.openTime, 
+          tuesday: {
+            isOpen: businessData.workDays.tuesday,
+            openTime: businessData.openTime,
             closeTime: businessData.closeTime,
             breakStart: businessData.breakStart,
-            breakEnd: businessData.breakEnd
+            breakEnd: businessData.breakEnd,
           },
-          wednesday: { 
-            isOpen: businessData.workDays.wednesday, 
-            openTime: businessData.openTime, 
+          wednesday: {
+            isOpen: businessData.workDays.wednesday,
+            openTime: businessData.openTime,
             closeTime: businessData.closeTime,
             breakStart: businessData.breakStart,
-            breakEnd: businessData.breakEnd
+            breakEnd: businessData.breakEnd,
           },
-          thursday: { 
-            isOpen: businessData.workDays.thursday, 
-            openTime: businessData.openTime, 
+          thursday: {
+            isOpen: businessData.workDays.thursday,
+            openTime: businessData.openTime,
             closeTime: businessData.closeTime,
             breakStart: businessData.breakStart,
-            breakEnd: businessData.breakEnd
+            breakEnd: businessData.breakEnd,
           },
-          friday: { 
-            isOpen: businessData.workDays.friday, 
-            openTime: businessData.openTime, 
+          friday: {
+            isOpen: businessData.workDays.friday,
+            openTime: businessData.openTime,
             closeTime: businessData.closeTime,
             breakStart: businessData.breakStart,
-            breakEnd: businessData.breakEnd
+            breakEnd: businessData.breakEnd,
           },
-          saturday: { 
-            isOpen: businessData.workDays.saturday, 
-            openTime: businessData.openTime, 
+          saturday: {
+            isOpen: businessData.workDays.saturday,
+            openTime: businessData.openTime,
             closeTime: businessData.closeTime,
             breakStart: businessData.breakStart,
-            breakEnd: businessData.breakEnd
+            breakEnd: businessData.breakEnd,
           },
-          sunday: { 
-            isOpen: businessData.workDays.sunday, 
-            openTime: businessData.openTime, 
+          sunday: {
+            isOpen: businessData.workDays.sunday,
+            openTime: businessData.openTime,
             closeTime: businessData.closeTime,
             breakStart: businessData.breakStart,
-            breakEnd: businessData.breakEnd
+            breakEnd: businessData.breakEnd,
           },
-        },        services: services.filter(service => service.enabled).map((service, index) => ({
-          id: `service_${index + 1}`,
-          name: service.name,
-          price: parseFloat(service.price),
-          duration: parseInt(service.duration),
-          category: 'Corte e Barba',
-          isActive: true,
-          createdAt: new Date().toISOString(),
-        })),
-      });      if (barbershopSuccess) {
+        },
+        services: services
+          .filter((service) => service.enabled)
+          .map((service, index) => ({
+            id: `service_${index + 1}`,
+            name: service.name,
+            price: parseFloat(service.price),
+            duration: parseInt(service.duration),
+            category: 'Corte e Barba',
+            isActive: true,
+            createdAt: new Date().toISOString(),
+          })),
+      });
+      if (barbershopSuccess) {
         // Sucesso - redirecionar diretamente para o dashboard do barbeiro
         Alert.alert(
           'Bem-vindo!',
@@ -299,8 +308,8 @@ export default function BarberOnboardingScreen() {
           [
             {
               text: 'Começar',
-              onPress: () => router.replace('/(barbertabs)')
-            }
+              onPress: () => router.replace('/(barbertabs)'),
+            },
           ]
         );
       } else {
@@ -308,7 +317,10 @@ export default function BarberOnboardingScreen() {
       }
     } catch (error) {
       console.error('Error during onboarding:', error);
-      Alert.alert('Erro', 'Ocorreu um erro durante o cadastro. Tente novamente.');
+      Alert.alert(
+        'Erro',
+        'Ocorreu um erro durante o cadastro. Tente novamente.'
+      );
     } finally {
       setLoading(false);
     }
@@ -325,7 +337,9 @@ export default function BarberOnboardingScreen() {
           style={styles.input}
           placeholder="Nome completo"
           value={personalData.name}
-          onChangeText={(text) => setPersonalData({...personalData, name: text})}
+          onChangeText={(text) =>
+            setPersonalData({ ...personalData, name: text })
+          }
           autoCapitalize="words"
         />
       </View>
@@ -336,7 +350,9 @@ export default function BarberOnboardingScreen() {
           style={styles.input}
           placeholder="Email"
           value={personalData.email}
-          onChangeText={(text) => setPersonalData({...personalData, email: text})}
+          onChangeText={(text) =>
+            setPersonalData({ ...personalData, email: text })
+          }
           keyboardType="email-address"
           autoCapitalize="none"
         />
@@ -348,7 +364,9 @@ export default function BarberOnboardingScreen() {
           style={styles.input}
           placeholder="Telefone"
           value={personalData.phone}
-          onChangeText={(text) => setPersonalData({...personalData, phone: text})}
+          onChangeText={(text) =>
+            setPersonalData({ ...personalData, phone: text })
+          }
           keyboardType="phone-pad"
         />
       </View>
@@ -359,7 +377,9 @@ export default function BarberOnboardingScreen() {
           style={styles.input}
           placeholder="Senha"
           value={personalData.password}
-          onChangeText={(text) => setPersonalData({...personalData, password: text})}
+          onChangeText={(text) =>
+            setPersonalData({ ...personalData, password: text })
+          }
           secureTextEntry={!showPassword}
         />
         <TouchableOpacity
@@ -380,7 +400,9 @@ export default function BarberOnboardingScreen() {
           style={styles.input}
           placeholder="Confirmar senha"
           value={personalData.confirmPassword}
-          onChangeText={(text) => setPersonalData({...personalData, confirmPassword: text})}
+          onChangeText={(text) =>
+            setPersonalData({ ...personalData, confirmPassword: text })
+          }
           secureTextEntry={!showConfirmPassword}
         />
         <TouchableOpacity
@@ -400,7 +422,9 @@ export default function BarberOnboardingScreen() {
   const renderStep2 = () => (
     <ScrollView style={styles.stepContent}>
       <Text style={styles.stepTitle}>Dados da Barbearia</Text>
-      <Text style={styles.stepSubtitle}>Agora vamos configurar sua barbearia</Text>
+      <Text style={styles.stepSubtitle}>
+        Agora vamos configurar sua barbearia
+      </Text>
 
       <View style={styles.inputContainer}>
         <Store size={20} color="#6B7280" style={styles.inputIcon} />
@@ -408,7 +432,9 @@ export default function BarberOnboardingScreen() {
           style={styles.input}
           placeholder="Nome da barbearia"
           value={barbershopData.name}
-          onChangeText={(text) => setBarbershopData({...barbershopData, name: text})}
+          onChangeText={(text) =>
+            setBarbershopData({ ...barbershopData, name: text })
+          }
           autoCapitalize="words"
         />
       </View>
@@ -418,7 +444,9 @@ export default function BarberOnboardingScreen() {
           style={[styles.input, styles.textArea]}
           placeholder="Descrição (opcional)"
           value={barbershopData.description}
-          onChangeText={(text) => setBarbershopData({...barbershopData, description: text})}
+          onChangeText={(text) =>
+            setBarbershopData({ ...barbershopData, description: text })
+          }
           multiline
           numberOfLines={3}
         />
@@ -430,7 +458,9 @@ export default function BarberOnboardingScreen() {
           style={styles.input}
           placeholder="Endereço completo"
           value={barbershopData.address}
-          onChangeText={(text) => setBarbershopData({...barbershopData, address: text})}
+          onChangeText={(text) =>
+            setBarbershopData({ ...barbershopData, address: text })
+          }
           autoCapitalize="words"
         />
       </View>
@@ -441,7 +471,9 @@ export default function BarberOnboardingScreen() {
             style={styles.input}
             placeholder="Cidade"
             value={barbershopData.city}
-            onChangeText={(text) => setBarbershopData({...barbershopData, city: text})}
+            onChangeText={(text) =>
+              setBarbershopData({ ...barbershopData, city: text })
+            }
             autoCapitalize="words"
           />
         </View>
@@ -450,7 +482,9 @@ export default function BarberOnboardingScreen() {
             style={styles.input}
             placeholder="Estado"
             value={barbershopData.state}
-            onChangeText={(text) => setBarbershopData({...barbershopData, state: text})}
+            onChangeText={(text) =>
+              setBarbershopData({ ...barbershopData, state: text })
+            }
             autoCapitalize="characters"
             maxLength={2}
           />
@@ -462,7 +496,9 @@ export default function BarberOnboardingScreen() {
           style={styles.input}
           placeholder="CEP (opcional)"
           value={barbershopData.zipCode}
-          onChangeText={(text) => setBarbershopData({...barbershopData, zipCode: text})}
+          onChangeText={(text) =>
+            setBarbershopData({ ...barbershopData, zipCode: text })
+          }
           keyboardType="numeric"
         />
       </View>
@@ -472,7 +508,9 @@ export default function BarberOnboardingScreen() {
   const renderStep3 = () => (
     <ScrollView style={styles.stepContent}>
       <Text style={styles.stepTitle}>Horário de Funcionamento</Text>
-      <Text style={styles.stepSubtitle}>Configure quando sua barbearia funciona</Text>
+      <Text style={styles.stepSubtitle}>
+        Configure quando sua barbearia funciona
+      </Text>
 
       <View style={styles.timeSection}>
         <Text style={styles.sectionTitle}>Horários</Text>
@@ -483,7 +521,9 @@ export default function BarberOnboardingScreen() {
               style={styles.input}
               placeholder="Abertura"
               value={businessData.openTime}
-              onChangeText={(text) => setBusinessData({...businessData, openTime: text})}
+              onChangeText={(text) =>
+                setBusinessData({ ...businessData, openTime: text })
+              }
             />
           </View>
           <View style={[styles.inputContainer, styles.flex1]}>
@@ -492,19 +532,25 @@ export default function BarberOnboardingScreen() {
               style={styles.input}
               placeholder="Fechamento"
               value={businessData.closeTime}
-              onChangeText={(text) => setBusinessData({...businessData, closeTime: text})}
+              onChangeText={(text) =>
+                setBusinessData({ ...businessData, closeTime: text })
+              }
             />
           </View>
         </View>
 
-        <Text style={styles.sectionSubtitle}>Intervalo para almoço (opcional)</Text>
+        <Text style={styles.sectionSubtitle}>
+          Intervalo para almoço (opcional)
+        </Text>
         <View style={styles.row}>
           <View style={[styles.inputContainer, styles.flex1]}>
             <TextInput
               style={styles.input}
               placeholder="Início (12:00)"
               value={businessData.breakStart}
-              onChangeText={(text) => setBusinessData({...businessData, breakStart: text})}
+              onChangeText={(text) =>
+                setBusinessData({ ...businessData, breakStart: text })
+              }
             />
           </View>
           <View style={[styles.inputContainer, styles.flex1]}>
@@ -512,7 +558,9 @@ export default function BarberOnboardingScreen() {
               style={styles.input}
               placeholder="Fim (13:00)"
               value={businessData.breakEnd}
-              onChangeText={(text) => setBusinessData({...businessData, breakEnd: text})}
+              onChangeText={(text) =>
+                setBusinessData({ ...businessData, breakEnd: text })
+              }
             />
           </View>
         </View>
@@ -524,13 +572,15 @@ export default function BarberOnboardingScreen() {
           <TouchableOpacity
             key={day}
             style={styles.dayToggle}
-            onPress={() => setBusinessData({
-              ...businessData,
-              workDays: {
-                ...businessData.workDays,
-                [day]: !isActive
-              }
-            })}
+            onPress={() =>
+              setBusinessData({
+                ...businessData,
+                workDays: {
+                  ...businessData.workDays,
+                  [day]: !isActive,
+                },
+              })
+            }
           >
             <Text style={styles.dayName}>
               {day === 'monday' && 'Segunda-feira'}
@@ -553,14 +603,19 @@ export default function BarberOnboardingScreen() {
   const renderStep4 = () => (
     <ScrollView style={styles.stepContent}>
       <Text style={styles.stepTitle}>Serviços Básicos</Text>
-      <Text style={styles.stepSubtitle}>Configure os principais serviços da sua barbearia</Text>
+      <Text style={styles.stepSubtitle}>
+        Configure os principais serviços da sua barbearia
+      </Text>
 
       {services.map((service, index) => (
         <View key={index} style={styles.serviceCard}>
           <View style={styles.serviceHeader}>
             <Text style={styles.serviceName}>{service.name}</Text>
             <TouchableOpacity
-              style={[styles.serviceToggle, service.enabled && styles.serviceToggleActive]}
+              style={[
+                styles.serviceToggle,
+                service.enabled && styles.serviceToggleActive,
+              ]}
               onPress={() => {
                 const newServices = [...services];
                 newServices[index].enabled = !newServices[index].enabled;
@@ -570,12 +625,16 @@ export default function BarberOnboardingScreen() {
               {service.enabled && <Check size={14} color="#FFFFFF" />}
             </TouchableOpacity>
           </View>
-          
+
           {service.enabled && (
             <View style={styles.serviceDetails}>
               <View style={styles.row}>
                 <View style={[styles.inputContainer, styles.flex1]}>
-                  <DollarSign size={16} color="#6B7280" style={styles.inputIcon} />
+                  <DollarSign
+                    size={16}
+                    color="#6B7280"
+                    style={styles.inputIcon}
+                  />
                   <TextInput
                     style={styles.input}
                     placeholder="Preço"
@@ -626,8 +685,8 @@ export default function BarberOnboardingScreen() {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
+    <KeyboardAvoidingView
+      style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <SafeAreaView style={styles.container}>
@@ -636,23 +695,21 @@ export default function BarberOnboardingScreen() {
           <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
             <ArrowLeft size={24} color="#6B7280" />
           </TouchableOpacity>
-          
+
           <View style={styles.headerContent}>
             <Text style={styles.title}>Cadastro de Barbeiro</Text>
             <Text style={styles.stepIndicator}>
               Etapa {currentStep} de {totalSteps}
             </Text>
           </View>
-          
+
           <View style={styles.headerSpace} />
         </View>
 
         <StepProgress currentStep={currentStep} totalSteps={totalSteps} />
 
         {/* Content */}
-        <View style={styles.content}>
-          {renderCurrentStep()}
-        </View>
+        <View style={styles.content}>{renderCurrentStep()}</View>
 
         {/* Footer */}
         <View style={styles.footer}>

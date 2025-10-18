@@ -76,7 +76,8 @@ export default function ProfileScreen() {
     React.useCallback(() => {
       loadUserData();
     }, [])
-  );  const menuItems = [
+  );
+  const menuItems = [
     {
       id: 'bookings-history',
       title: 'Histórico de Agendamentos',
@@ -152,15 +153,16 @@ export default function ProfileScreen() {
       >
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Meu Perfil</Text>
-        </View>        <View style={styles.profileSection}>
+        </View>{' '}
+        <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
             <Image source={{ uri: user.avatar }} style={styles.avatar} />
           </View>
           <Text style={styles.userName}>{user.name}</Text>
           <Text style={styles.userEmail}>{user.email}</Text>
           <Text style={styles.userPhone}>{user.phone}</Text>
-            {/* Edit Profile Button */}
-          <TouchableOpacity 
+          {/* Edit Profile Button */}
+          <TouchableOpacity
             style={styles.editProfileButton}
             onPress={() => router.push('/(tabs)/edit-profile')}
           >
@@ -168,7 +170,6 @@ export default function ProfileScreen() {
             <Text style={styles.editProfileText}>Editar Perfil</Text>
           </TouchableOpacity>
         </View>
-
         <View style={styles.statsSection}>
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>{user.totalBookings}</Text>
@@ -193,7 +194,6 @@ export default function ProfileScreen() {
             <Text style={styles.statLabel}>Média</Text>
           </View>
         </View>
-
         <View style={styles.menuSection}>
           {menuItems.map((item) => (
             // @ts-ignore: suppress key prop error
@@ -217,12 +217,10 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           ))}
         </View>
-
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <LogOut size={20} color="#EF4444" />
           <Text style={styles.logoutButtonText}>Sair da Conta</Text>
         </TouchableOpacity>
-
         <View style={styles.footer}>
           <Text style={styles.footerText}>Versão 1.0.0</Text>
         </View>
@@ -286,7 +284,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     color: '#6B7280',
     marginBottom: 8,
-  },  editProfileButton: {
+  },
+  editProfileButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

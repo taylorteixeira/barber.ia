@@ -41,9 +41,12 @@ export default function TabLayout() {
         name="bookings"
         options={{
           title: 'Agendamentos',
-          tabBarIcon: ({ size, color }) => <Calendar size={size} color={color} />,
+          tabBarIcon: ({ size, color }) => (
+            <Calendar size={size} color={color} />
+          ),
         }}
-      />      <Tabs.Screen
+      />{' '}
+      <Tabs.Screen
         name="profile"
         options={{
           title: 'Perfil',

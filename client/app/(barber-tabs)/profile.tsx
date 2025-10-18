@@ -35,7 +35,8 @@ export default function BarberProfile() {
     email: 'carregando@email.com',
     phone: '(11) 99999-9999',
     address: 'Rua das Flores, 123 - Centro',
-    avatar: 'https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg',
+    avatar:
+      'https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg',
     barbershopName: 'Barbearia Premium',
     workingHours: '09:00 - 18:00',
     services: ['Corte', 'Barba', 'Sobrancelha'],
@@ -58,21 +59,17 @@ export default function BarberProfile() {
   }, []);
 
   const handleLogout = () => {
-    Alert.alert(
-      'Sair da conta',
-      'Tem certeza que deseja sair?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Sair',
-          style: 'destructive',
-          onPress: async () => {
-            await logoutUser();
-            router.replace('/landing');
-          },
+    Alert.alert('Sair da conta', 'Tem certeza que deseja sair?', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Sair',
+        style: 'destructive',
+        onPress: async () => {
+          await logoutUser();
+          router.replace('/landing');
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const menuSections = [
@@ -84,28 +81,32 @@ export default function BarberProfile() {
           title: 'Editar Perfil',
           icon: Edit,
           color: '#3B82F6',
-          onPress: () => Alert.alert('Editar Perfil', 'Funcionalidade será implementada'),
+          onPress: () =>
+            Alert.alert('Editar Perfil', 'Funcionalidade será implementada'),
         },
         {
           id: 'services',
           title: 'Meus Serviços',
           icon: SettingsIcon,
           color: '#8B5CF6',
-          onPress: () => Alert.alert('Serviços', 'Funcionalidade será implementada'),
+          onPress: () =>
+            Alert.alert('Serviços', 'Funcionalidade será implementada'),
         },
         {
           id: 'pricing',
           title: 'Tabela de Preços',
           icon: DollarSign,
           color: '#10B981',
-          onPress: () => Alert.alert('Preços', 'Funcionalidade será implementada'),
+          onPress: () =>
+            Alert.alert('Preços', 'Funcionalidade será implementada'),
         },
         {
           id: 'schedule',
           title: 'Horário de Funcionamento',
           icon: Clock,
           color: '#F59E0B',
-          onPress: () => Alert.alert('Horários', 'Funcionalidade será implementada'),
+          onPress: () =>
+            Alert.alert('Horários', 'Funcionalidade será implementada'),
         },
       ],
     },
@@ -117,7 +118,11 @@ export default function BarberProfile() {
           title: 'Ajuda e Suporte',
           icon: HelpCircle,
           color: '#06B6D4',
-          onPress: () => Alert.alert('Ajuda', 'Entre em contato conosco pelo email suporte@barber.ia'),
+          onPress: () =>
+            Alert.alert(
+              'Ajuda',
+              'Entre em contato conosco pelo email suporte@barber.ia'
+            ),
         },
       ],
     },
@@ -136,7 +141,9 @@ export default function BarberProfile() {
           <Image source={{ uri: barberData.avatar }} style={styles.avatar} />
           <View style={styles.profileInfo}>
             <Text style={styles.name}>{barberData.name}</Text>
-            <Text style={styles.barbershopName}>{barberData.barbershopName}</Text>
+            <Text style={styles.barbershopName}>
+              {barberData.barbershopName}
+            </Text>
             <View style={styles.contactInfo}>
               <View style={styles.contactItem}>
                 <Mail size={14} color="#6B7280" />
@@ -212,7 +219,12 @@ export default function BarberProfile() {
                 onPress={item.onPress}
               >
                 <View style={styles.menuItemLeft}>
-                  <View style={[styles.menuIcon, { backgroundColor: `${item.color}20` }]}>
+                  <View
+                    style={[
+                      styles.menuIcon,
+                      { backgroundColor: `${item.color}20` },
+                    ]}
+                  >
                     <item.icon size={20} color={item.color} />
                   </View>
                   <Text style={styles.menuItemText}>{item.title}</Text>

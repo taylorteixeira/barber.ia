@@ -43,33 +43,35 @@ export default function ProductsManagement() {
       id: '1',
       name: 'Pomada para Cabelo',
       description: 'Pomada modeladora efeito molhado',
-      price: 35.90,
+      price: 35.9,
       stock: 12,
       brand: 'BarberShop Pro',
       category: 'Cabelo',
-      image: 'https://images.pexels.com/photos/3738347/pexels-photo-3738347.jpeg',
+      image:
+        'https://images.pexels.com/photos/3738347/pexels-photo-3738347.jpeg',
     },
     {
       id: '2',
       name: 'Óleo para Barba',
       description: 'Óleo hidratante para barba',
-      price: 28.50,
+      price: 28.5,
       stock: 8,
       brand: 'BeardCare',
       category: 'Barba',
-      image: 'https://images.pexels.com/photos/4041392/pexels-photo-4041392.jpeg',
+      image:
+        'https://images.pexels.com/photos/4041392/pexels-photo-4041392.jpeg',
     },
     {
       id: '3',
       name: 'Shampoo Masculino',
       description: 'Shampoo anticaspa masculino',
-      price: 22.90,
+      price: 22.9,
       stock: 15,
       brand: 'MenCare',
       category: 'Cabelo',
     },
   ]);
-  
+
   const [searchQuery, setSearchQuery] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -85,10 +87,11 @@ export default function ProductsManagement() {
 
   const categories = ['Cabelo', 'Barba', 'Pele', 'Ferramentas', 'Outros'];
 
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProducts = products.filter(
+    (product) =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const openAddModal = () => {
@@ -120,7 +123,12 @@ export default function ProductsManagement() {
   };
 
   const handleSave = () => {
-    if (!formData.name || !formData.price || !formData.stock || !formData.brand) {
+    if (
+      !formData.name ||
+      !formData.price ||
+      !formData.stock ||
+      !formData.brand
+    ) {
       Alert.alert('Erro', 'Preencha todos os campos obrigatórios');
       return;
     }
@@ -137,13 +145,18 @@ export default function ProductsManagement() {
     };
 
     if (editingProduct) {
-      setProducts(products.map(p => p.id === editingProduct.id ? productData : p));
+      setProducts(
+        products.map((p) => (p.id === editingProduct.id ? productData : p))
+      );
     } else {
       setProducts([...products, productData]);
     }
 
     setModalVisible(false);
-    Alert.alert('Sucesso', editingProduct ? 'Produto atualizado!' : 'Produto adicionado!');
+    Alert.alert(
+      'Sucesso',
+      editingProduct ? 'Produto atualizado!' : 'Produto adicionado!'
+    );
   };
 
   const handleDelete = (product: Product) => {
@@ -156,7 +169,7 @@ export default function ProductsManagement() {
           text: 'Excluir',
           style: 'destructive',
           onPress: () => {
-            setProducts(products.filter(p => p.id !== product.id));
+            setProducts(products.filter((p) => p.id !== product.id));
             Alert.alert('Sucesso', 'Produto excluído!');
           },
         },
@@ -166,17 +179,20 @@ export default function ProductsManagement() {
 
   const updateStock = (product: Product, newStock: number) => {
     if (newStock < 0) return;
-    
-    setProducts(products.map(p => 
-      p.id === product.id ? { ...p, stock: newStock } : p
-    ));
+
+    setProducts(
+      products.map((p) => (p.id === product.id ? { ...p, stock: newStock } : p))
+    );
   };
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
           <ArrowLeft size={24} color="#374151" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Meus Produtos</Text>
@@ -197,7 +213,10 @@ export default function ProductsManagement() {
       </View>
 
       {/* Products List */}
-      <ScrollView style={styles.productsList} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.productsList}
+        showsVerticalScrollIndicator={false}
+      >
         {filteredProducts.map((product) => (
           <View key={product.id} style={styles.productCard}>
             <View style={styles.productImage}>
@@ -213,23 +232,37 @@ export default function ProductsManagement() {
             <View style={styles.productInfo}>
               <View style={styles.productHeader}>
                 <Text style={styles.productName}>{product.name}</Text>
-                <View style={[styles.stockBadge, product.stock <= 5 && styles.stockBadgeLow]}>
-                  <Text style={[styles.stockText, product.stock <= 5 && styles.stockTextLow]}>
+                <View
+                  style={[
+                    styles.stockBadge,
+                    product.stock <= 5 && styles.stockBadgeLow,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.stockText,
+                      product.stock <= 5 && styles.stockTextLow,
+                    ]}
+                  >
                     {product.stock} un.
                   </Text>
                 </View>
               </View>
-              
+
               <Text style={styles.productBrand}>{product.brand}</Text>
-              
+
               {product.description ? (
-                <Text style={styles.productDescription}>{product.description}</Text>
+                <Text style={styles.productDescription}>
+                  {product.description}
+                </Text>
               ) : null}
-              
+
               <View style={styles.productDetails}>
                 <View style={styles.detailItem}>
                   <DollarSign size={16} color="#10B981" />
-                  <Text style={styles.priceText}>R$ {product.price.toFixed(2)}</Text>
+                  <Text style={styles.priceText}>
+                    R$ {product.price.toFixed(2)}
+                  </Text>
                 </View>
                 <View style={styles.categoryBadge}>
                   <Text style={styles.categoryText}>{product.category}</Text>
@@ -256,7 +289,7 @@ export default function ProductsManagement() {
                 </View>
               </View>
             </View>
-            
+
             <View style={styles.productActions}>
               <TouchableOpacity
                 onPress={() => openEditModal(product)}
@@ -273,12 +306,14 @@ export default function ProductsManagement() {
             </View>
           </View>
         ))}
-        
+
         {filteredProducts.length === 0 && (
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>Nenhum produto encontrado</Text>
             <TouchableOpacity onPress={openAddModal} style={styles.emptyButton}>
-              <Text style={styles.emptyButtonText}>Adicionar Primeiro Produto</Text>
+              <Text style={styles.emptyButtonText}>
+                Adicionar Primeiro Produto
+              </Text>
             </TouchableOpacity>
           </View>
         )}
@@ -310,7 +345,9 @@ export default function ProductsManagement() {
               <TextInput
                 style={styles.input}
                 value={formData.name}
-                onChangeText={(text) => setFormData({...formData, name: text})}
+                onChangeText={(text) =>
+                  setFormData({ ...formData, name: text })
+                }
                 placeholder="Ex: Pomada para Cabelo"
               />
             </View>
@@ -320,7 +357,9 @@ export default function ProductsManagement() {
               <TextInput
                 style={styles.input}
                 value={formData.brand}
-                onChangeText={(text) => setFormData({...formData, brand: text})}
+                onChangeText={(text) =>
+                  setFormData({ ...formData, brand: text })
+                }
                 placeholder="Ex: BarberShop Pro"
               />
             </View>
@@ -330,7 +369,9 @@ export default function ProductsManagement() {
               <TextInput
                 style={[styles.input, styles.textArea]}
                 value={formData.description}
-                onChangeText={(text) => setFormData({...formData, description: text})}
+                onChangeText={(text) =>
+                  setFormData({ ...formData, description: text })
+                }
                 placeholder="Descrição do produto..."
                 multiline
                 numberOfLines={3}
@@ -343,7 +384,9 @@ export default function ProductsManagement() {
                 <TextInput
                   style={styles.input}
                   value={formData.price}
-                  onChangeText={(text) => setFormData({...formData, price: text})}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, price: text })
+                  }
                   placeholder="0,00"
                   keyboardType="numeric"
                 />
@@ -354,7 +397,9 @@ export default function ProductsManagement() {
                 <TextInput
                   style={styles.input}
                   value={formData.stock}
-                  onChangeText={(text) => setFormData({...formData, stock: text})}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, stock: text })
+                  }
                   placeholder="0"
                   keyboardType="numeric"
                 />
@@ -366,7 +411,9 @@ export default function ProductsManagement() {
               <TextInput
                 style={styles.input}
                 value={formData.image}
-                onChangeText={(text) => setFormData({...formData, image: text})}
+                onChangeText={(text) =>
+                  setFormData({ ...formData, image: text })
+                }
                 placeholder="https://exemplo.com/imagem.jpg"
                 autoCapitalize="none"
               />
@@ -374,20 +421,28 @@ export default function ProductsManagement() {
 
             <View style={styles.formGroup}>
               <Text style={styles.label}>Categoria</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categorySelector}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.categorySelector}
+              >
                 {categories.map((category) => (
                   <TouchableOpacity
                     key={category}
-                    onPress={() => setFormData({...formData, category})}
+                    onPress={() => setFormData({ ...formData, category })}
                     style={[
                       styles.categoryOption,
-                      formData.category === category && styles.categoryOptionSelected
+                      formData.category === category &&
+                        styles.categoryOptionSelected,
                     ]}
                   >
-                    <Text style={[
-                      styles.categoryOptionText,
-                      formData.category === category && styles.categoryOptionTextSelected
-                    ]}>
+                    <Text
+                      style={[
+                        styles.categoryOptionText,
+                        formData.category === category &&
+                          styles.categoryOptionTextSelected,
+                      ]}
+                    >
                       {category}
                     </Text>
                   </TouchableOpacity>

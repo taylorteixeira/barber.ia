@@ -191,7 +191,9 @@ export default function HomeScreen() {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
               {selectedCategory
-                ? `Categoria: ${categories.find((c) => c.id === selectedCategory)?.name}`
+                ? `Categoria: ${
+                    categories.find((c) => c.id === selectedCategory)?.name
+                  }`
                 : 'Barbeiros próximos'}
             </Text>
             <TouchableOpacity>

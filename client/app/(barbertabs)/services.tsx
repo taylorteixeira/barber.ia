@@ -31,13 +31,13 @@ import {
   Service,
   getCurrentUser,
   getBarbershopByOwnerId,
-  updateBarbershopServices
+  updateBarbershopServices,
 } from '@/services/database';
 
 export default function ServicesManagement() {
   const router = useRouter();
   const [services, setServices] = useState<Service[]>([]);
-  
+
   const [searchQuery, setSearchQuery] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
@@ -59,7 +59,7 @@ export default function ServicesManagement() {
   const loadServices = async () => {
     try {
       const data = await getServices();
-      const activeServices = data.filter(s => s.isActive);
+      const activeServices = data.filter((s) => s.isActive);
       setServices(activeServices);
     } catch (error) {
       console.error('Error loading services:', error);
@@ -75,7 +75,9 @@ export default function ServicesManagement() {
         if (barbershop) {
           // Update barbershop services to sync with client views
           await updateBarbershopServices(barbershop.id, services);
-          console.log('✅ Services synced with barbershop - clients will see updates immediately');
+          console.log(
+            '✅ Services synced with barbershop - clients will see updates immediately'
+          );
         }
       }
     } catch (error) {
@@ -83,9 +85,10 @@ export default function ServicesManagement() {
     }
   };
 
-  const filteredServices = services.filter(service =>
-    service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    service.category.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredServices = services.filter(
+    (service) =>
+      service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      service.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const openAddModal = () => {
@@ -130,7 +133,9 @@ export default function ServicesManagement() {
         // Update existing service
         const updatedService = { ...editingService, ...serviceData };
         await updateService(updatedService);
-        setServices(services.map(s => s.id === editingService.id ? updatedService : s));
+        setServices(
+          services.map((s) => (s.id === editingService.id ? updatedService : s))
+        );
       } else {
         // Create new service
         const newService = await createService(serviceData);
@@ -141,7 +146,10 @@ export default function ServicesManagement() {
       await syncWithBarbershop();
 
       setModalVisible(false);
-      Alert.alert('Sucesso', editingService ? 'Serviço atualizado!' : 'Serviço adicionado!');
+      Alert.alert(
+        'Sucesso',
+        editingService ? 'Serviço atualizado!' : 'Serviço adicionado!'
+      );
     } catch (error) {
       console.error('Error saving service:', error);
       Alert.alert('Erro', 'Não foi possível salvar o serviço');
@@ -159,11 +167,11 @@ export default function ServicesManagement() {
           onPress: async () => {
             try {
               await deleteService(service.id);
-              setServices(services.filter(s => s.id !== service.id));
-              
+              setServices(services.filter((s) => s.id !== service.id));
+
               // Sync with barbershop for real-time client updates
               await syncWithBarbershop();
-              
+
               Alert.alert('Sucesso', 'Serviço excluído!');
             } catch (error) {
               console.error('Error deleting service:', error);
@@ -179,7 +187,10 @@ export default function ServicesManagement() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
           <ArrowLeft size={24} color="#374151" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Meus Serviços</Text>
@@ -200,7 +211,10 @@ export default function ServicesManagement() {
       </View>
 
       {/* Services List */}
-      <ScrollView style={styles.servicesList} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.servicesList}
+        showsVerticalScrollIndicator={false}
+      >
         {filteredServices.map((service) => (
           <View key={service.id} style={styles.serviceCard}>
             <View style={styles.serviceInfo}>
@@ -210,23 +224,29 @@ export default function ServicesManagement() {
                   <Text style={styles.categoryText}>{service.category}</Text>
                 </View>
               </View>
-              
+
               {service.description ? (
-                <Text style={styles.serviceDescription}>{service.description}</Text>
+                <Text style={styles.serviceDescription}>
+                  {service.description}
+                </Text>
               ) : null}
-              
+
               <View style={styles.serviceDetails}>
                 <View style={styles.detailItem}>
                   <DollarSign size={16} color="#10B981" />
-                  <Text style={styles.priceText}>R$ {service.price.toFixed(2)}</Text>
+                  <Text style={styles.priceText}>
+                    R$ {service.price.toFixed(2)}
+                  </Text>
                 </View>
                 <View style={styles.detailItem}>
                   <Clock size={16} color="#6B7280" />
-                  <Text style={styles.durationText}>{service.duration} min</Text>
+                  <Text style={styles.durationText}>
+                    {service.duration} min
+                  </Text>
                 </View>
               </View>
             </View>
-            
+
             <View style={styles.serviceActions}>
               <TouchableOpacity
                 onPress={() => openEditModal(service)}
@@ -243,12 +263,14 @@ export default function ServicesManagement() {
             </View>
           </View>
         ))}
-        
+
         {filteredServices.length === 0 && (
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>Nenhum serviço encontrado</Text>
             <TouchableOpacity onPress={openAddModal} style={styles.emptyButton}>
-              <Text style={styles.emptyButtonText}>Adicionar Primeiro Serviço</Text>
+              <Text style={styles.emptyButtonText}>
+                Adicionar Primeiro Serviço
+              </Text>
             </TouchableOpacity>
           </View>
         )}
@@ -280,7 +302,9 @@ export default function ServicesManagement() {
               <TextInput
                 style={styles.input}
                 value={formData.name}
-                onChangeText={(text) => setFormData({...formData, name: text})}
+                onChangeText={(text) =>
+                  setFormData({ ...formData, name: text })
+                }
                 placeholder="Ex: Corte Masculino"
               />
             </View>
@@ -290,7 +314,9 @@ export default function ServicesManagement() {
               <TextInput
                 style={[styles.input, styles.textArea]}
                 value={formData.description}
-                onChangeText={(text) => setFormData({...formData, description: text})}
+                onChangeText={(text) =>
+                  setFormData({ ...formData, description: text })
+                }
                 placeholder="Descrição do serviço..."
                 multiline
                 numberOfLines={3}
@@ -303,7 +329,9 @@ export default function ServicesManagement() {
                 <TextInput
                   style={styles.input}
                   value={formData.price}
-                  onChangeText={(text) => setFormData({...formData, price: text})}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, price: text })
+                  }
                   placeholder="0,00"
                   keyboardType="numeric"
                 />
@@ -314,7 +342,9 @@ export default function ServicesManagement() {
                 <TextInput
                   style={styles.input}
                   value={formData.duration}
-                  onChangeText={(text) => setFormData({...formData, duration: text})}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, duration: text })
+                  }
                   placeholder="30"
                   keyboardType="numeric"
                 />
@@ -323,20 +353,28 @@ export default function ServicesManagement() {
 
             <View style={styles.formGroup}>
               <Text style={styles.label}>Categoria</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categorySelector}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.categorySelector}
+              >
                 {categories.map((category) => (
                   <TouchableOpacity
                     key={category}
-                    onPress={() => setFormData({...formData, category})}
+                    onPress={() => setFormData({ ...formData, category })}
                     style={[
                       styles.categoryOption,
-                      formData.category === category && styles.categoryOptionSelected
+                      formData.category === category &&
+                        styles.categoryOptionSelected,
                     ]}
                   >
-                    <Text style={[
-                      styles.categoryOptionText,
-                      formData.category === category && styles.categoryOptionTextSelected
-                    ]}>
+                    <Text
+                      style={[
+                        styles.categoryOptionText,
+                        formData.category === category &&
+                          styles.categoryOptionTextSelected,
+                      ]}
+                    >
                       {category}
                     </Text>
                   </TouchableOpacity>

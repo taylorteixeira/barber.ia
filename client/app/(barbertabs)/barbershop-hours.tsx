@@ -12,12 +12,7 @@ import {
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import {
-  ArrowLeft,
-  Save,
-  Clock,
-  Edit,
-} from 'lucide-react-native';
+import { ArrowLeft, Save, Clock, Edit } from 'lucide-react-native';
 import {
   getCurrentUser,
   getBarbershopByOwnerId,
@@ -34,10 +29,13 @@ export default function BarbershopHours() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [barbershop, setBarbershop] = useState<Barbershop | null>(null);
-  const [workingHours, setWorkingHours] = useState<WorkingHours>(getDefaultWorkingHours());
+  const [workingHours, setWorkingHours] = useState<WorkingHours>(
+    getDefaultWorkingHours()
+  );
   const [modalVisible, setModalVisible] = useState(false);
   const [editingDay, setEditingDay] = useState<string>('');
-  const [currentDaySchedule, setCurrentDaySchedule] = useState<DaySchedule | null>(null);
+  const [currentDaySchedule, setCurrentDaySchedule] =
+    useState<DaySchedule | null>(null);
 
   useEffect(() => {
     loadData();
@@ -105,7 +103,7 @@ export default function BarbershopHours() {
       };
 
       const success = await updateBarbershop(updatedBarbershop);
-      
+
       if (success) {
         Alert.alert('Sucesso', 'Horários de funcionamento atualizados!');
         setBarbershop(updatedBarbershop);
@@ -122,7 +120,10 @@ export default function BarbershopHours() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
           <ArrowLeft size={24} color="#374151" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Horário da Barbearia</Text>
@@ -135,7 +136,8 @@ export default function BarbershopHours() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Horários de Funcionamento</Text>
           <Text style={styles.sectionSubtitle}>
-            Configure os horários de funcionamento da sua barbearia. Estes serão os horários base para todos os barbeiros.
+            Configure os horários de funcionamento da sua barbearia. Estes serão
+            os horários base para todos os barbeiros.
           </Text>
 
           {Object.entries(workingHours).map(([day, schedule]) => (
@@ -149,7 +151,7 @@ export default function BarbershopHours() {
                   <Edit size={16} color="#6B7280" />
                 </TouchableOpacity>
               </View>
-              
+
               <View style={styles.dayInfo}>
                 {schedule.isOpen ? (
                   <View>
@@ -188,7 +190,7 @@ export default function BarbershopHours() {
                 <Text style={styles.modalClose}>✕</Text>
               </TouchableOpacity>
             </View>
-            
+
             {currentDaySchedule && (
               <DayScheduleEditor
                 schedule={currentDaySchedule}
@@ -204,11 +206,11 @@ export default function BarbershopHours() {
 }
 
 // Componente para editar horário do dia
-function DayScheduleEditor({ 
-  schedule, 
-  onSave, 
-  onCancel 
-}: { 
+function DayScheduleEditor({
+  schedule,
+  onSave,
+  onCancel,
+}: {
   schedule: DaySchedule;
   onSave: (schedule: DaySchedule) => void;
   onCancel: () => void;
@@ -225,7 +227,9 @@ function DayScheduleEditor({
         <Text style={styles.switchLabel}>Aberto neste dia</Text>
         <Switch
           value={localSchedule.isOpen}
-          onValueChange={(value) => setLocalSchedule({...localSchedule, isOpen: value})}
+          onValueChange={(value) =>
+            setLocalSchedule({ ...localSchedule, isOpen: value })
+          }
           trackColor={{ false: '#E5E7EB', true: '#10B981' }}
           thumbColor={localSchedule.isOpen ? '#FFFFFF' : '#FFFFFF'}
         />
@@ -239,7 +243,9 @@ function DayScheduleEditor({
               <TextInput
                 style={styles.timeInput}
                 value={localSchedule.openTime}
-                onChangeText={(text) => setLocalSchedule({...localSchedule, openTime: text})}
+                onChangeText={(text) =>
+                  setLocalSchedule({ ...localSchedule, openTime: text })
+                }
                 placeholder="09:00"
               />
             </View>
@@ -248,7 +254,9 @@ function DayScheduleEditor({
               <TextInput
                 style={styles.timeInput}
                 value={localSchedule.closeTime}
-                onChangeText={(text) => setLocalSchedule({...localSchedule, closeTime: text})}
+                onChangeText={(text) =>
+                  setLocalSchedule({ ...localSchedule, closeTime: text })
+                }
                 placeholder="18:00"
               />
             </View>
@@ -260,7 +268,9 @@ function DayScheduleEditor({
               <TextInput
                 style={styles.timeInput}
                 value={localSchedule.breakStart || ''}
-                onChangeText={(text) => setLocalSchedule({...localSchedule, breakStart: text})}
+                onChangeText={(text) =>
+                  setLocalSchedule({ ...localSchedule, breakStart: text })
+                }
                 placeholder="12:00"
               />
             </View>
@@ -269,7 +279,9 @@ function DayScheduleEditor({
               <TextInput
                 style={styles.timeInput}
                 value={localSchedule.breakEnd || ''}
-                onChangeText={(text) => setLocalSchedule({...localSchedule, breakEnd: text})}
+                onChangeText={(text) =>
+                  setLocalSchedule({ ...localSchedule, breakEnd: text })
+                }
                 placeholder="13:00"
               />
             </View>
@@ -278,10 +290,16 @@ function DayScheduleEditor({
       )}
 
       <View style={styles.modalActions}>
-        <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={onCancel}>
+        <TouchableOpacity
+          style={[styles.modalButton, styles.cancelButton]}
+          onPress={onCancel}
+        >
           <Text style={styles.cancelButtonText}>Cancelar</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.modalButton, styles.confirmButton]} onPress={handleSave}>
+        <TouchableOpacity
+          style={[styles.modalButton, styles.confirmButton]}
+          onPress={handleSave}
+        >
           <Text style={styles.confirmButtonText}>Salvar</Text>
         </TouchableOpacity>
       </View>

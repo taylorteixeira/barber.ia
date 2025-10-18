@@ -22,7 +22,8 @@ export default function BarberClients() {
       email: 'joao@email.com',
       lastVisit: '2024-06-20',
       totalVisits: 15,
-      avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
+      avatar:
+        'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
       rating: 5,
       preferredService: 'Corte + Barba',
     },
@@ -33,7 +34,8 @@ export default function BarberClients() {
       email: 'pedro@email.com',
       lastVisit: '2024-06-18',
       totalVisits: 8,
-      avatar: 'https://images.pexels.com/photos/1212984/pexels-photo-1212984.jpeg',
+      avatar:
+        'https://images.pexels.com/photos/1212984/pexels-photo-1212984.jpeg',
       rating: 4,
       preferredService: 'Corte',
     },
@@ -44,7 +46,8 @@ export default function BarberClients() {
       email: 'carlos@email.com',
       lastVisit: '2024-06-15',
       totalVisits: 22,
-      avatar: 'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg',
+      avatar:
+        'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg',
       rating: 5,
       preferredService: 'Barba',
     },
@@ -55,16 +58,18 @@ export default function BarberClients() {
       email: 'ana@email.com',
       lastVisit: '2024-06-12',
       totalVisits: 5,
-      avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg',
+      avatar:
+        'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg',
       rating: 4,
       preferredService: 'Corte',
     },
   ];
 
-  const filteredClients = clients.filter(client =>
-    client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    client.phone.includes(searchQuery) ||
-    client.email.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredClients = clients.filter(
+    (client) =>
+      client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      client.phone.includes(searchQuery) ||
+      client.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const renderStars = (rating: number) => {
@@ -72,8 +77,8 @@ export default function BarberClients() {
       <Star
         key={i}
         size={12}
-        color={i < rating ? "#F59E0B" : "#E5E7EB"}
-        fill={i < rating ? "#F59E0B" : "transparent"}
+        color={i < rating ? '#F59E0B' : '#E5E7EB'}
+        fill={i < rating ? '#F59E0B' : 'transparent'}
       />
     ));
   };
@@ -107,29 +112,39 @@ export default function BarberClients() {
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>
-            {clients.filter(c => {
-              const lastVisit = new Date(c.lastVisit);
-              const oneWeekAgo = new Date();
-              oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-              return lastVisit >= oneWeekAgo;
-            }).length}
+            {
+              clients.filter((c) => {
+                const lastVisit = new Date(c.lastVisit);
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                return lastVisit >= oneWeekAgo;
+              }).length
+            }
           </Text>
           <Text style={styles.statLabel}>Esta Semana</Text>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>
-            {(clients.reduce((sum, c) => sum + c.rating, 0) / clients.length).toFixed(1)}
+            {(
+              clients.reduce((sum, c) => sum + c.rating, 0) / clients.length
+            ).toFixed(1)}
           </Text>
           <Text style={styles.statLabel}>Avaliação Média</Text>
         </View>
       </View>
 
       {/* Clients List */}
-      <ScrollView style={styles.clientsList} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.clientsList}
+        showsVerticalScrollIndicator={false}
+      >
         {filteredClients.map((client) => (
           <TouchableOpacity key={client.id} style={styles.clientCard}>
-            <Image source={{ uri: client.avatar }} style={styles.clientAvatar} />
-            
+            <Image
+              source={{ uri: client.avatar }}
+              style={styles.clientAvatar}
+            />
+
             <View style={styles.clientInfo}>
               <View style={styles.clientHeader}>
                 <Text style={styles.clientName}>{client.name}</Text>
@@ -137,10 +152,10 @@ export default function BarberClients() {
                   {renderStars(client.rating)}
                 </View>
               </View>
-              
+
               <Text style={styles.clientPhone}>{client.phone}</Text>
               <Text style={styles.clientEmail}>{client.email}</Text>
-              
+
               <View style={styles.clientStats}>
                 <Text style={styles.preferredService}>
                   Preferência: {client.preferredService}
@@ -149,9 +164,10 @@ export default function BarberClients() {
                   {client.totalVisits} visitas
                 </Text>
               </View>
-              
+
               <Text style={styles.lastVisit}>
-                Última visita: {new Date(client.lastVisit).toLocaleDateString('pt-BR')}
+                Última visita:{' '}
+                {new Date(client.lastVisit).toLocaleDateString('pt-BR')}
               </Text>
             </View>
 

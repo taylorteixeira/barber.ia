@@ -1,5 +1,10 @@
 import { Tabs } from 'expo-router';
-import { BarChart3 as Dashboard, Calendar, Users, Settings } from 'lucide-react-native';
+import {
+  BarChart3 as Dashboard,
+  Calendar,
+  Users,
+  Settings,
+} from 'lucide-react-native';
 
 export default function BarberTabLayout() {
   return (
@@ -27,14 +32,18 @@ export default function BarberTabLayout() {
         name="index"
         options={{
           title: 'Dashboard',
-          tabBarIcon: ({ size, color }) => <Dashboard size={size} color={color} />,
+          tabBarIcon: ({ size, color }) => (
+            <Dashboard size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="agenda"
         options={{
           title: 'Agenda',
-          tabBarIcon: ({ size, color }) => <Calendar size={size} color={color} />,
+          tabBarIcon: ({ size, color }) => (
+            <Calendar size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -48,7 +57,9 @@ export default function BarberTabLayout() {
         name="profile"
         options={{
           title: 'Perfil',
-          tabBarIcon: ({ size, color }) => <Settings size={size} color={color} />,
+          tabBarIcon: ({ size, color }) => (
+            <Settings size={size} color={color} />
+          ),
         }}
       />
     </Tabs>

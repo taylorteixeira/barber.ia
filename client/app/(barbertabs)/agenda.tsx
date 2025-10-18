@@ -12,13 +12,13 @@ import {
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import { 
-  Calendar as CalendarIcon, 
-  Clock, 
-  Plus, 
-  Filter, 
-  User, 
-  Phone, 
+import {
+  Calendar as CalendarIcon,
+  Clock,
+  Plus,
+  Filter,
+  User,
+  Phone,
   MapPin,
   DollarSign,
   X,
@@ -31,10 +31,21 @@ import {
   Download,
   FileText,
   Calendar,
-  Settings
+  Settings,
 } from 'lucide-react-native';
-import { exportAppointments, getPredefinedPeriods, AppointmentExport, ExportOptions } from '../../services/exportService';
-import { getAppointments, Appointment, getAppointmentsForCurrentBarber, updateBookingStatus, getBookingsForCurrentBarbershop } from '../../services/database';
+import {
+  exportAppointments,
+  getPredefinedPeriods,
+  AppointmentExport,
+  ExportOptions,
+} from '../../services/exportService';
+import {
+  getAppointments,
+  Appointment,
+  getAppointmentsForCurrentBarber,
+  updateBookingStatus,
+  getBookingsForCurrentBarbershop,
+} from '../../services/database';
 
 interface AppointmentDetail {
   id: string;
@@ -53,15 +64,20 @@ interface AppointmentDetail {
 
 export default function BarberAgenda() {
   const router = useRouter();
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentDetail | null>(null);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split('T')[0]
+  );
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<AppointmentDetail | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [appointments, setAppointments] = useState<AppointmentDetail[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Estados para exportação
   const [exportModalVisible, setExportModalVisible] = useState(false);
-  const [exportFormat, setExportFormat] = useState<'csv' | 'excel' | 'pdf'>('csv');
+  const [exportFormat, setExportFormat] = useState<'csv' | 'excel' | 'pdf'>(
+    'csv'
+  );
   const [exportStartDate, setExportStartDate] = useState('');
   const [exportEndDate, setExportEndDate] = useState('');
   const [exportStatus, setExportStatus] = useState<string[]>([]);
@@ -72,32 +88,39 @@ export default function BarberAgenda() {
     const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Começar na segunda-feira
     const monday = new Date(today);
     monday.setDate(today.getDate() + mondayOffset);
-    return monday;  });
+    return monday;
+  });
   // Load appointments from database
   useEffect(() => {
     let isMounted = true; // Track if component is still mounted
-    
+
     const loadAppointmentsData = async () => {
       try {
         if (!isMounted) return;
         setLoading(true);
         // Get appointments specific to current barber/barbershop
         const data = await getAppointmentsForCurrentBarber();
-        
+
         if (!isMounted) return; // Check again after async operation
-        
+
         // Convert appointments to AppointmentDetail format
-        const formattedAppointments: AppointmentDetail[] = data.map(apt => {
-          const clientName = apt.notes?.includes('Cliente:') ? 
-            apt.notes.split('Cliente: ')[1].split(' (')[0] : 'Cliente';
-          const phone = apt.notes?.includes('Cliente:') && apt.notes.includes('(') ? 
-            apt.notes.split('(')[1].split(')')[0] : '';
-          const service = apt.notes?.includes('Serviço:') ? 
-            apt.notes.split('Serviço: ')[1].split(' -')[0] : 'Serviço';
-          const price = apt.notes?.includes('Valor: R$ ') ? 
-            parseInt(apt.notes.split('Valor: R$ ')[1].split(' ')[0]) || 0 : 0;
-          const email = apt.notes?.includes('Email:') ? 
-            apt.notes.split('Email: ')[1].trim() : '';
+        const formattedAppointments: AppointmentDetail[] = data.map((apt) => {
+          const clientName = apt.notes?.includes('Cliente:')
+            ? apt.notes.split('Cliente: ')[1].split(' (')[0]
+            : 'Cliente';
+          const phone =
+            apt.notes?.includes('Cliente:') && apt.notes.includes('(')
+              ? apt.notes.split('(')[1].split(')')[0]
+              : '';
+          const service = apt.notes?.includes('Serviço:')
+            ? apt.notes.split('Serviço: ')[1].split(' -')[0]
+            : 'Serviço';
+          const price = apt.notes?.includes('Valor: R$ ')
+            ? parseInt(apt.notes.split('Valor: R$ ')[1].split(' ')[0]) || 0
+            : 0;
+          const email = apt.notes?.includes('Email:')
+            ? apt.notes.split('Email: ')[1].trim()
+            : '';
 
           return {
             id: apt.id,
@@ -111,10 +134,10 @@ export default function BarberAgenda() {
             price: price,
             notes: apt.notes || '',
             createdAt: apt.createdAt,
-            date: apt.date
+            date: apt.date,
           };
         });
-        
+
         if (isMounted) {
           setAppointments(formattedAppointments);
         }
@@ -131,31 +154,37 @@ export default function BarberAgenda() {
     };
 
     loadAppointmentsData();
-    
+
     // Cleanup function to prevent state updates on unmounted component
     return () => {
       isMounted = false;
     };
   }, []);
-  
+
   const loadAppointments = async () => {
     try {
       setLoading(true);
       // Get appointments specific to current barber/barbershop
       const data = await getAppointmentsForCurrentBarber();
-      
+
       // Convert appointments to AppointmentDetail format
-      const formattedAppointments: AppointmentDetail[] = data.map(apt => {
-        const clientName = apt.notes?.includes('Cliente:') ? 
-          apt.notes.split('Cliente: ')[1].split(' (')[0] : 'Cliente';
-        const phone = apt.notes?.includes('Cliente:') && apt.notes.includes('(') ? 
-          apt.notes.split('(')[1].split(')')[0] : '';
-        const service = apt.notes?.includes('Serviço:') ? 
-          apt.notes.split('Serviço: ')[1].split(' -')[0] : 'Serviço';
-        const price = apt.notes?.includes('Valor: R$ ') ? 
-          parseInt(apt.notes.split('Valor: R$ ')[1].split(' ')[0]) || 0 : 0;
-        const email = apt.notes?.includes('Email:') ? 
-          apt.notes.split('Email: ')[1].trim() : '';
+      const formattedAppointments: AppointmentDetail[] = data.map((apt) => {
+        const clientName = apt.notes?.includes('Cliente:')
+          ? apt.notes.split('Cliente: ')[1].split(' (')[0]
+          : 'Cliente';
+        const phone =
+          apt.notes?.includes('Cliente:') && apt.notes.includes('(')
+            ? apt.notes.split('(')[1].split(')')[0]
+            : '';
+        const service = apt.notes?.includes('Serviço:')
+          ? apt.notes.split('Serviço: ')[1].split(' -')[0]
+          : 'Serviço';
+        const price = apt.notes?.includes('Valor: R$ ')
+          ? parseInt(apt.notes.split('Valor: R$ ')[1].split(' ')[0]) || 0
+          : 0;
+        const email = apt.notes?.includes('Email:')
+          ? apt.notes.split('Email: ')[1].trim()
+          : '';
 
         return {
           id: apt.id,
@@ -169,10 +198,10 @@ export default function BarberAgenda() {
           price: price,
           notes: apt.notes || '',
           createdAt: apt.createdAt,
-          date: apt.date
+          date: apt.date,
         };
       });
-      
+
       setAppointments(formattedAppointments);
     } catch (error) {
       console.error('Error loading appointments:', error);
@@ -184,23 +213,34 @@ export default function BarberAgenda() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed': return '#10B981';
-      case 'pending': return '#F59E0B';
-      case 'cancelled': return '#EF4444';
-      case 'completed': return '#6366F1';
-      default: return '#6B7280';
+      case 'confirmed':
+        return '#10B981';
+      case 'pending':
+        return '#F59E0B';
+      case 'cancelled':
+        return '#EF4444';
+      case 'completed':
+        return '#6366F1';
+      default:
+        return '#6B7280';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'Confirmado';
-      case 'cancelled': return 'Cancelado';
-      case 'completed': return 'Concluído';
-      case 'pending': return 'Pendente';
-      default: return status;
+      case 'confirmed':
+        return 'Confirmado';
+      case 'cancelled':
+        return 'Cancelado';
+      case 'completed':
+        return 'Concluído';
+      case 'pending':
+        return 'Pendente';
+      default:
+        return status;
     }
-  };  const handleAddAppointment = () => {
+  };
+  const handleAddAppointment = () => {
     router.push('/(barbertabs)/new-appointment' as any);
   };
 
@@ -216,9 +256,11 @@ export default function BarberAgenda() {
 
   const navigateWeek = (direction: 'prev' | 'next') => {
     const newWeekStart = new Date(currentWeekStart);
-    newWeekStart.setDate(currentWeekStart.getDate() + (direction === 'next' ? 7 : -7));
+    newWeekStart.setDate(
+      currentWeekStart.getDate() + (direction === 'next' ? 7 : -7)
+    );
     setCurrentWeekStart(newWeekStart);
-    
+
     // Atualizar a data selecionada para o primeiro dia da nova semana se necessário
     const newWeekDays = [];
     for (let i = 0; i < 7; i++) {
@@ -226,19 +268,20 @@ export default function BarberAgenda() {
       date.setDate(newWeekStart.getDate() + i);
       newWeekDays.push(date.toISOString().split('T')[0]);
     }
-    
+
     if (!newWeekDays.includes(selectedDate)) {
       setSelectedDate(newWeekDays[0]);
     }
-  };  const getAppointmentsForDate = (date: string) => {
+  };
+  const getAppointmentsForDate = (date: string) => {
     // Use only real appointments - no mock data
-    return appointments.filter(appointment => appointment.date === date);
+    return appointments.filter((appointment) => appointment.date === date);
   };
 
   const getTotalAppointmentsForWeek = () => {
     const weekDays = getWeekDays();
     let total = 0;
-    weekDays.forEach(day => {
+    weekDays.forEach((day) => {
       const dayStr = day.toISOString().split('T')[0];
       total += getAppointmentsForDate(dayStr).length;
     });
@@ -253,12 +296,15 @@ export default function BarberAgenda() {
   const closeModal = () => {
     setModalVisible(false);
     setSelectedAppointment(null);
-  };  const handleUpdateStatus = async (newStatus: 'confirmed' | 'cancelled' | 'completed') => {
+  };
+  const handleUpdateStatus = async (
+    newStatus: 'confirmed' | 'cancelled' | 'completed'
+  ) => {
     if (!selectedAppointment) return;
 
     let title = '';
     let message = '';
-    
+
     switch (newStatus) {
       case 'confirmed':
         title = 'Confirmar Agendamento';
@@ -274,59 +320,63 @@ export default function BarberAgenda() {
         break;
     }
 
-    Alert.alert(
-      title,
-      message,
-      [
-        {
-          text: 'Não',
-          style: 'cancel'
-        },
-        {
-          text: 'Sim',
-          onPress: async () => {
-            try {
-              // Extract booking ID from appointment ID if it exists
-              let bookingId = selectedAppointment.id;
-              if (bookingId.startsWith('booking_')) {
-                bookingId = bookingId.replace('booking_', '');
-              }
-              
-              // Update booking status with bidirectional sync
-              const success = await updateBookingStatus(
-                bookingId, 
-                newStatus === 'confirmed' ? 'confirmed' : 
-                newStatus === 'cancelled' ? 'cancelled' : 'completed',
-                'barber'
-              );
-              
-              if (success) {
-                // Update local state
-                setAppointments(prev => 
-                  prev.map(apt => 
-                    apt.id === selectedAppointment.id 
-                      ? { ...apt, status: newStatus }
-                      : apt
-                  )
-                );
-                
-                Alert.alert(
-                  'Sucesso',
-                  `Agendamento ${getStatusText(newStatus).toLowerCase()} com sucesso! O cliente foi notificado.`
-                );
-              } else {
-                Alert.alert('Erro', 'Não foi possível atualizar o agendamento. Tente novamente.');
-              }
-            } catch (error) {
-              console.error('Error updating appointment status:', error);
-              Alert.alert('Erro', 'Ocorreu um erro ao atualizar o agendamento.');
+    Alert.alert(title, message, [
+      {
+        text: 'Não',
+        style: 'cancel',
+      },
+      {
+        text: 'Sim',
+        onPress: async () => {
+          try {
+            // Extract booking ID from appointment ID if it exists
+            let bookingId = selectedAppointment.id;
+            if (bookingId.startsWith('booking_')) {
+              bookingId = bookingId.replace('booking_', '');
             }
-            
-            closeModal();
+
+            // Update booking status with bidirectional sync
+            const success = await updateBookingStatus(
+              bookingId,
+              newStatus === 'confirmed'
+                ? 'confirmed'
+                : newStatus === 'cancelled'
+                ? 'cancelled'
+                : 'completed',
+              'barber'
+            );
+
+            if (success) {
+              // Update local state
+              setAppointments((prev) =>
+                prev.map((apt) =>
+                  apt.id === selectedAppointment.id
+                    ? { ...apt, status: newStatus }
+                    : apt
+                )
+              );
+
+              Alert.alert(
+                'Sucesso',
+                `Agendamento ${getStatusText(
+                  newStatus
+                ).toLowerCase()} com sucesso! O cliente foi notificado.`
+              );
+            } else {
+              Alert.alert(
+                'Erro',
+                'Não foi possível atualizar o agendamento. Tente novamente.'
+              );
+            }
+          } catch (error) {
+            console.error('Error updating appointment status:', error);
+            Alert.alert('Erro', 'Ocorreu um erro ao atualizar o agendamento.');
           }
-        }
-      ]
-    );
+
+          closeModal();
+        },
+      },
+    ]);
   };
   const handleCallClient = () => {
     if (selectedAppointment) {
@@ -335,10 +385,16 @@ export default function BarberAgenda() {
         `Ligar para ${selectedAppointment.client}?\n${selectedAppointment.phone}`,
         [
           { text: 'Cancelar', style: 'cancel' },
-          { text: 'Ligar', onPress: () => {
-            // Aqui você implementaria a funcionalidade de chamada
-            Alert.alert('Funcionalidade', 'Integração com telefone será implementada');
-          }}
+          {
+            text: 'Ligar',
+            onPress: () => {
+              // Aqui você implementaria a funcionalidade de chamada
+              Alert.alert(
+                'Funcionalidade',
+                'Integração com telefone será implementada'
+              );
+            },
+          },
         ]
       );
     }
@@ -375,21 +431,23 @@ export default function BarberAgenda() {
 
     try {
       // Converter agendamentos para o formato de exportação
-      const appointmentsToExport: AppointmentExport[] = appointments.map(apt => ({
-        id: apt.id,
-        date: apt.date,
-        time: apt.time,
-        client: apt.client,
-        service: apt.service,
-        duration: apt.duration,
-        status: apt.status,
-        phone: apt.phone,
-        email: apt.email,
-        price: apt.price,
-        notes: apt.notes,
-        createdAt: apt.createdAt,
-        barber: 'Proprietário', // Por enquanto assumindo que é sempre o proprietário
-      }));
+      const appointmentsToExport: AppointmentExport[] = appointments.map(
+        (apt) => ({
+          id: apt.id,
+          date: apt.date,
+          time: apt.time,
+          client: apt.client,
+          service: apt.service,
+          duration: apt.duration,
+          status: apt.status,
+          phone: apt.phone,
+          email: apt.email,
+          price: apt.price,
+          notes: apt.notes,
+          createdAt: apt.createdAt,
+          barber: 'Proprietário', // Por enquanto assumindo que é sempre o proprietário
+        })
+      );
 
       const exportOptions: ExportOptions = {
         format: exportFormat,
@@ -408,14 +466,16 @@ export default function BarberAgenda() {
   };
 
   const toggleExportStatus = (status: string) => {
-    setExportStatus(prev => 
-      prev.includes(status) 
-        ? prev.filter(s => s !== status)
+    setExportStatus((prev) =>
+      prev.includes(status)
+        ? prev.filter((s) => s !== status)
         : [...prev, status]
     );
   };
 
-  const setPredefinedPeriod = (period: keyof ReturnType<typeof getPredefinedPeriods>) => {
+  const setPredefinedPeriod = (
+    period: keyof ReturnType<typeof getPredefinedPeriods>
+  ) => {
     const periods = getPredefinedPeriods();
     const selectedPeriod = periods[period];
     setExportStartDate(selectedPeriod.startDate);
@@ -423,87 +483,117 @@ export default function BarberAgenda() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>      {/* Header */}
+    <SafeAreaView style={styles.container}>
+      {' '}
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Agenda</Text>
         <View style={styles.headerButtons}>
-          <TouchableOpacity style={styles.exportButton} onPress={openExportModal}>
+          <TouchableOpacity
+            style={styles.exportButton}
+            onPress={openExportModal}
+          >
             <Download size={18} color="#059669" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.addButton} onPress={handleAddAppointment}>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={handleAddAppointment}
+          >
             <Plus size={20} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
-      </View>{/* Date Selector */}
+      </View>
+      {/* Date Selector */}
       <View style={styles.dateContainer}>
         <View style={styles.weekNavigation}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.weekNavButton}
             onPress={() => navigateWeek('prev')}
           >
             <ChevronLeft size={20} color="#059669" />
           </TouchableOpacity>
-          
+
           <View style={styles.weekInfo}>
             <Text style={styles.weekRange}>
-              {currentWeekStart.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })} - {' '}
-              {new Date(currentWeekStart.getTime() + 6 * 24 * 60 * 60 * 1000)
-                .toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+              {currentWeekStart.toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: 'short',
+              })}{' '}
+              -{' '}
+              {new Date(
+                currentWeekStart.getTime() + 6 * 24 * 60 * 60 * 1000
+              ).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
             </Text>
             <Text style={styles.weekTotal}>
               {getTotalAppointmentsForWeek()} agendamentos
             </Text>
           </View>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.weekNavButton}
             onPress={() => navigateWeek('next')}
           >
             <ChevronRight size={20} color="#059669" />
           </TouchableOpacity>
         </View>
-        
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.daysScrollView}>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.daysScrollView}
+        >
           {getWeekDays().map((date, index) => {
             const dateStr = date.toISOString().split('T')[0];
-            const dayName = date.toLocaleDateString('pt-BR', { weekday: 'short' });
+            const dayName = date.toLocaleDateString('pt-BR', {
+              weekday: 'short',
+            });
             const dayNumber = date.getDate();
             const appointmentsCount = getAppointmentsForDate(dateStr).length;
             const isToday = dateStr === new Date().toISOString().split('T')[0];
-            
+
             return (
               <TouchableOpacity
                 key={dateStr}
                 style={[
                   styles.dateCard,
                   selectedDate === dateStr && styles.selectedDateCard,
-                  isToday && styles.todayDateCard
+                  isToday && styles.todayDateCard,
                 ]}
                 onPress={() => setSelectedDate(dateStr)}
               >
-                <Text style={[
-                  styles.dayName,
-                  selectedDate === dateStr && styles.selectedDayName,
-                  isToday && styles.todayDayName
-                ]}>
+                <Text
+                  style={[
+                    styles.dayName,
+                    selectedDate === dateStr && styles.selectedDayName,
+                    isToday && styles.todayDayName,
+                  ]}
+                >
                   {dayName}
                 </Text>
-                <Text style={[
-                  styles.dayNumber,
-                  selectedDate === dateStr && styles.selectedDayNumber,
-                  isToday && styles.todayDayNumber
-                ]}>
+                <Text
+                  style={[
+                    styles.dayNumber,
+                    selectedDate === dateStr && styles.selectedDayNumber,
+                    isToday && styles.todayDayNumber,
+                  ]}
+                >
                   {dayNumber}
                 </Text>
                 {appointmentsCount > 0 && (
-                  <View style={[
-                    styles.appointmentsBadge,
-                    selectedDate === dateStr && styles.selectedAppointmentsBadge
-                  ]}>
-                    <Text style={[
-                      styles.appointmentsBadgeText,
-                      selectedDate === dateStr && styles.selectedAppointmentsBadgeText
-                    ]}>
+                  <View
+                    style={[
+                      styles.appointmentsBadge,
+                      selectedDate === dateStr &&
+                        styles.selectedAppointmentsBadge,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.appointmentsBadgeText,
+                        selectedDate === dateStr &&
+                          styles.selectedAppointmentsBadgeText,
+                      ]}
+                    >
                       {appointmentsCount}
                     </Text>
                   </View>
@@ -512,86 +602,104 @@ export default function BarberAgenda() {
             );
           })}
         </ScrollView>
-      </View>      {/* Appointments List */}
-      <ScrollView style={styles.appointmentsList} showsVerticalScrollIndicator={false}>
+      </View>{' '}
+      {/* Appointments List */}
+      <ScrollView
+        style={styles.appointmentsList}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.appointmentsHeader}>
           <Text style={styles.appointmentsTitle}>
-            Agendamentos - {new Date(selectedDate).toLocaleDateString('pt-BR', { 
-              day: '2-digit', 
+            Agendamentos -{' '}
+            {new Date(selectedDate).toLocaleDateString('pt-BR', {
+              day: '2-digit',
               month: 'long',
-              weekday: 'long'
+              weekday: 'long',
             })}
           </Text>
           <TouchableOpacity style={styles.filterButton}>
             <Filter size={16} color="#6B7280" />
           </TouchableOpacity>
-        </View>        {getAppointmentsForDate(selectedDate).length > 0 ? (
+        </View>{' '}
+        {getAppointmentsForDate(selectedDate).length > 0 ? (
           getAppointmentsForDate(selectedDate)
             .sort((a, b) => a.time.localeCompare(b.time))
             .map((appointment) => (
-            <TouchableOpacity 
-              key={appointment.id} 
-              style={styles.appointmentCard}
-              onPress={() => openAppointmentDetails(appointment)}
-            >
-              <View style={styles.timeColumn}>
-                <Text style={styles.appointmentTime}>{appointment.time}</Text>
-                <View style={styles.durationContainer}>
-                  <Clock size={12} color="#6B7280" />
-                  <Text style={styles.durationText}>{appointment.duration}min</Text>
+              <TouchableOpacity
+                key={appointment.id}
+                style={styles.appointmentCard}
+                onPress={() => openAppointmentDetails(appointment)}
+              >
+                <View style={styles.timeColumn}>
+                  <Text style={styles.appointmentTime}>{appointment.time}</Text>
+                  <View style={styles.durationContainer}>
+                    <Clock size={12} color="#6B7280" />
+                    <Text style={styles.durationText}>
+                      {appointment.duration}min
+                    </Text>
+                  </View>
                 </View>
-              </View>
 
-              <View style={styles.appointmentDetails}>
-                <Text style={styles.clientName}>{appointment.client}</Text>
-                <Text style={styles.serviceText}>{appointment.service}</Text>
-                <View style={styles.statusContainer}>
-                  <View style={[
-                    styles.statusDot, 
-                    { backgroundColor: getStatusColor(appointment.status) }
-                  ]} />
-                  <Text style={[
-                    styles.statusText,
-                    { color: getStatusColor(appointment.status) }
-                  ]}>
-                    {getStatusText(appointment.status)}
-                  </Text>
+                <View style={styles.appointmentDetails}>
+                  <Text style={styles.clientName}>{appointment.client}</Text>
+                  <Text style={styles.serviceText}>{appointment.service}</Text>
+                  <View style={styles.statusContainer}>
+                    <View
+                      style={[
+                        styles.statusDot,
+                        { backgroundColor: getStatusColor(appointment.status) },
+                      ]}
+                    />
+                    <Text
+                      style={[
+                        styles.statusText,
+                        { color: getStatusColor(appointment.status) },
+                      ]}
+                    >
+                      {getStatusText(appointment.status)}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-              
-              <View style={styles.appointmentActions}>
-                <View style={styles.actionButton}>
-                  <Text style={styles.actionButtonText}>Ver</Text>
+
+                <View style={styles.appointmentActions}>
+                  <View style={styles.actionButton}>
+                    <Text style={styles.actionButtonText}>Ver</Text>
+                  </View>
                 </View>
-              </View>
-            </TouchableOpacity>
-          ))
+              </TouchableOpacity>
+            ))
         ) : (
           <View style={styles.emptyDay}>
             <CalendarIcon size={48} color="#D1D5DB" />
             <Text style={styles.emptyDayTitle}>Nenhum agendamento</Text>
             <Text style={styles.emptyDayText}>
-              Não há agendamentos para {new Date(selectedDate).toLocaleDateString('pt-BR', { 
-                day: '2-digit', 
-                month: 'long' 
+              Não há agendamentos para{' '}
+              {new Date(selectedDate).toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: 'long',
               })}
             </Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.addAppointmentButton}
               onPress={handleAddAppointment}
             >
               <Plus size={16} color="#FFFFFF" />
-              <Text style={styles.addAppointmentButtonText}>Novo Agendamento</Text>
+              <Text style={styles.addAppointmentButtonText}>
+                Novo Agendamento
+              </Text>
             </TouchableOpacity>
           </View>
         )}
-
         {/* Available time slots */}
         {getAppointmentsForDate(selectedDate).length > 0 && (
           <View style={styles.emptySlots}>
             <Text style={styles.emptySlotsTitle}>Horários Livres</Text>
             {['12:00', '13:00', '16:30', '18:00'].map((time) => (
-              <TouchableOpacity key={time} style={styles.emptySlot} onPress={handleAddAppointment}>
+              <TouchableOpacity
+                key={time}
+                style={styles.emptySlot}
+                onPress={handleAddAppointment}
+              >
                 <Text style={styles.emptySlotTime}>{time}</Text>
                 <Text style={styles.emptySlotText}>Disponível</Text>
                 <Plus size={16} color="#059669" />
@@ -600,7 +708,6 @@ export default function BarberAgenda() {
           </View>
         )}
       </ScrollView>
-
       {/* Modal de Detalhes do Agendamento */}
       <Modal
         animationType="slide"
@@ -615,10 +722,17 @@ export default function BarberAgenda() {
                 {/* Header do Modal */}
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalTitle}>Detalhes do Agendamento</Text>
-                  <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
+                  <TouchableOpacity
+                    onPress={closeModal}
+                    style={styles.closeButton}
+                  >
                     <X size={24} color="#6B7280" />
                   </TouchableOpacity>
-                </View>                <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+                </View>{' '}
+                <ScrollView
+                  style={styles.modalBody}
+                  showsVerticalScrollIndicator={false}
+                >
                   {/* Informações do Cliente */}
                   <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Cliente</Text>
@@ -627,28 +741,47 @@ export default function BarberAgenda() {
                         <View style={styles.clientInfo}>
                           <View style={styles.infoRow}>
                             <User size={20} color="#059669" />
-                            <Text style={styles.clientNameModal}>{selectedAppointment.client}</Text>
+                            <Text style={styles.clientNameModal}>
+                              {selectedAppointment.client}
+                            </Text>
                           </View>
                           <View style={styles.statusRow}>
-                            <View style={[
-                              styles.statusIndicator,
-                              { backgroundColor: getStatusColor(selectedAppointment.status) }
-                            ]} />
-                            <Text style={[
-                              styles.statusTextModal,
-                              { color: getStatusColor(selectedAppointment.status) }
-                            ]}>
+                            <View
+                              style={[
+                                styles.statusIndicator,
+                                {
+                                  backgroundColor: getStatusColor(
+                                    selectedAppointment.status
+                                  ),
+                                },
+                              ]}
+                            />
+                            <Text
+                              style={[
+                                styles.statusTextModal,
+                                {
+                                  color: getStatusColor(
+                                    selectedAppointment.status
+                                  ),
+                                },
+                              ]}
+                            >
                               {getStatusText(selectedAppointment.status)}
                             </Text>
                           </View>
                         </View>
                       </View>
-                      
+
                       <View style={styles.contactInfo}>
                         <View style={styles.infoRow}>
                           <Phone size={18} color="#6B7280" />
-                          <Text style={styles.infoText}>{selectedAppointment.phone}</Text>
-                          <TouchableOpacity onPress={handleCallClient} style={styles.callButton}>
+                          <Text style={styles.infoText}>
+                            {selectedAppointment.phone}
+                          </Text>
+                          <TouchableOpacity
+                            onPress={handleCallClient}
+                            style={styles.callButton}
+                          >
                             <Phone size={14} color="#FFFFFF" />
                             <Text style={styles.callButtonText}>Ligar</Text>
                           </TouchableOpacity>
@@ -656,110 +789,148 @@ export default function BarberAgenda() {
                         {selectedAppointment.email && (
                           <View style={styles.infoRow}>
                             <MessageSquare size={18} color="#6B7280" />
-                            <Text style={styles.infoText}>{selectedAppointment.email}</Text>
+                            <Text style={styles.infoText}>
+                              {selectedAppointment.email}
+                            </Text>
                           </View>
                         )}
                       </View>
                     </View>
                   </View>
-
                   {/* Informações do Serviço */}
                   <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Serviço e Horário</Text>
                     <View style={styles.serviceCard}>
                       <View style={styles.serviceHeader}>
-                        <Text style={styles.serviceName}>{selectedAppointment.service}</Text>
+                        <Text style={styles.serviceName}>
+                          {selectedAppointment.service}
+                        </Text>
                         <View style={styles.priceTag}>
                           <DollarSign size={16} color="#059669" />
-                          <Text style={styles.priceText}>R$ {selectedAppointment.price.toFixed(2)}</Text>
+                          <Text style={styles.priceText}>
+                            R$ {selectedAppointment.price.toFixed(2)}
+                          </Text>
                         </View>
                       </View>
-                      
+
                       <View style={styles.timeDetails}>
                         <View style={styles.timeItem}>
                           <Clock size={16} color="#6B7280" />
-                          <Text style={styles.timeText}>Horário: {selectedAppointment.time}</Text>
+                          <Text style={styles.timeText}>
+                            Horário: {selectedAppointment.time}
+                          </Text>
                         </View>
                         <View style={styles.timeItem}>
                           <CalendarIcon size={16} color="#6B7280" />
-                          <Text style={styles.timeText}>Duração: {selectedAppointment.duration} min</Text>
+                          <Text style={styles.timeText}>
+                            Duração: {selectedAppointment.duration} min
+                          </Text>
                         </View>
                       </View>
                     </View>
                   </View>
-
-                  {/* Notas */}                  {selectedAppointment.notes && (
+                  {/* Notas */}{' '}
+                  {selectedAppointment.notes && (
                     <View style={styles.section}>
                       <Text style={styles.sectionTitle}>Observações</Text>
                       <View style={styles.notesCard}>
                         <MessageSquare size={18} color="#F59E0B" />
-                        <Text style={[styles.notesText, { marginLeft: 8, flex: 1 }]}>{selectedAppointment.notes}</Text>
+                        <Text
+                          style={[styles.notesText, { marginLeft: 8, flex: 1 }]}
+                        >
+                          {selectedAppointment.notes}
+                        </Text>
                       </View>
                     </View>
                   )}
-
                   {/* Informações Adicionais */}
                   <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Detalhes do Agendamento</Text>
+                    <Text style={styles.sectionTitle}>
+                      Detalhes do Agendamento
+                    </Text>
                     <View style={styles.additionalCard}>
                       <Text style={styles.additionalLabel}>Agendado em:</Text>
                       <Text style={styles.additionalValue}>
-                        {new Date(selectedAppointment.createdAt).toLocaleDateString('pt-BR', {
+                        {new Date(
+                          selectedAppointment.createdAt
+                        ).toLocaleDateString('pt-BR', {
                           day: '2-digit',
                           month: '2-digit',
                           year: 'numeric',
                           hour: '2-digit',
-                          minute: '2-digit'
+                          minute: '2-digit',
                         })}
                       </Text>
-                      <Text style={styles.additionalLabel}>ID do Agendamento:</Text>
-                      <Text style={styles.additionalValue}>#{selectedAppointment.id}</Text>
+                      <Text style={styles.additionalLabel}>
+                        ID do Agendamento:
+                      </Text>
+                      <Text style={styles.additionalValue}>
+                        #{selectedAppointment.id}
+                      </Text>
                     </View>
                   </View>
-                </ScrollView>                {/* Ações do Modal */}
+                </ScrollView>{' '}
+                {/* Ações do Modal */}
                 <View style={styles.modalActions}>
                   {selectedAppointment.status === 'pending' && (
                     <>
-                      <TouchableOpacity 
+                      <TouchableOpacity
                         style={[styles.actionModalButton, styles.confirmButton]}
                         onPress={() => handleUpdateStatus('confirmed')}
                       >
                         <CheckCircle size={18} color="#FFFFFF" />
-                        <Text style={styles.actionModalButtonText}>Confirmar</Text>
+                        <Text style={styles.actionModalButtonText}>
+                          Confirmar
+                        </Text>
                       </TouchableOpacity>
-                      <TouchableOpacity 
+                      <TouchableOpacity
                         style={[styles.actionModalButton, styles.cancelButton]}
                         onPress={() => handleUpdateStatus('cancelled')}
                       >
                         <XCircle size={18} color="#FFFFFF" />
-                        <Text style={styles.actionModalButtonText}>Cancelar</Text>
-                      </TouchableOpacity>
-                    </>
-                  )}
-                  
-                  {selectedAppointment.status === 'confirmed' && (
-                    <>
-                      <TouchableOpacity 
-                        style={[styles.actionModalButton, styles.completeButton]}
-                        onPress={() => handleUpdateStatus('completed')}
-                      >
-                        <CheckCircle size={18} color="#FFFFFF" />
-                        <Text style={styles.actionModalButtonText}>Concluir</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity 
-                        style={[styles.actionModalButton, styles.cancelButton]}
-                        onPress={() => handleUpdateStatus('cancelled')}
-                      >
-                        <XCircle size={18} color="#FFFFFF" />
-                        <Text style={styles.actionModalButtonText}>Cancelar</Text>
+                        <Text style={styles.actionModalButtonText}>
+                          Cancelar
+                        </Text>
                       </TouchableOpacity>
                     </>
                   )}
 
-                  {(selectedAppointment.status === 'completed' || selectedAppointment.status === 'cancelled') && (
-                    <TouchableOpacity 
+                  {selectedAppointment.status === 'confirmed' && (
+                    <>
+                      <TouchableOpacity
+                        style={[
+                          styles.actionModalButton,
+                          styles.completeButton,
+                        ]}
+                        onPress={() => handleUpdateStatus('completed')}
+                      >
+                        <CheckCircle size={18} color="#FFFFFF" />
+                        <Text style={styles.actionModalButtonText}>
+                          Concluir
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.actionModalButton, styles.cancelButton]}
+                        onPress={() => handleUpdateStatus('cancelled')}
+                      >
+                        <XCircle size={18} color="#FFFFFF" />
+                        <Text style={styles.actionModalButtonText}>
+                          Cancelar
+                        </Text>
+                      </TouchableOpacity>
+                    </>
+                  )}
+
+                  {(selectedAppointment.status === 'completed' ||
+                    selectedAppointment.status === 'cancelled') && (
+                    <TouchableOpacity
                       style={[styles.actionModalButton, styles.editButton]}
-                      onPress={() => Alert.alert('Editar', 'Funcionalidade de edição será implementada')}
+                      onPress={() =>
+                        Alert.alert(
+                          'Editar',
+                          'Funcionalidade de edição será implementada'
+                        )
+                      }
                     >
                       <Edit size={18} color="#FFFFFF" />
                       <Text style={styles.actionModalButtonText}>Editar</Text>
@@ -769,8 +940,8 @@ export default function BarberAgenda() {
               </>
             )}
           </View>
-        </View>      </Modal>
-
+        </View>{' '}
+      </Modal>
       {/* Modal de Exportação */}
       <Modal
         visible={exportModalVisible}
@@ -799,13 +970,20 @@ export default function BarberAgenda() {
                   ]}
                   onPress={() => setExportFormat('csv')}
                 >
-                  <FileText size={16} color={exportFormat === 'csv' ? '#059669' : '#6B7280'} />
-                  <Text style={[
-                    styles.formatButtonText,
-                    exportFormat === 'csv' && styles.formatButtonTextSelected,
-                  ]}>CSV</Text>
+                  <FileText
+                    size={16}
+                    color={exportFormat === 'csv' ? '#059669' : '#6B7280'}
+                  />
+                  <Text
+                    style={[
+                      styles.formatButtonText,
+                      exportFormat === 'csv' && styles.formatButtonTextSelected,
+                    ]}
+                  >
+                    CSV
+                  </Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
                   style={[
                     styles.formatButton,
@@ -813,13 +991,21 @@ export default function BarberAgenda() {
                   ]}
                   onPress={() => setExportFormat('excel')}
                 >
-                  <FileText size={16} color={exportFormat === 'excel' ? '#059669' : '#6B7280'} />
-                  <Text style={[
-                    styles.formatButtonText,
-                    exportFormat === 'excel' && styles.formatButtonTextSelected,
-                  ]}>Excel</Text>
+                  <FileText
+                    size={16}
+                    color={exportFormat === 'excel' ? '#059669' : '#6B7280'}
+                  />
+                  <Text
+                    style={[
+                      styles.formatButtonText,
+                      exportFormat === 'excel' &&
+                        styles.formatButtonTextSelected,
+                    ]}
+                  >
+                    Excel
+                  </Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
                   style={[
                     styles.formatButton,
@@ -827,11 +1013,18 @@ export default function BarberAgenda() {
                   ]}
                   onPress={() => setExportFormat('pdf')}
                 >
-                  <FileText size={16} color={exportFormat === 'pdf' ? '#059669' : '#6B7280'} />
-                  <Text style={[
-                    styles.formatButtonText,
-                    exportFormat === 'pdf' && styles.formatButtonTextSelected,
-                  ]}>PDF</Text>
+                  <FileText
+                    size={16}
+                    color={exportFormat === 'pdf' ? '#059669' : '#6B7280'}
+                  />
+                  <Text
+                    style={[
+                      styles.formatButtonText,
+                      exportFormat === 'pdf' && styles.formatButtonTextSelected,
+                    ]}
+                  >
+                    PDF
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -845,24 +1038,26 @@ export default function BarberAgenda() {
                     key={key}
                     style={[
                       styles.periodButton,
-                      exportStartDate === period.startDate && 
-                      exportEndDate === period.endDate && 
-                      styles.periodButtonSelected,
+                      exportStartDate === period.startDate &&
+                        exportEndDate === period.endDate &&
+                        styles.periodButtonSelected,
                     ]}
                     onPress={() => setPredefinedPeriod(key as any)}
                   >
-                    <Text style={[
-                      styles.periodButtonText,
-                      exportStartDate === period.startDate && 
-                      exportEndDate === period.endDate && 
-                      styles.periodButtonTextSelected,
-                    ]}>
+                    <Text
+                      style={[
+                        styles.periodButtonText,
+                        exportStartDate === period.startDate &&
+                          exportEndDate === period.endDate &&
+                          styles.periodButtonTextSelected,
+                      ]}
+                    >
                       {period.label}
                     </Text>
                   </TouchableOpacity>
                 ))}
               </View>
-              
+
               <View style={styles.dateInputs}>
                 <View style={styles.dateInputContainer}>
                   <Text style={styles.dateLabel}>Data Início</Text>
@@ -901,21 +1096,27 @@ export default function BarberAgenda() {
                     key={status.key}
                     style={[
                       styles.statusFilter,
-                      exportStatus.includes(status.key) && styles.statusFilterSelected,
+                      exportStatus.includes(status.key) &&
+                        styles.statusFilterSelected,
                     ]}
                     onPress={() => toggleExportStatus(status.key)}
                   >
-                    <Text style={[
-                      styles.statusFilterText,
-                      exportStatus.includes(status.key) && styles.statusFilterTextSelected,
-                    ]}>
+                    <Text
+                      style={[
+                        styles.statusFilterText,
+                        exportStatus.includes(status.key) &&
+                          styles.statusFilterTextSelected,
+                      ]}
+                    >
                       {status.label}
                     </Text>
                   </TouchableOpacity>
                 ))}
               </View>
               <Text style={styles.dateLabel}>
-                {exportStatus.length === 0 ? 'Todos os status serão incluídos' : `${exportStatus.length} status selecionados`}
+                {exportStatus.length === 0
+                  ? 'Todos os status serão incluídos'
+                  : `${exportStatus.length} status selecionados`}
               </Text>
             </View>
           </ScrollView>
@@ -928,7 +1129,7 @@ export default function BarberAgenda() {
             >
               <Text style={styles.exportCancelButtonText}>Cancelar</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={[
                 styles.exportConfirmButton,
@@ -978,7 +1179,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-  },  dateContainer: {
+  },
+  dateContainer: {
     paddingHorizontal: 20,
     marginBottom: 20,
   },
@@ -1026,7 +1228,8 @@ const styles = StyleSheet.create({
     minWidth: 60,
     borderWidth: 1,
     borderColor: '#E5E7EB',
-  },  selectedDateCard: {
+  },
+  selectedDateCard: {
     backgroundColor: '#059669',
     borderColor: '#059669',
   },
@@ -1200,7 +1403,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
     color: '#059669',
     marginRight: 12,
-  },  emptySlotText: {
+  },
+  emptySlotText: {
     flex: 1,
     fontSize: 14,
     fontFamily: 'Inter-Regular',
@@ -1280,7 +1484,8 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     padding: 4,
-  },  modalBody: {
+  },
+  modalBody: {
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
@@ -1346,7 +1551,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold',
     color: '#059669',
     marginLeft: 4,
-  },  notesText: {
+  },
+  notesText: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
     color: '#92400E',
@@ -1356,7 +1562,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter-Regular',
     color: '#6B7280',
-  },  modalActions: {
+  },
+  modalActions: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     paddingHorizontal: 20,
@@ -1393,7 +1600,8 @@ const styles = StyleSheet.create({
   },
   completeButton: {
     backgroundColor: '#6366F1',
-  },  editButton: {
+  },
+  editButton: {
     backgroundColor: '#F59E0B',
   },
   // Novos estilos para o modal melhorado
@@ -1504,7 +1712,8 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     marginBottom: 2,
     marginTop: 8,
-  },  additionalValue: {
+  },
+  additionalValue: {
     fontSize: 14,
     fontFamily: 'Inter-SemiBold',
     color: '#374151',

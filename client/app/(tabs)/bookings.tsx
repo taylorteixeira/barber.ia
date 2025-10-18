@@ -11,7 +11,14 @@ import {
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { Calendar, Clock, MapPin, Phone, X, Star } from 'lucide-react-native';
-import { getBookings, updateBooking, Booking, getBookingsByUserId, getCurrentUser, updateBookingStatus } from '@/services/database';
+import {
+  getBookings,
+  updateBooking,
+  Booking,
+  getBookingsByUserId,
+  getCurrentUser,
+  updateBookingStatus,
+} from '@/services/database';
 
 type BookingStatus = 'confirmed' | 'completed' | 'cancelled';
 
@@ -82,20 +89,31 @@ export default function BookingsScreen() {
           onPress: async () => {
             try {
               // Update status with bidirectional sync
-              const success = await updateBookingStatus(bookingId, 'cancelled', 'client');
-              
+              const success = await updateBookingStatus(
+                bookingId,
+                'cancelled',
+                'client'
+              );
+
               if (success) {
                 // Update local state
                 setBookings((prev) =>
-                  prev.map((b) => (b.id === bookingId ? { ...b, status: 'cancelled' as const } : b))
+                  prev.map((b) =>
+                    b.id === bookingId
+                      ? { ...b, status: 'cancelled' as const }
+                      : b
+                  )
                 );
-                
+
                 Alert.alert(
                   'Agendamento cancelado',
                   'Seu agendamento foi cancelado com sucesso. O barbeiro será notificado.'
                 );
               } else {
-                Alert.alert('Erro', 'Não foi possível cancelar o agendamento. Tente novamente.');
+                Alert.alert(
+                  'Erro',
+                  'Não foi possível cancelar o agendamento. Tente novamente.'
+                );
               }
             } catch (error) {
               console.error('Error cancelling booking:', error);
@@ -123,20 +141,31 @@ export default function BookingsScreen() {
           onPress: async () => {
             try {
               // Update status with bidirectional sync
-              const success = await updateBookingStatus(bookingId, 'completed', 'client');
-              
+              const success = await updateBookingStatus(
+                bookingId,
+                'completed',
+                'client'
+              );
+
               if (success) {
                 // Update local state
                 setBookings((prev) =>
-                  prev.map((b) => (b.id === bookingId ? { ...b, status: 'completed' as const } : b))
+                  prev.map((b) =>
+                    b.id === bookingId
+                      ? { ...b, status: 'completed' as const }
+                      : b
+                  )
                 );
-                
+
                 Alert.alert(
                   'Serviço concluído',
                   'Obrigado! Esperamos vê-lo novamente em breve.'
                 );
               } else {
-                Alert.alert('Erro', 'Não foi possível atualizar o status. Tente novamente.');
+                Alert.alert(
+                  'Erro',
+                  'Não foi possível atualizar o status. Tente novamente.'
+                );
               }
             } catch (error) {
               console.error('Error completing booking:', error);
@@ -174,7 +203,6 @@ export default function BookingsScreen() {
         </View>
         <Text style={styles.priceText}>R$ {booking.price}</Text>
       </View>
-
       <View style={styles.bookingDetails}>
         <View style={styles.detailRow}>
           <Calendar size={16} color="#6B7280" />
@@ -191,7 +219,8 @@ export default function BookingsScreen() {
           <Phone size={16} color="#6B7280" />
           <Text style={styles.detailText}>{booking.phone}</Text>
         </View>
-      </View>      <View style={styles.bookingActions}>
+      </View>{' '}
+      <View style={styles.bookingActions}>
         {booking.status === 'confirmed' && (
           <>
             <TouchableOpacity
@@ -201,7 +230,7 @@ export default function BookingsScreen() {
               <X size={16} color="#EF4444" />
               <Text style={styles.cancelButtonText}>Cancelar</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.completeButton}
               onPress={() => handleCompleteBooking(booking.id)}
             >

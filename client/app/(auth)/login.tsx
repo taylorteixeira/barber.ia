@@ -33,20 +33,26 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       const user = await loginUser(email, password);
-        if (user) {
+      if (user) {
         // Check if user type matches
         if (user.userType !== userType) {
           const typeText = userType === 'client' ? 'cliente' : 'barbeiro';
-          Alert.alert('Erro', `Esta conta não é de ${typeText}. Verifique o tipo de acesso.`);
+          Alert.alert(
+            'Erro',
+            `Esta conta não é de ${typeText}. Verifique o tipo de acesso.`
+          );
           setLoading(false);
           return;
         }
-        
+
         // Save current user
         await setCurrentUser(user);
-        
-        console.log('Navigating to:', userType === 'barber' ? '/(barbertabs)' : '/(tabs)');
-        
+
+        console.log(
+          'Navigating to:',
+          userType === 'barber' ? '/(barbertabs)' : '/(tabs)'
+        );
+
         if (userType === 'barber') {
           router.replace('/(barbertabs)' as any);
         } else {
@@ -73,24 +79,19 @@ export default function LoginScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         {/* Back Button */}
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={handleGoBack}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
           <ArrowLeft size={24} color="#6B7280" />
         </TouchableOpacity>
-        
         <View style={styles.header}>
           <Text style={styles.title}>
             {userType === 'barber' ? 'Área do Barbeiro' : 'Área do Cliente'}
           </Text>
           <Text style={styles.subtitle}>
-            {userType === 'barber' 
-              ? 'Gerencie sua barbearia e clientes' 
+            {userType === 'barber'
+              ? 'Gerencie sua barbearia e clientes'
               : 'Encontre e agende com barbeiros'}
           </Text>
         </View>
-
         <View style={styles.form}>
           <View style={styles.inputContainer}>
             <Mail size={20} color="#6B7280" style={styles.inputIcon} />
@@ -154,12 +155,18 @@ export default function LoginScreen() {
             style={styles.socialButton}
             onPress={() => handleSocialLogin('Apple')}
           >
-            <Text style={styles.socialButtonText}>Continuar com Apple</Text>          </TouchableOpacity>
-        </View>        <View style={styles.footer}>
+            <Text style={styles.socialButtonText}>Continuar com Apple</Text>{' '}
+          </TouchableOpacity>
+        </View>{' '}
+        <View style={styles.footer}>
           <Text style={styles.footerText}>
             Não tem uma conta?{' '}
-            <Link 
-              href={userType === 'barber' ? '/(auth)/barber-onboarding' : `/(auth)/register?userType=${userType}`} 
+            <Link
+              href={
+                userType === 'barber'
+                  ? '/(auth)/barber-onboarding'
+                  : `/(auth)/register?userType=${userType}`
+              }
               asChild
             >
               <Text style={styles.footerLink}>Cadastre-se</Text>
@@ -175,7 +182,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-  },  content: {
+  },
+  content: {
     flex: 1,
     paddingHorizontal: 24,
     justifyContent: 'center',

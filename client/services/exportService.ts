@@ -31,26 +31,30 @@ export const filterAppointments = (
   appointments: AppointmentExport[],
   options: ExportOptions
 ): AppointmentExport[] => {
-  return appointments.filter(appointment => {
+  return appointments.filter((appointment) => {
     // Filtro por data
     const appointmentDate = new Date(appointment.date);
     const startDate = new Date(options.startDate);
     const endDate = new Date(options.endDate);
-    
+
     if (appointmentDate < startDate || appointmentDate > endDate) {
       return false;
     }
-    
+
     // Filtro por barbeiro (se especificado)
     if (options.barberId && appointment.barber !== options.barberId) {
       return false;
     }
-    
+
     // Filtro por status (se especificado)
-    if (options.status && options.status.length > 0 && !options.status.includes(appointment.status)) {
+    if (
+      options.status &&
+      options.status.length > 0 &&
+      !options.status.includes(appointment.status)
+    ) {
       return false;
     }
-    
+
     return true;
   });
 };
@@ -69,39 +73,44 @@ export const generateCSV = (appointments: AppointmentExport[]): string => {
     'Status',
     'Barbeiro',
     'Observações',
-    'Data Criação'
+    'Data Criação',
   ].join(',');
-  
-  const rows = appointments.map(appointment => [
-    appointment.date,
-    appointment.time,
-    `"${appointment.client}"`,
-    appointment.phone,
-    appointment.email || '',
-    `"${appointment.service}"`,
-    appointment.duration.toString(),
-    appointment.price.toFixed(2),
-    appointment.status,
-    appointment.barber || '',
-    `"${appointment.notes || ''}"`,
-    new Date(appointment.createdAt).toLocaleDateString('pt-BR')
-  ].join(','));
-  
+
+  const rows = appointments.map((appointment) =>
+    [
+      appointment.date,
+      appointment.time,
+      `"${appointment.client}"`,
+      appointment.phone,
+      appointment.email || '',
+      `"${appointment.service}"`,
+      appointment.duration.toString(),
+      appointment.price.toFixed(2),
+      appointment.status,
+      appointment.barber || '',
+      `"${appointment.notes || ''}"`,
+      new Date(appointment.createdAt).toLocaleDateString('pt-BR'),
+    ].join(',')
+  );
+
   return [headers, ...rows].join('\n');
 };
 
 // Função para gerar HTML para PDF
-export const generateHTML = (appointments: AppointmentExport[], options: ExportOptions): string => {
+export const generateHTML = (
+  appointments: AppointmentExport[],
+  options: ExportOptions
+): string => {
   const totalValue = appointments.reduce((sum, apt) => sum + apt.price, 0);
   const totalAppointments = appointments.length;
-  
+
   const statusMap = {
     confirmed: 'Confirmado',
     pending: 'Pendente',
     cancelled: 'Cancelado',
-    completed: 'Concluído'
+    completed: 'Concluído',
   };
-  
+
   return `
     <!DOCTYPE html>
     <html>
@@ -196,7 +205,9 @@ export const generateHTML = (appointments: AppointmentExport[], options: ExportO
       <div class="header">
         <h1>Barber.IA</h1>
         <h2>Relatório de Agendamentos</h2>
-        <p>Período: ${new Date(options.startDate).toLocaleDateString('pt-BR')} a ${new Date(options.endDate).toLocaleDateString('pt-BR')}</p>
+        <p>Período: ${new Date(options.startDate).toLocaleDateString(
+          'pt-BR'
+        )} a ${new Date(options.endDate).toLocaleDateString('pt-BR')}</p>
       </div>
       
       <div class="summary">
@@ -209,7 +220,11 @@ export const generateHTML = (appointments: AppointmentExport[], options: ExportO
           <div class="summary-label">Receita Total</div>
         </div>
         <div class="summary-item">
-          <div class="summary-value">R$ ${totalAppointments > 0 ? (totalValue / totalAppointments).toFixed(2) : '0.00'}</div>
+          <div class="summary-value">R$ ${
+            totalAppointments > 0
+              ? (totalValue / totalAppointments).toFixed(2)
+              : '0.00'
+          }</div>
           <div class="summary-label">Ticket Médio</div>
         </div>
       </div>
@@ -229,7 +244,9 @@ export const generateHTML = (appointments: AppointmentExport[], options: ExportO
           </tr>
         </thead>
         <tbody>
-          ${appointments.map(appointment => `
+          ${appointments
+            .map(
+              (appointment) => `
             <tr>
               <td>${new Date(appointment.date).toLocaleDateString('pt-BR')}</td>
               <td>${appointment.time}</td>
@@ -238,15 +255,21 @@ export const generateHTML = (appointments: AppointmentExport[], options: ExportO
               <td>${appointment.service}</td>
               <td>${appointment.duration} min</td>
               <td>R$ ${appointment.price.toFixed(2)}</td>
-              <td><span class="status ${appointment.status}">${statusMap[appointment.status]}</span></td>
+              <td><span class="status ${appointment.status}">${
+                statusMap[appointment.status]
+              }</span></td>
               <td>${appointment.notes || '-'}</td>
             </tr>
-          `).join('')}
+          `
+            )
+            .join('')}
         </tbody>
       </table>
       
       <div class="footer">
-        <p>Relatório gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</p>
+        <p>Relatório gerado em ${new Date().toLocaleDateString(
+          'pt-BR'
+        )} às ${new Date().toLocaleTimeString('pt-BR')}</p>
         <p>Barber.IA - Sistema de Gestão para Barbearias</p>
       </div>
     </body>
@@ -261,16 +284,19 @@ export const exportAppointments = async (
 ): Promise<void> => {
   try {
     const filteredAppointments = filterAppointments(appointments, options);
-    
+
     if (filteredAppointments.length === 0) {
-      Alert.alert('Aviso', 'Nenhum agendamento encontrado para o período selecionado.');
+      Alert.alert(
+        'Aviso',
+        'Nenhum agendamento encontrado para o período selecionado.'
+      );
       return;
     }
-    
+
     const fileName = `agendamentos_${options.startDate}_${options.endDate}`;
     let fileUri: string;
     let mimeType: string;
-    
+
     switch (options.format) {
       case 'csv':
         const csvContent = generateCSV(filteredAppointments);
@@ -280,7 +306,7 @@ export const exportAppointments = async (
         });
         mimeType = 'text/csv';
         break;
-        
+
       case 'excel':
         // Para Excel, vamos usar CSV com extensão .xls
         const excelContent = generateCSV(filteredAppointments);
@@ -290,7 +316,7 @@ export const exportAppointments = async (
         });
         mimeType = 'application/vnd.ms-excel';
         break;
-        
+
       case 'pdf':
         // Para PDF, vamos criar um HTML e compartilhar
         const htmlContent = generateHTML(filteredAppointments, options);
@@ -300,17 +326,17 @@ export const exportAppointments = async (
         });
         mimeType = 'text/html';
         break;
-        
+
       default:
         throw new Error('Formato não suportado');
     }
-    
+
     // Verificar se o arquivo foi criado
     const fileInfo = await FileSystem.getInfoAsync(fileUri);
     if (!fileInfo.exists) {
       throw new Error('Erro ao criar arquivo');
     }
-    
+
     // Compartilhar o arquivo
     const canShare = await Sharing.isAvailableAsync();
     if (canShare) {
@@ -326,7 +352,7 @@ export const exportAppointments = async (
         [{ text: 'OK' }]
       );
     }
-    
+
     // Limpar arquivo temporário após um tempo
     setTimeout(async () => {
       try {
@@ -335,14 +361,11 @@ export const exportAppointments = async (
         console.log('Erro ao limpar arquivo temporário:', error);
       }
     }, 300000); // 5 minutos
-    
   } catch (error) {
     console.error('Erro na exportação:', error);
-    Alert.alert(
-      'Erro',
-      'Erro ao exportar agendamentos. Tente novamente.',
-      [{ text: 'OK' }]
-    );
+    Alert.alert('Erro', 'Erro ao exportar agendamentos. Tente novamente.', [
+      { text: 'OK' },
+    ]);
   }
 };
 
@@ -351,25 +374,25 @@ export const getPredefinedPeriods = () => {
   const today = new Date();
   const thisWeekStart = new Date(today);
   const thisWeekEnd = new Date(today);
-  
+
   // Início da semana (segunda-feira)
   const dayOfWeek = today.getDay();
   const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
   thisWeekStart.setDate(today.getDate() + mondayOffset);
   thisWeekEnd.setDate(thisWeekStart.getDate() + 6);
-  
+
   // Mês atual
   const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
   const thisMonthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-  
+
   // Últimos 30 dias
   const last30DaysStart = new Date(today);
   last30DaysStart.setDate(today.getDate() - 30);
-  
+
   // Próximos 30 dias
   const next30DaysEnd = new Date(today);
   next30DaysEnd.setDate(today.getDate() + 30);
-  
+
   return {
     today: {
       label: 'Hoje',

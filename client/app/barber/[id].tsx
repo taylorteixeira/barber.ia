@@ -9,7 +9,12 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { getBarbers, Barber, getBarbershopById, Barbershop } from '@/services/database';
+import {
+  getBarbers,
+  Barber,
+  getBarbershopById,
+  Barbershop,
+} from '@/services/database';
 import {
   Calendar,
   Clock,
@@ -54,11 +59,12 @@ export default function BarberProfile() {
         <Text>Carregando barbeiro...</Text>
       </View>
     );
-  }  const handleBook = () => {
+  }
+  const handleBook = () => {
     // Navigate to booking screen with barber ID
     router.push({
       pathname: '/booking',
-      params: { id: id }
+      params: { id: id },
     });
   };
 
@@ -78,14 +84,17 @@ export default function BarberProfile() {
               </Text>
             </View>
           </View>
-        </View>        {/* Info Cards */}
+        </View>{' '}
+        {/* Info Cards */}
         <View style={styles.infoSection}>
           <View style={styles.infoCard}>
             <MapPin size={24} color="#2563EB" />
             <View style={styles.infoContent}>
               <Text style={styles.infoTitle}>Localização</Text>
               <Text style={styles.infoText}>
-                {barbershop ? barbershop.address : `${barber.distance}km de distância`}
+                {barbershop
+                  ? barbershop.address
+                  : `${barber.distance}km de distância`}
               </Text>
             </View>
           </View>
@@ -95,10 +104,11 @@ export default function BarberProfile() {
             <View style={styles.infoContent}>
               <Text style={styles.infoTitle}>Horário</Text>
               <Text style={styles.infoText}>
-                {barbershop && barbershop.workingHours && barbershop.workingHours.monday 
+                {barbershop &&
+                barbershop.workingHours &&
+                barbershop.workingHours.monday
                   ? `${barbershop.workingHours.monday.openTime} às ${barbershop.workingHours.monday.closeTime}`
-                  : 'Seg-Sáb: 8h às 18h'
-                }
+                  : 'Seg-Sáb: 8h às 18h'}
               </Text>
             </View>
           </View>
@@ -113,7 +123,6 @@ export default function BarberProfile() {
             </View>
           </View>
         </View>
-
         {/* Additional Barbershop Info */}
         {barbershop && barbershop.description && (
           <View style={styles.aboutSection}>
@@ -121,12 +130,13 @@ export default function BarberProfile() {
             <Text style={styles.aboutText}>{barbershop.description}</Text>
           </View>
         )}
-
         {/* Services */}
         <View style={styles.servicesSection}>
           <Text style={styles.sectionTitle}>Serviços Oferecidos</Text>
           <View style={styles.servicesList}>
-            {barbershop && barbershop.services && barbershop.services.length > 0 ? (
+            {barbershop &&
+            barbershop.services &&
+            barbershop.services.length > 0 ? (
               barbershop.services.map((service, index) => (
                 <View key={index} style={styles.serviceItem}>
                   <Text style={styles.serviceName}>{service.name}</Text>
@@ -161,7 +171,6 @@ export default function BarberProfile() {
             )}
           </View>
         </View>
-
         {/* About */}
         <View style={styles.aboutSection}>
           <Text style={styles.sectionTitle}>Sobre</Text>

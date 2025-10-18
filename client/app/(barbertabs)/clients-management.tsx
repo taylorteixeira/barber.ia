@@ -11,26 +11,26 @@ import {
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import { 
-  Plus, 
-  Search, 
-  User, 
-  Phone, 
-  Mail, 
-  Edit, 
-  Trash2, 
+import {
+  Plus,
+  Search,
+  User,
+  Phone,
+  Mail,
+  Edit,
+  Trash2,
   Save,
   X,
   Calendar,
-  ArrowRight
+  ArrowRight,
 } from 'lucide-react-native';
-import { 
-  getClients, 
-  createClient, 
-  updateClient, 
-  deleteClient, 
+import {
+  getClients,
+  createClient,
+  updateClient,
+  deleteClient,
   Client,
-  getClientsFromBookings
+  getClientsFromBookings,
 } from '@/services/database';
 
 export default function ClientsManagementScreen() {
@@ -48,7 +48,7 @@ export default function ClientsManagementScreen() {
   // Load clients
   useEffect(() => {
     let isMounted = true; // Track if component is still mounted
-    
+
     const loadClientsData = async () => {
       try {
         if (!isMounted) return;
@@ -66,13 +66,13 @@ export default function ClientsManagementScreen() {
     };
 
     loadClientsData();
-    
+
     // Cleanup function to prevent state updates on unmounted component
     return () => {
       isMounted = false;
     };
   }, []);
-  
+
   const loadClients = async () => {
     try {
       // Load real clients from bookings (includes both booked clients and manually added ones)
@@ -84,9 +84,10 @@ export default function ClientsManagementScreen() {
     }
   };
 
-  const filteredClients = clients.filter(client =>
-    client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    client.phone.includes(searchQuery)
+  const filteredClients = clients.filter(
+    (client) =>
+      client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      client.phone.includes(searchQuery)
   );
 
   const handleAddClient = () => {
@@ -130,7 +131,7 @@ export default function ClientsManagementScreen() {
           isTemporary: false,
         });
       }
-      
+
       await loadClients();
       setShowModal(false);
       setClientForm({ name: '', phone: '', email: '' });
@@ -167,7 +168,9 @@ export default function ClientsManagementScreen() {
   };
 
   const handleScheduleAppointment = (client: Client) => {
-    router.push(`/(barbertabs)/new-appointment?clientId=${client.id}&clientName=${client.name}`);
+    router.push(
+      `/(barbertabs)/new-appointment?clientId=${client.id}&clientName=${client.name}`
+    );
   };
 
   return (
@@ -194,18 +197,22 @@ export default function ClientsManagementScreen() {
       </View>
 
       {/* Clients List */}
-      <ScrollView style={styles.clientsList} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.clientsList}
+        showsVerticalScrollIndicator={false}
+      >
         {filteredClients.length === 0 ? (
           <View style={styles.emptyState}>
             <User size={48} color="#9CA3AF" />
             <Text style={styles.emptyTitle}>
-              {searchQuery ? 'Nenhum cliente encontrado' : 'Nenhum cliente cadastrado'}
+              {searchQuery
+                ? 'Nenhum cliente encontrado'
+                : 'Nenhum cliente cadastrado'}
             </Text>
             <Text style={styles.emptySubtitle}>
-              {searchQuery 
-                ? 'Tente buscar por outro nome ou telefone' 
-                : 'Adicione seus primeiros clientes para começar'
-              }
+              {searchQuery
+                ? 'Tente buscar por outro nome ou telefone'
+                : 'Adicione seus primeiros clientes para começar'}
             </Text>
           </View>
         ) : (
@@ -234,7 +241,7 @@ export default function ClientsManagementScreen() {
                   )}
                 </View>
               </View>
-              
+
               <View style={styles.clientActions}>
                 <TouchableOpacity
                   style={styles.actionButton}
@@ -285,7 +292,9 @@ export default function ClientsManagementScreen() {
                   style={styles.input}
                   placeholder="Nome completo"
                   value={clientForm.name}
-                  onChangeText={(text) => setClientForm({...clientForm, name: text})}
+                  onChangeText={(text) =>
+                    setClientForm({ ...clientForm, name: text })
+                  }
                 />
               </View>
 
@@ -295,7 +304,9 @@ export default function ClientsManagementScreen() {
                   style={styles.input}
                   placeholder="Telefone"
                   value={clientForm.phone}
-                  onChangeText={(text) => setClientForm({...clientForm, phone: text})}
+                  onChangeText={(text) =>
+                    setClientForm({ ...clientForm, phone: text })
+                  }
                   keyboardType="phone-pad"
                 />
               </View>
@@ -306,7 +317,9 @@ export default function ClientsManagementScreen() {
                   style={styles.input}
                   placeholder="E-mail (opcional)"
                   value={clientForm.email}
-                  onChangeText={(text) => setClientForm({...clientForm, email: text})}
+                  onChangeText={(text) =>
+                    setClientForm({ ...clientForm, email: text })
+                  }
                   keyboardType="email-address"
                   autoCapitalize="none"
                 />
@@ -320,9 +333,12 @@ export default function ClientsManagementScreen() {
               >
                 <Text style={styles.cancelButtonText}>Cancelar</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
-                style={[styles.saveButton, loading && styles.saveButtonDisabled]}
+                style={[
+                  styles.saveButton,
+                  loading && styles.saveButtonDisabled,
+                ]}
                 onPress={handleSaveClient}
                 disabled={loading}
               >
@@ -488,7 +504,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  
+
   // Modal Styles
   modalOverlay: {
     flex: 1,

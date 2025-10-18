@@ -8,7 +8,14 @@ import {
 } from 'react-native';
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
-import { Check, ArrowRight, Scissors, Users, Calendar, Star } from 'lucide-react-native';
+import {
+  Check,
+  ArrowRight,
+  Scissors,
+  Users,
+  Calendar,
+  Star,
+} from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function WelcomeScreen() {
@@ -50,7 +57,8 @@ export default function WelcomeScreen() {
     {
       icon: Star,
       title: 'Relatórios Detalhados',
-      description: 'Acompanhe o crescimento do seu negócio com relatórios completos',
+      description:
+        'Acompanhe o crescimento do seu negócio com relatórios completos',
     },
   ];
 
@@ -60,7 +68,7 @@ export default function WelcomeScreen() {
         colors={['#1E40AF', '#2563EB', '#3B82F6']}
         style={styles.gradient}
       >
-        <Animated.View 
+        <Animated.View
           style={[
             styles.content,
             {
@@ -84,14 +92,16 @@ export default function WelcomeScreen() {
               Sua barbearia foi configurada com sucesso
             </Text>
             <Text style={styles.description}>
-              Agora você tem acesso a todas as ferramentas necessárias para 
+              Agora você tem acesso a todas as ferramentas necessárias para
               gerenciar seu negócio de forma profissional.
             </Text>
           </View>
 
           {/* Features List */}
           <View style={styles.featuresContainer}>
-            <Text style={styles.featuresTitle}>O que você pode fazer agora:</Text>
+            <Text style={styles.featuresTitle}>
+              O que você pode fazer agora:
+            </Text>
             {features.map((feature, index) => (
               <Animated.View
                 key={index}
@@ -115,7 +125,9 @@ export default function WelcomeScreen() {
                 </View>
                 <View style={styles.featureContent}>
                   <Text style={styles.featureTitle}>{feature.title}</Text>
-                  <Text style={styles.featureDescription}>{feature.description}</Text>
+                  <Text style={styles.featureDescription}>
+                    {feature.description}
+                  </Text>
                 </View>
               </Animated.View>
             ))}
@@ -135,7 +147,7 @@ export default function WelcomeScreen() {
           <View style={styles.tipsContainer}>
             <Text style={styles.tipsTitle}>💡 Dica:</Text>
             <Text style={styles.tipsText}>
-              Complete seu perfil na seção "Configurações" para oferecer uma 
+              Complete seu perfil na seção "Configurações" para oferecer uma
               experiência ainda melhor aos seus clientes.
             </Text>
           </View>

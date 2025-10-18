@@ -25,9 +25,9 @@ import {
   UserPlus,
   Users,
 } from 'lucide-react-native';
-import { 
-  getCurrentUser, 
-  getBarbershopByOwnerId, 
+import {
+  getCurrentUser,
+  getBarbershopByOwnerId,
   getBarbersByBarbershopId,
   getUserById,
   getBarberProfileByUserId,
@@ -80,12 +80,27 @@ interface Appointment {
 
 export default function NewAppointment() {
   const router = useRouter();
-  
+
   // Estados dos dados
   const [clients, setClients] = useState<Client[]>([
-    { id: '1', name: 'João Silva', phone: '(11) 99999-1111', email: 'joao@email.com' },
-    { id: '2', name: 'Maria Santos', phone: '(11) 99999-2222', email: 'maria@email.com' },
-    { id: '3', name: 'Pedro Costa', phone: '(11) 99999-3333', email: 'pedro@email.com' },
+    {
+      id: '1',
+      name: 'João Silva',
+      phone: '(11) 99999-1111',
+      email: 'joao@email.com',
+    },
+    {
+      id: '2',
+      name: 'Maria Santos',
+      phone: '(11) 99999-2222',
+      email: 'maria@email.com',
+    },
+    {
+      id: '3',
+      name: 'Pedro Costa',
+      phone: '(11) 99999-3333',
+      email: 'pedro@email.com',
+    },
   ]);
 
   const [services] = useState<Service[]>([
@@ -100,19 +115,21 @@ export default function NewAppointment() {
   const [selectedBarber, setSelectedBarber] = useState<Barber | null>(null);
   const [appointmentDate, setAppointmentDate] = useState('');
   const [appointmentTime, setAppointmentTime] = useState('');
-    // Data states
+  // Data states
   const [barbers, setBarbers] = useState<Barber[]>([]);
-  const [barbersDetails, setBarbersDetails] = useState<{[key: number]: UserType}>({});
+  const [barbersDetails, setBarbersDetails] = useState<{
+    [key: number]: UserType;
+  }>({});
   const [barbershop, setBarbershop] = useState<Barbershop | null>(null);
   const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
-  
+
   // Search and modal states
   const [clientSearchQuery, setClientSearchQuery] = useState('');
   const [showClientModal, setShowClientModal] = useState(false);
   const [showServiceModal, setShowServiceModal] = useState(false);
   const [showBarberModal, setShowBarberModal] = useState(false);
   const [showNewClientModal, setShowNewClientModal] = useState(false);
-  
+
   // New client form
   const [newClientForm, setNewClientForm] = useState({
     name: '',
@@ -121,20 +138,37 @@ export default function NewAppointment() {
 
   // Time slots (simulando horários disponíveis)
   const timeSlots = [
-    '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
-    '11:00', '11:30', '14:00', '14:30', '15:00', '15:30',
-    '16:00', '16:30', '17:00', '17:30', '18:00'
+    '08:00',
+    '08:30',
+    '09:00',
+    '09:30',
+    '10:00',
+    '10:30',
+    '11:00',
+    '11:30',
+    '14:00',
+    '14:30',
+    '15:00',
+    '15:30',
+    '16:00',
+    '16:30',
+    '17:00',
+    '17:30',
+    '18:00',
   ];
 
-  const filteredClients = clients.filter(client =>
-    client.name.toLowerCase().includes(clientSearchQuery.toLowerCase()) ||
-    client.phone.includes(clientSearchQuery.replace(/\D/g, ''))
+  const filteredClients = clients.filter(
+    (client) =>
+      client.name.toLowerCase().includes(clientSearchQuery.toLowerCase()) ||
+      client.phone.includes(clientSearchQuery.replace(/\D/g, ''))
   );
 
   const formatPhone = (phone: string) => {
     const numbers = phone.replace(/\D/g, '');
     if (numbers.length === 11) {
-      return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7)}`;
+      return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(
+        7
+      )}`;
     }
     return phone;
   };
@@ -159,7 +193,13 @@ export default function NewAppointment() {
     Alert.alert('Sucesso', 'Cliente temporário criado!');
   };
   const handleSaveAppointment = () => {
-    if (!selectedClient || !selectedService || !selectedBarber || !appointmentDate || !appointmentTime) {
+    if (
+      !selectedClient ||
+      !selectedService ||
+      !selectedBarber ||
+      !appointmentDate ||
+      !appointmentTime
+    ) {
       Alert.alert('Erro', 'Preencha todos os campos obrigatórios');
       return;
     }
@@ -182,15 +222,21 @@ export default function NewAppointment() {
 
     // Aqui salvaria no banco de dados
     console.log('Agendamento criado:', appointment);
-    
+
     Alert.alert(
       'Agendamento Criado!',
-      `Cliente: ${selectedClient.name}\nServiço: ${selectedService.name}\nBarbeiro: ${selectedBarber.name}\nData: ${appointmentDate} às ${appointmentTime}\nValor: R$ ${selectedService.price.toFixed(2)}`,
+      `Cliente: ${selectedClient.name}\nServiço: ${
+        selectedService.name
+      }\nBarbeiro: ${
+        selectedBarber.name
+      }\nData: ${appointmentDate} às ${appointmentTime}\nValor: R$ ${selectedService.price.toFixed(
+        2
+      )}`,
       [
         {
           text: 'OK',
-          onPress: () => router.back()
-        }
+          onPress: () => router.back(),
+        },
       ]
     );
   };
@@ -210,22 +256,35 @@ export default function NewAppointment() {
     try {
       // Para o proprietário, usar horários da barbearia
       let workingHours: WorkingHours;
-      
+
       if (selectedBarber.id === 'owner') {
         workingHours = barbershop.workingHours;
       } else {
         // Para barbeiros da equipe, buscar perfil e usar horários efetivos
-        const barberProfile = await getBarberProfileByUserId(selectedBarber.userId);
+        const barberProfile = await getBarberProfileByUserId(
+          selectedBarber.userId
+        );
         if (!barberProfile) {
           setAvailableTimeSlots([]);
           return;
         }
-        workingHours = getEffectiveBarberWorkingHours(barberProfile, barbershop.workingHours);
+        workingHours = getEffectiveBarberWorkingHours(
+          barberProfile,
+          barbershop.workingHours
+        );
       }
 
       // Determinar dia da semana
       const date = new Date(appointmentDate);
-      const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const dayNames = [
+        'sunday',
+        'monday',
+        'tuesday',
+        'wednesday',
+        'thursday',
+        'friday',
+        'saturday',
+      ];
       const dayOfWeek = dayNames[date.getDay()] as keyof WorkingHours;
       const daySchedule = workingHours[dayOfWeek];
 
@@ -238,13 +297,21 @@ export default function NewAppointment() {
       const slots: string[] = [];
       const openMinutes = timeToMinutes(daySchedule.openTime);
       const closeMinutes = timeToMinutes(daySchedule.closeTime);
-      const breakStartMinutes = daySchedule.breakStart ? timeToMinutes(daySchedule.breakStart) : null;
-      const breakEndMinutes = daySchedule.breakEnd ? timeToMinutes(daySchedule.breakEnd) : null;
+      const breakStartMinutes = daySchedule.breakStart
+        ? timeToMinutes(daySchedule.breakStart)
+        : null;
+      const breakEndMinutes = daySchedule.breakEnd
+        ? timeToMinutes(daySchedule.breakEnd)
+        : null;
 
       for (let minutes = openMinutes; minutes < closeMinutes; minutes += 30) {
         // Pular horário de almoço
-        if (breakStartMinutes && breakEndMinutes && 
-            minutes >= breakStartMinutes && minutes < breakEndMinutes) {
+        if (
+          breakStartMinutes &&
+          breakEndMinutes &&
+          minutes >= breakStartMinutes &&
+          minutes < breakEndMinutes
+        ) {
           continue;
         }
 
@@ -269,7 +336,9 @@ export default function NewAppointment() {
   const minutesToTime = (minutes: number): string => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
-    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+    return `${hours.toString().padStart(2, '0')}:${mins
+      .toString()
+      .padStart(2, '0')}`;
   };
   // Caregar barbeiros da barbearia
   useEffect(() => {
@@ -292,11 +361,11 @@ export default function NewAppointment() {
         if (barbershop) {
           setBarbershop(barbershop);
           const shopBarbers = await getBarbersByBarbershopId(barbershop.id);
-          
+
           // Buscar detalhes dos usuários barbeiros
-          const barbersDetailsMap: {[key: number]: UserType} = {};
+          const barbersDetailsMap: { [key: number]: UserType } = {};
           const barbersWithDetails: Barber[] = [];
-          
+
           for (const barber of shopBarbers) {
             if (barber.isActive) {
               const userDetails = await getUserById(barber.userId);
@@ -312,7 +381,7 @@ export default function NewAppointment() {
               }
             }
           }
-          
+
           // Adicionar o próprio dono como barbeiro
           barbersWithDetails.unshift({
             id: 'owner',
@@ -322,7 +391,7 @@ export default function NewAppointment() {
             isActive: true,
           });
           barbersDetailsMap[currentUser.id] = currentUser;
-          
+
           setBarbers(barbersWithDetails);
           setBarbersDetails(barbersDetailsMap);
         }
@@ -336,11 +405,17 @@ export default function NewAppointment() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
           <ArrowLeft size={24} color="#374151" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Novo Agendamento</Text>
-        <TouchableOpacity onPress={handleSaveAppointment} style={styles.saveButton}>
+        <TouchableOpacity
+          onPress={handleSaveAppointment}
+          style={styles.saveButton}
+        >
           <Save size={20} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
@@ -357,7 +432,9 @@ export default function NewAppointment() {
               <View style={styles.selectedItem}>
                 <User size={20} color="#059669" />
                 <View style={styles.selectedItemInfo}>
-                  <Text style={styles.selectedItemName}>{selectedClient.name}</Text>
+                  <Text style={styles.selectedItemName}>
+                    {selectedClient.name}
+                  </Text>
                   <Text style={styles.selectedItemDetail}>
                     {selectedClient.phone}
                     {selectedClient.isTemporary && ' (Temporário)'}
@@ -384,9 +461,12 @@ export default function NewAppointment() {
               <View style={styles.selectedItem}>
                 <DollarSign size={20} color="#059669" />
                 <View style={styles.selectedItemInfo}>
-                  <Text style={styles.selectedItemName}>{selectedService.name}</Text>
+                  <Text style={styles.selectedItemName}>
+                    {selectedService.name}
+                  </Text>
                   <Text style={styles.selectedItemDetail}>
-                    R$ {selectedService.price.toFixed(2)} • {selectedService.duration} min
+                    R$ {selectedService.price.toFixed(2)} •{' '}
+                    {selectedService.duration} min
                   </Text>
                 </View>
               </View>
@@ -401,7 +481,8 @@ export default function NewAppointment() {
 
         {/* Barber Selection */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Barbeiro</Text>          <TouchableOpacity
+          <Text style={styles.sectionTitle}>Barbeiro</Text>{' '}
+          <TouchableOpacity
             style={styles.selectionCard}
             onPress={() => setShowBarberModal(true)}
           >
@@ -409,7 +490,9 @@ export default function NewAppointment() {
               <View style={styles.selectedItem}>
                 <Users size={20} color="#059669" />
                 <View style={styles.selectedItemInfo}>
-                  <Text style={styles.selectedItemName}>{selectedBarber.name}</Text>
+                  <Text style={styles.selectedItemName}>
+                    {selectedBarber.name}
+                  </Text>
                   <Text style={styles.selectedItemDetail}>
                     {selectedBarber.specialties.join(', ')}
                   </Text>
@@ -453,14 +536,16 @@ export default function NewAppointment() {
                   key={time}
                   style={[
                     styles.timeSlot,
-                    appointmentTime === time && styles.timeSlotSelected
+                    appointmentTime === time && styles.timeSlotSelected,
                   ]}
                   onPress={() => setAppointmentTime(time)}
                 >
-                  <Text style={[
-                    styles.timeSlotText,
-                    appointmentTime === time && styles.timeSlotTextSelected
-                  ]}>
+                  <Text
+                    style={[
+                      styles.timeSlotText,
+                      appointmentTime === time && styles.timeSlotTextSelected,
+                    ]}
+                  >
                     {time}
                   </Text>
                 </TouchableOpacity>
@@ -476,47 +561,62 @@ export default function NewAppointment() {
         </View>
 
         {/* Summary */}
-        {selectedClient && selectedService && selectedBarber && appointmentDate && appointmentTime && (
-          <View style={styles.summary}>
-            <Text style={styles.summaryTitle}>Resumo do Agendamento</Text>
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Cliente:</Text>
-              <Text style={styles.summaryValue}>{selectedClient.name}</Text>
+        {selectedClient &&
+          selectedService &&
+          selectedBarber &&
+          appointmentDate &&
+          appointmentTime && (
+            <View style={styles.summary}>
+              <Text style={styles.summaryTitle}>Resumo do Agendamento</Text>
+              <View style={styles.summaryItem}>
+                <Text style={styles.summaryLabel}>Cliente:</Text>
+                <Text style={styles.summaryValue}>{selectedClient.name}</Text>
+              </View>
+              <View style={styles.summaryItem}>
+                <Text style={styles.summaryLabel}>Serviço:</Text>
+                <Text style={styles.summaryValue}>{selectedService.name}</Text>
+              </View>
+              <View style={styles.summaryItem}>
+                <Text style={styles.summaryLabel}>Barbeiro:</Text>
+                <Text style={styles.summaryValue}>{selectedBarber.name}</Text>
+              </View>
+              <View style={styles.summaryItem}>
+                <Text style={styles.summaryLabel}>Data e Hora:</Text>
+                <Text style={styles.summaryValue}>
+                  {appointmentDate} às {appointmentTime}
+                </Text>
+              </View>
+              <View style={styles.summaryItem}>
+                <Text style={styles.summaryLabel}>Valor:</Text>
+                <Text style={[styles.summaryValue, styles.summaryPrice]}>
+                  R$ {selectedService.price.toFixed(2)}
+                </Text>
+              </View>{' '}
             </View>
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Serviço:</Text>
-              <Text style={styles.summaryValue}>{selectedService.name}</Text>
-            </View>
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Barbeiro:</Text>
-              <Text style={styles.summaryValue}>{selectedBarber.name}</Text>
-            </View>
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Data e Hora:</Text>
-              <Text style={styles.summaryValue}>{appointmentDate} às {appointmentTime}</Text>
-            </View>
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Valor:</Text>
-              <Text style={[styles.summaryValue, styles.summaryPrice]}>
-                R$ {selectedService.price.toFixed(2)}
-              </Text>
-            </View>          </View>
-        )}
+          )}
       </ScrollView>
 
       {/* Floating Action Button */}
-      {selectedClient && selectedService && selectedBarber && appointmentDate && appointmentTime && (
-        <TouchableOpacity 
-          style={styles.floatingButton}
-          onPress={handleSaveAppointment}
-        >
-          <Save size={24} color="#FFFFFF" />
-          <Text style={styles.floatingButtonText}>Confirmar Agendamento</Text>
-        </TouchableOpacity>
-      )}
+      {selectedClient &&
+        selectedService &&
+        selectedBarber &&
+        appointmentDate &&
+        appointmentTime && (
+          <TouchableOpacity
+            style={styles.floatingButton}
+            onPress={handleSaveAppointment}
+          >
+            <Save size={24} color="#FFFFFF" />
+            <Text style={styles.floatingButtonText}>Confirmar Agendamento</Text>
+          </TouchableOpacity>
+        )}
 
       {/* Client Selection Modal */}
-      <Modal visible={showClientModal} animationType="slide" presentationStyle="pageSheet">
+      <Modal
+        visible={showClientModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
         <SafeAreaView style={styles.modalContainer}>
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={() => setShowClientModal(false)}>
@@ -559,7 +659,7 @@ export default function NewAppointment() {
                 </View>
               </TouchableOpacity>
             ))}
-            
+
             {filteredClients.length === 0 && clientSearchQuery && (
               <View style={styles.emptyState}>
                 <Text style={styles.emptyText}>Nenhum cliente encontrado</Text>
@@ -574,7 +674,9 @@ export default function NewAppointment() {
                   }}
                 >
                   <UserPlus size={16} color="#FFFFFF" />
-                  <Text style={styles.createClientButtonText}>Criar Cliente</Text>
+                  <Text style={styles.createClientButtonText}>
+                    Criar Cliente
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -583,7 +685,11 @@ export default function NewAppointment() {
       </Modal>
 
       {/* Service Selection Modal */}
-      <Modal visible={showServiceModal} animationType="slide" presentationStyle="pageSheet">
+      <Modal
+        visible={showServiceModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
         <SafeAreaView style={styles.modalContainer}>
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={() => setShowServiceModal(false)}>
@@ -592,7 +698,6 @@ export default function NewAppointment() {
             <Text style={styles.modalTitle}>Selecionar Serviço</Text>
             <View style={{ width: 24 }} />
           </View>
-
           <ScrollView style={styles.modalContent}>
             {services.map((service) => (
               <TouchableOpacity
@@ -612,11 +717,16 @@ export default function NewAppointment() {
                 </View>
               </TouchableOpacity>
             ))}
-          </ScrollView>        </SafeAreaView>
+          </ScrollView>{' '}
+        </SafeAreaView>
       </Modal>
 
       {/* Barber Selection Modal */}
-      <Modal visible={showBarberModal} animationType="slide" presentationStyle="pageSheet">
+      <Modal
+        visible={showBarberModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
         <SafeAreaView style={styles.modalContainer}>
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={() => setShowBarberModal(false)}>
@@ -625,7 +735,7 @@ export default function NewAppointment() {
             <Text style={styles.modalTitle}>Selecionar Barbeiro</Text>
             <View style={styles.headerSpace} />
           </View>
-          
+
           <ScrollView style={styles.modalContent}>
             {barbers.map((barber) => (
               <TouchableOpacity
@@ -648,7 +758,7 @@ export default function NewAppointment() {
                 </View>
               </TouchableOpacity>
             ))}
-            
+
             {barbers.length === 0 && (
               <View style={styles.emptyState}>
                 <Users size={48} color="#D1D5DB" />
@@ -663,14 +773,21 @@ export default function NewAppointment() {
       </Modal>
 
       {/* New Client Modal */}
-      <Modal visible={showNewClientModal} animationType="slide" presentationStyle="pageSheet">
+      <Modal
+        visible={showNewClientModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
         <SafeAreaView style={styles.modalContainer}>
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={() => setShowNewClientModal(false)}>
               <X size={24} color="#374151" />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Novo Cliente</Text>
-            <TouchableOpacity onPress={handleCreateTemporaryClient} style={styles.createButton}>
+            <TouchableOpacity
+              onPress={handleCreateTemporaryClient}
+              style={styles.createButton}
+            >
               <Text style={styles.createButtonText}>Criar</Text>
             </TouchableOpacity>
           </View>
@@ -681,7 +798,9 @@ export default function NewAppointment() {
               <TextInput
                 style={styles.input}
                 value={newClientForm.name}
-                onChangeText={(text) => setNewClientForm({...newClientForm, name: text})}
+                onChangeText={(text) =>
+                  setNewClientForm({ ...newClientForm, name: text })
+                }
                 placeholder="Nome do cliente"
               />
             </View>
@@ -691,14 +810,17 @@ export default function NewAppointment() {
               <TextInput
                 style={styles.input}
                 value={newClientForm.phone}
-                onChangeText={(text) => setNewClientForm({...newClientForm, phone: text})}
+                onChangeText={(text) =>
+                  setNewClientForm({ ...newClientForm, phone: text })
+                }
                 placeholder="(11) 99999-9999"
                 keyboardType="phone-pad"
               />
             </View>
 
             <Text style={styles.temporaryNote}>
-              Este será um cliente temporário. Você poderá completar os dados depois.
+              Este será um cliente temporário. Você poderá completar os dados
+              depois.
             </Text>
           </View>
         </SafeAreaView>
@@ -1015,7 +1137,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
     color: '#374151',
     marginBottom: 8,
-  },  temporaryNote: {
+  },
+  temporaryNote: {
     fontSize: 12,
     fontFamily: 'Inter-Regular',
     color: '#6B7280',
@@ -1042,7 +1165,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     color: '#6B7280',
     marginTop: 4,
-  },  placeholderContainer: {
+  },
+  placeholderContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -1061,7 +1185,8 @@ const styles = StyleSheet.create({
   selectedOption: {
     backgroundColor: '#F0FDF4',
     borderColor: '#BBF7D0',
-  },  emptySubtext: {
+  },
+  emptySubtext: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
     color: '#9CA3AF',
@@ -1086,7 +1211,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 5,
-  },  floatingButtonText: {
+  },
+  floatingButtonText: {
     fontSize: 16,
     fontFamily: 'Inter-SemiBold',
     color: '#FFFFFF',

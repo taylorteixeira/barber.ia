@@ -11,17 +11,25 @@ import {
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { 
-  Calendar, 
-  Clock, 
-  DollarSign, 
-  ArrowLeft, 
+import {
+  Calendar,
+  Clock,
+  DollarSign,
+  ArrowLeft,
   CheckCircle,
   User,
   Phone,
-  Mail
+  Mail,
 } from 'lucide-react-native';
-import { createBooking, createClient, getCurrentUser, isUserLoggedIn, getBarbershopById, Barbershop, refreshBarbershopData } from '@/services/database';
+import {
+  createBooking,
+  createClient,
+  getCurrentUser,
+  isUserLoggedIn,
+  getBarbershopById,
+  Barbershop,
+  refreshBarbershopData,
+} from '@/services/database';
 
 interface Service {
   id: string;
@@ -42,53 +50,55 @@ const SERVICES: Service[] = [
     name: 'Corte Masculino',
     duration: 30,
     price: 25,
-    description: 'Corte tradicional e moderno'
+    description: 'Corte tradicional e moderno',
   },
   {
     id: '2',
     name: 'Barba',
     duration: 20,
     price: 15,
-    description: 'Aparar e modelar barba'
+    description: 'Aparar e modelar barba',
   },
   {
     id: '3',
     name: 'Corte + Barba',
     duration: 45,
     price: 35,
-    description: 'Serviço completo'
+    description: 'Serviço completo',
   },
   {
     id: '4',
     name: 'Sobrancelha',
     duration: 15,
     price: 10,
-    description: 'Design e aparar'
+    description: 'Design e aparar',
   },
   {
     id: '5',
     name: 'Lavagem + Corte',
     duration: 40,
     price: 30,
-    description: 'Lavagem e corte premium'
-  }
+    description: 'Lavagem e corte premium',
+  },
 ];
 
 const generateTimeSlots = (selectedDate: string): TimeSlot[] => {
   const slots: TimeSlot[] = [];
   const startHour = 8;
   const endHour = 18;
-  
+
   for (let hour = startHour; hour < endHour; hour++) {
     for (let minute = 0; minute < 60; minute += 30) {
-      const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+      const timeString = `${hour.toString().padStart(2, '0')}:${minute
+        .toString()
+        .padStart(2, '0')}`;
       slots.push({
         time: timeString,
-        available: Math.random() > 0.3 // 70% chance of being available
+        available: Math.random() > 0.3, // 70% chance of being available
       });
     }
   }
-  
+
   return slots;
 };
 
@@ -96,29 +106,34 @@ export default function BookingScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const barberId = params.id as string;
-  
+
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);  const [clientInfo, setClientInfo] = useState({
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [clientInfo, setClientInfo] = useState({
     name: '',
     phone: '',
-    email: ''
-  });  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [currentUser, setCurrentUser] = useState<any>(null);  const [barbershop, setBarbershop] = useState<Barbershop | null>(null);
-  const [availableServices, setAvailableServices] = useState<Service[]>(SERVICES);
+    email: '',
+  });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [barbershop, setBarbershop] = useState<Barbershop | null>(null);
+  const [availableServices, setAvailableServices] =
+    useState<Service[]>(SERVICES);
 
   // Check if user is logged in and load barbershop data on mount
   useEffect(() => {
     checkLoginStatus();
     loadBarbershopData();
-  }, []);  const loadBarbershopData = async () => {
+  }, []);
+  const loadBarbershopData = async () => {
     if (barberId) {
       try {
         // Get real-time barbershop data
         const barbershopInfo = await refreshBarbershopData(barberId);
-        
+
         // Also get detailed barbershop object if it's a real barbershop
         let barbershopData: Barbershop | null = null;
         if (barberId.startsWith('real_')) {
@@ -127,20 +142,24 @@ export default function BookingScreen() {
         } else if (!isNaN(Number(barberId))) {
           barbershopData = await getBarbershopById(Number(barberId));
         }
-        
+
         setBarbershop(barbershopData);
-        
+
         // Use real-time services data (always current)
         if (barbershopInfo.services && barbershopInfo.services.length > 0) {
-          const mappedServices: Service[] = barbershopInfo.services.map(s => ({
-            id: s.id,
-            name: s.name,
-            duration: s.duration,
-            price: s.price,
-            description: s.description || 'Serviço profissional'
-          }));
+          const mappedServices: Service[] = barbershopInfo.services.map(
+            (s) => ({
+              id: s.id,
+              name: s.name,
+              duration: s.duration,
+              price: s.price,
+              description: s.description || 'Serviço profissional',
+            })
+          );
           setAvailableServices(mappedServices);
-          console.log(`✅ Loaded ${mappedServices.length} real-time services for barbershop ${barberId}`);
+          console.log(
+            `✅ Loaded ${mappedServices.length} real-time services for barbershop ${barberId}`
+          );
         } else {
           // Use default services for mock barbershops
           setAvailableServices(SERVICES);
@@ -151,18 +170,19 @@ export default function BookingScreen() {
         setAvailableServices(SERVICES);
       }
     }
-  };const checkLoginStatus = async () => {
+  };
+  const checkLoginStatus = async () => {
     try {
       const loggedIn = await isUserLoggedIn();
       setIsLoggedIn(loggedIn);
-      
+
       if (loggedIn) {
         const user = await getCurrentUser();
         setCurrentUser(user);
         setClientInfo({
           name: user?.name || '',
           phone: user?.phone || '',
-          email: user?.email || ''
+          email: user?.email || '',
         });
       }
     } catch (error) {
@@ -174,7 +194,7 @@ export default function BookingScreen() {
   const generateDates = () => {
     const dates = [];
     const today = new Date();
-    
+
     for (let i = 0; i < 30; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
@@ -182,10 +202,10 @@ export default function BookingScreen() {
         date: date.toISOString().split('T')[0],
         dayName: date.toLocaleDateString('pt-BR', { weekday: 'short' }),
         dayNumber: date.getDate(),
-        monthName: date.toLocaleDateString('pt-BR', { month: 'short' })
+        monthName: date.toLocaleDateString('pt-BR', { month: 'short' }),
       });
     }
-    
+
     return dates;
   };
 
@@ -210,12 +230,13 @@ export default function BookingScreen() {
     setSelectedService(service);
   };
 
-  const canProceed = selectedService && selectedDate && selectedTime;  const handleBooking = () => {
+  const canProceed = selectedService && selectedDate && selectedTime;
+  const handleBooking = () => {
     if (!canProceed) {
       Alert.alert('Erro', 'Por favor, selecione todos os campos obrigatórios');
       return;
     }
-    
+
     if (isLoggedIn) {
       // User is logged in, confirm booking directly
       confirmBooking();
@@ -238,11 +259,11 @@ export default function BookingScreen() {
           name: clientInfo.name,
           phone: clientInfo.phone,
           email: clientInfo.email,
-          isTemporary: true
+          isTemporary: true,
         });
-      }      // Create booking
+      } // Create booking
       const bookingId = Date.now().toString();
-      
+
       // Determine correct barbershop ID
       let correctBarbershopId: number | undefined;
       if (barbershop) {
@@ -252,12 +273,13 @@ export default function BookingScreen() {
       } else if (!isNaN(Number(barberId))) {
         correctBarbershopId = Number(barberId);
       }
-      
+
       await createBooking({
         id: bookingId,
         barbershopId: correctBarbershopId,
         barberName: barbershop ? barbershop.name : 'Barbeiro Premium',
-        barberImage: 'https://images.pexels.com/photos/1813272/pexels-photo-1813272.jpeg',
+        barberImage:
+          'https://images.pexels.com/photos/1813272/pexels-photo-1813272.jpeg',
         service: selectedService!.name,
         date: selectedDate,
         time: selectedTime,
@@ -266,23 +288,29 @@ export default function BookingScreen() {
         address: barbershop ? barbershop.address : 'Rua Example, 123',
         phone: barbershop ? barbershop.phone : clientInfo.phone,
         clientName: isLoggedIn ? currentUser?.name : clientInfo.name,
-        clientEmail: isLoggedIn ? currentUser?.email : clientInfo.email
-      });setShowConfirmModal(false);
-      
+        clientEmail: isLoggedIn ? currentUser?.email : clientInfo.email,
+      });
+      setShowConfirmModal(false);
+
       const userName = isLoggedIn ? currentUser?.name : clientInfo.name;
       Alert.alert(
         'Agendamento Confirmado!',
-        `${userName}, seu ${selectedService!.name} foi agendado para ${selectedDate} às ${selectedTime}`,
+        `${userName}, seu ${
+          selectedService!.name
+        } foi agendado para ${selectedDate} às ${selectedTime}`,
         [
           {
             text: 'OK',
-            onPress: () => router.push('/(tabs)/bookings')
-          }
+            onPress: () => router.push('/(tabs)/bookings'),
+          },
         ]
       );
     } catch (error) {
       console.error('Error creating booking:', error);
-      Alert.alert('Erro', 'Ocorreu um erro ao criar o agendamento. Tente novamente.');
+      Alert.alert(
+        'Erro',
+        'Ocorreu um erro ao criar o agendamento. Tente novamente.'
+      );
     }
   };
 
@@ -290,11 +318,15 @@ export default function BookingScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
           <ArrowLeft size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Agendar Horário</Text>
-      </View>      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      </View>{' '}
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Barbershop Info */}
         {barbershop && (
           <View style={styles.barbershopInfo}>
@@ -303,7 +335,8 @@ export default function BookingScreen() {
           </View>
         )}
 
-        {/* Service Selection */}<View style={styles.section}>
+        {/* Service Selection */}
+        <View style={styles.section}>
           <Text style={styles.sectionTitle}>Escolha o Serviço</Text>
           <View style={styles.servicesGrid}>
             {availableServices.map((service) => (
@@ -311,44 +344,71 @@ export default function BookingScreen() {
                 key={service.id}
                 style={[
                   styles.serviceCard,
-                  selectedService?.id === service.id && styles.serviceCardSelected
+                  selectedService?.id === service.id &&
+                    styles.serviceCardSelected,
                 ]}
                 onPress={() => handleServiceSelect(service)}
               >
-                <Text style={[
-                  styles.serviceName,
-                  selectedService?.id === service.id && styles.serviceNameSelected
-                ]}>
+                <Text
+                  style={[
+                    styles.serviceName,
+                    selectedService?.id === service.id &&
+                      styles.serviceNameSelected,
+                  ]}
+                >
                   {service.name}
                 </Text>
-                <Text style={[
-                  styles.serviceDescription,
-                  selectedService?.id === service.id && styles.serviceDescriptionSelected
-                ]}>
+                <Text
+                  style={[
+                    styles.serviceDescription,
+                    selectedService?.id === service.id &&
+                      styles.serviceDescriptionSelected,
+                  ]}
+                >
                   {service.description}
                 </Text>
                 <View style={styles.serviceInfo}>
                   <View style={styles.serviceDetail}>
-                    <Clock size={14} color={selectedService?.id === service.id ? '#FFFFFF' : '#666'} />
-                    <Text style={[
-                      styles.serviceDetailText,
-                      selectedService?.id === service.id && styles.serviceDetailTextSelected
-                    ]}>
+                    <Clock
+                      size={14}
+                      color={
+                        selectedService?.id === service.id ? '#FFFFFF' : '#666'
+                      }
+                    />
+                    <Text
+                      style={[
+                        styles.serviceDetailText,
+                        selectedService?.id === service.id &&
+                          styles.serviceDetailTextSelected,
+                      ]}
+                    >
                       {service.duration}min
                     </Text>
                   </View>
                   <View style={styles.serviceDetail}>
-                    <DollarSign size={14} color={selectedService?.id === service.id ? '#FFFFFF' : '#666'} />
-                    <Text style={[
-                      styles.servicePrice,
-                      selectedService?.id === service.id && styles.servicePriceSelected
-                    ]}>
+                    <DollarSign
+                      size={14}
+                      color={
+                        selectedService?.id === service.id ? '#FFFFFF' : '#666'
+                      }
+                    />
+                    <Text
+                      style={[
+                        styles.servicePrice,
+                        selectedService?.id === service.id &&
+                          styles.servicePriceSelected,
+                      ]}
+                    >
                       R$ {service.price}
                     </Text>
                   </View>
                 </View>
                 {selectedService?.id === service.id && (
-                  <CheckCircle size={20} color="#FFFFFF" style={styles.checkIcon} />
+                  <CheckCircle
+                    size={20}
+                    color="#FFFFFF"
+                    style={styles.checkIcon}
+                  />
                 )}
               </TouchableOpacity>
             ))}
@@ -358,9 +418,9 @@ export default function BookingScreen() {
         {/* Date Selection */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Escolha a Data</Text>
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false} 
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
             style={styles.datesContainer}
           >
             {dates.map((dateItem) => (
@@ -368,26 +428,32 @@ export default function BookingScreen() {
                 key={dateItem.date}
                 style={[
                   styles.dateCard,
-                  selectedDate === dateItem.date && styles.dateCardSelected
+                  selectedDate === dateItem.date && styles.dateCardSelected,
                 ]}
                 onPress={() => handleDateSelect(dateItem.date)}
               >
-                <Text style={[
-                  styles.dateDay,
-                  selectedDate === dateItem.date && styles.dateDaySelected
-                ]}>
+                <Text
+                  style={[
+                    styles.dateDay,
+                    selectedDate === dateItem.date && styles.dateDaySelected,
+                  ]}
+                >
                   {dateItem.dayName}
                 </Text>
-                <Text style={[
-                  styles.dateNumber,
-                  selectedDate === dateItem.date && styles.dateNumberSelected
-                ]}>
+                <Text
+                  style={[
+                    styles.dateNumber,
+                    selectedDate === dateItem.date && styles.dateNumberSelected,
+                  ]}
+                >
                   {dateItem.dayNumber}
                 </Text>
-                <Text style={[
-                  styles.dateMonth,
-                  selectedDate === dateItem.date && styles.dateMonthSelected
-                ]}>
+                <Text
+                  style={[
+                    styles.dateMonth,
+                    selectedDate === dateItem.date && styles.dateMonthSelected,
+                  ]}
+                >
                   {dateItem.monthName}
                 </Text>
               </TouchableOpacity>
@@ -406,16 +472,18 @@ export default function BookingScreen() {
                   style={[
                     styles.timeSlot,
                     !slot.available && styles.timeSlotUnavailable,
-                    selectedTime === slot.time && styles.timeSlotSelected
+                    selectedTime === slot.time && styles.timeSlotSelected,
                   ]}
                   onPress={() => slot.available && handleTimeSelect(slot.time)}
                   disabled={!slot.available}
                 >
-                  <Text style={[
-                    styles.timeSlotText,
-                    !slot.available && styles.timeSlotTextUnavailable,
-                    selectedTime === slot.time && styles.timeSlotTextSelected
-                  ]}>
+                  <Text
+                    style={[
+                      styles.timeSlotText,
+                      !slot.available && styles.timeSlotTextUnavailable,
+                      selectedTime === slot.time && styles.timeSlotTextSelected,
+                    ]}
+                  >
                     {slot.time}
                   </Text>
                 </TouchableOpacity>
@@ -445,17 +513,20 @@ export default function BookingScreen() {
               </View>
               <View style={styles.summaryItem}>
                 <Text style={styles.summaryLabel}>Duração:</Text>
-                <Text style={styles.summaryValue}>{selectedService!.duration} minutos</Text>
+                <Text style={styles.summaryValue}>
+                  {selectedService!.duration} minutos
+                </Text>
               </View>
               <View style={[styles.summaryItem, styles.summaryTotal]}>
                 <Text style={styles.summaryTotalLabel}>Total:</Text>
-                <Text style={styles.summaryTotalValue}>R$ {selectedService!.price}</Text>
+                <Text style={styles.summaryTotalValue}>
+                  R$ {selectedService!.price}
+                </Text>
               </View>
             </View>
           </View>
         )}
       </ScrollView>
-
       {/* Bottom Button */}
       {canProceed && (
         <View style={styles.bottomContainer}>
@@ -466,7 +537,6 @@ export default function BookingScreen() {
           </TouchableOpacity>
         </View>
       )}
-
       {/* Confirmation Modal */}
       <Modal
         visible={showConfirmModal}
@@ -475,16 +545,18 @@ export default function BookingScreen() {
         onRequestClose={() => setShowConfirmModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>            <Text style={styles.modalTitle}>
-              {isLoggedIn ? 'Confirmar Agendamento' : 'Finalize seu Agendamento'}
+          <View style={styles.modalContent}>
+            {' '}
+            <Text style={styles.modalTitle}>
+              {isLoggedIn
+                ? 'Confirmar Agendamento'
+                : 'Finalize seu Agendamento'}
             </Text>
             <Text style={styles.modalSubtitle}>
-              {isLoggedIn 
-                ? 'Revise os dados do seu agendamento' 
-                : 'Preencha seus dados para confirmar'
-              }
+              {isLoggedIn
+                ? 'Revise os dados do seu agendamento'
+                : 'Preencha seus dados para confirmar'}
             </Text>
-
             {!isLoggedIn && (
               <>
                 <View style={styles.inputContainer}>
@@ -493,7 +565,9 @@ export default function BookingScreen() {
                     style={styles.input}
                     placeholder="Nome completo"
                     value={clientInfo.name}
-                    onChangeText={(text) => setClientInfo({...clientInfo, name: text})}
+                    onChangeText={(text) =>
+                      setClientInfo({ ...clientInfo, name: text })
+                    }
                   />
                 </View>
 
@@ -503,7 +577,9 @@ export default function BookingScreen() {
                     style={styles.input}
                     placeholder="Telefone"
                     value={clientInfo.phone}
-                    onChangeText={(text) => setClientInfo({...clientInfo, phone: text})}
+                    onChangeText={(text) =>
+                      setClientInfo({ ...clientInfo, phone: text })
+                    }
                     keyboardType="phone-pad"
                   />
                 </View>
@@ -514,34 +590,36 @@ export default function BookingScreen() {
                     style={styles.input}
                     placeholder="E-mail (opcional)"
                     value={clientInfo.email}
-                    onChangeText={(text) => setClientInfo({...clientInfo, email: text})}
+                    onChangeText={(text) =>
+                      setClientInfo({ ...clientInfo, email: text })
+                    }
                     keyboardType="email-address"
                     autoCapitalize="none"
                   />
                 </View>
               </>
             )}
-
             {isLoggedIn && (
               <View style={styles.userInfoContainer}>
                 <Text style={styles.userInfoTitle}>Seus dados:</Text>
                 <Text style={styles.userInfoText}>👤 {currentUser?.name}</Text>
                 <Text style={styles.userInfoText}>📞 {currentUser?.phone}</Text>
                 {currentUser?.email && (
-                  <Text style={styles.userInfoText}>📧 {currentUser?.email}</Text>
+                  <Text style={styles.userInfoText}>
+                    📧 {currentUser?.email}
+                  </Text>
                 )}
               </View>
             )}
-
             <View style={styles.modalButtons}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.modalCancelButton}
                 onPress={() => setShowConfirmModal(false)}
               >
                 <Text style={styles.modalCancelText}>Cancelar</Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 style={styles.modalConfirmButton}
                 onPress={confirmBooking}
               >
@@ -590,7 +668,7 @@ const styles = StyleSheet.create({
     color: '#111827',
     marginBottom: 16,
   },
-  
+
   // Services
   servicesGrid: {
     gap: 12,
@@ -655,7 +733,7 @@ const styles = StyleSheet.create({
     top: 12,
     right: 12,
   },
-  
+
   // Dates
   datesContainer: {
     paddingVertical: 8,
@@ -701,7 +779,7 @@ const styles = StyleSheet.create({
   dateMonthSelected: {
     color: 'rgba(255, 255, 255, 0.8)',
   },
-  
+
   // Time Slots
   timeSlotsGrid: {
     flexDirection: 'row',
@@ -737,7 +815,7 @@ const styles = StyleSheet.create({
   timeSlotTextUnavailable: {
     color: '#9CA3AF',
   },
-  
+
   // Summary
   summarySection: {
     marginVertical: 20,
@@ -787,7 +865,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Black',
     color: '#059669',
   },
-  
+
   // Bottom Button
   bottomContainer: {
     padding: 20,
@@ -806,7 +884,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold',
     color: '#FFFFFF',
   },
-  
+
   // Modal
   modalOverlay: {
     flex: 1,
@@ -884,7 +962,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
     color: '#FFFFFF',
   },
-  
+
   // User Info Styles
   userInfoContainer: {
     backgroundColor: '#F0FDF4',
@@ -904,7 +982,7 @@ const styles = StyleSheet.create({
     color: '#374151',
     marginBottom: 6,
   },
-  
+
   // Barbershop Info Styles
   barbershopInfo: {
     backgroundColor: '#F8FAFC',

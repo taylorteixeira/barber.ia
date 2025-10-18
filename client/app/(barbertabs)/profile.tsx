@@ -35,7 +35,8 @@ export default function BarberProfile() {
     email: 'carregando@email.com',
     phone: '(11) 99999-9999',
     address: 'Rua das Flores, 123 - Centro',
-    avatar: 'https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg',
+    avatar:
+      'https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg',
     barbershopName: 'Barbearia Premium',
     workingHours: '09:00 - 18:00',
     services: ['Corte', 'Barba', 'Sobrancelha'],
@@ -58,26 +59,23 @@ export default function BarberProfile() {
   }, []);
 
   const handleLogout = () => {
-    Alert.alert(
-      'Sair da conta',
-      'Tem certeza que deseja sair?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Sair',
-          style: 'destructive',
-          onPress: async () => {
-            await logoutUser();
-            router.replace('/landing');
-          },
+    Alert.alert('Sair da conta', 'Tem certeza que deseja sair?', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Sair',
+        style: 'destructive',
+        onPress: async () => {
+          await logoutUser();
+          router.replace('/landing');
         },
-      ]
-    );
+      },
+    ]);
   };
   const menuSections = [
     {
       title: 'Perfil Profissional',
-      items: [        {
+      items: [
+        {
           id: 'edit-profile',
           title: 'Editar Perfil',
           icon: Edit,
@@ -97,13 +95,15 @@ export default function BarberProfile() {
           icon: MapPin,
           color: '#F59E0B',
           onPress: () => router.push('/(barbertabs)/products' as any),
-        },        {
+        },
+        {
           id: 'pricing',
           title: 'Tabela de Preços',
           icon: DollarSign,
           color: '#10B981',
           onPress: () => router.push('/(barbertabs)/pricing' as any),
-        },        {
+        },
+        {
           id: 'schedule',
           title: 'Horário da Barbearia',
           icon: Clock,
@@ -114,7 +114,8 @@ export default function BarberProfile() {
     },
     {
       title: 'Configurações',
-      items: [        {
+      items: [
+        {
           id: 'help',
           title: 'Ajuda e Suporte',
           icon: HelpCircle,
@@ -138,7 +139,9 @@ export default function BarberProfile() {
           <Image source={{ uri: barberData.avatar }} style={styles.avatar} />
           <View style={styles.profileInfo}>
             <Text style={styles.name}>{barberData.name}</Text>
-            <Text style={styles.barbershopName}>{barberData.barbershopName}</Text>
+            <Text style={styles.barbershopName}>
+              {barberData.barbershopName}
+            </Text>
             <View style={styles.contactInfo}>
               <View style={styles.contactItem}>
                 <Mail size={14} color="#6B7280" />
@@ -214,7 +217,12 @@ export default function BarberProfile() {
                 onPress={item.onPress}
               >
                 <View style={styles.menuItemLeft}>
-                  <View style={[styles.menuIcon, { backgroundColor: `${item.color}20` }]}>
+                  <View
+                    style={[
+                      styles.menuIcon,
+                      { backgroundColor: `${item.color}20` },
+                    ]}
+                  >
                     <item.icon size={20} color={item.color} />
                   </View>
                   <Text style={styles.menuItemText}>{item.title}</Text>

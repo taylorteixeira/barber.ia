@@ -12,15 +12,15 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { 
-  User, 
-  Scissors, 
-  Star, 
-  Calendar, 
-  BarChart3, 
-  Sparkles, 
-  ArrowRight, 
-  Smartphone, 
+import {
+  User,
+  Scissors,
+  Star,
+  Calendar,
+  BarChart3,
+  Sparkles,
+  ArrowRight,
+  Smartphone,
   Zap,
   TrendingUp,
   Shield,
@@ -28,7 +28,7 @@ import {
   Rocket,
   Eye,
   Brain,
-  Layers
+  Layers,
 } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';
 
@@ -85,51 +85,72 @@ export default function LandingScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-      
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="transparent"
+        translucent
+      />
+
       {/* Background com gradiente mais sofisticado */}
       <LinearGradient
         colors={[
-          '#0C0C1D', 
-          '#1A1A2E', 
-          '#16213E', 
+          '#0C0C1D',
+          '#1A1A2E',
+          '#16213E',
           '#0F3460',
           '#1B263B',
-          '#2D3748'
+          '#2D3748',
         ]}
         style={styles.gradient}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
         {/* Elementos de background animados */}
-        <Animated.View style={[styles.backgroundElement1, { transform: [{ rotate: rotation }] }]} />
-        <Animated.View style={[styles.backgroundElement2, { transform: [{ rotate: rotation }] }]} />
+        <Animated.View
+          style={[
+            styles.backgroundElement1,
+            { transform: [{ rotate: rotation }] },
+          ]}
+        />
+        <Animated.View
+          style={[
+            styles.backgroundElement2,
+            { transform: [{ rotate: rotation }] },
+          ]}
+        />
         <View style={styles.backgroundGrid} />
-        
-        <ScrollView 
-          showsVerticalScrollIndicator={false} 
+
+        <ScrollView
+          showsVerticalScrollIndicator={false}
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
         >
           {/* Hero Section Revolucionária */}
-          <Animated.View 
+          <Animated.View
             style={[
               styles.heroSection,
               {
                 opacity: fadeAnim,
-                transform: [
-                  { translateY: slideAnim },
-                  { scale: scaleAnim }
-                ],
+                transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
               },
             ]}
           >
             {/* Logo com efeito holográfico */}
             <View style={styles.logoContainer}>
-              <Animated.View style={[styles.logoBackground, { transform: [{ scale: scaleAnim }] }]}>
+              <Animated.View
+                style={[
+                  styles.logoBackground,
+                  { transform: [{ scale: scaleAnim }] },
+                ]}
+              >
                 <View style={styles.holographicRing} />
                 <View style={styles.holographicRing2} />
-                <Animated.View style={[styles.sparkleContainer, { transform: [{ rotate: rotation }] }]}>
+                <Animated.View
+                  style={[
+                    styles.sparkleContainer,
+                    { transform: [{ rotate: rotation }] },
+                  ]}
+                >
                   <Sparkles size={20} color="#00F5FF" style={styles.sparkle1} />
                   <Sparkles size={16} color="#FF1493" style={styles.sparkle2} />
                   <Sparkles size={12} color="#7FFF00" style={styles.sparkle3} />
@@ -142,22 +163,28 @@ export default function LandingScreen() {
                 <View style={styles.logoGlow} />
               </Animated.View>
             </View>
-            
+
             {/* Título com efeito neon */}
-            <Animated.View style={[styles.titleContainer, { transform: [{ scale: scaleAnim }] }]}>
+            <Animated.View
+              style={[
+                styles.titleContainer,
+                { transform: [{ scale: scaleAnim }] },
+              ]}
+            >
               <Text style={styles.appName}>
                 <Text style={styles.barberText}>Barber</Text>
                 <Text style={styles.iaText}>.IA</Text>
               </Text>
               <View style={styles.neonUnderline} />
             </Animated.View>
-              <Text style={styles.tagline}>
+            <Text style={styles.tagline}>
               🚀 O futuro da gestão de barbearias chegou
             </Text>
-            
+
             <Text style={styles.subtitle}>
-              Sistema completo de gestão para barbearias com tecnologia avançada.
-              Transforme sua barbearia em uma experiência do próximo nível.
+              Sistema completo de gestão para barbearias com tecnologia
+              avançada. Transforme sua barbearia em uma experiência do próximo
+              nível.
             </Text>
 
             {/* Tech Features com efeito cyberpunk */}
@@ -188,9 +215,8 @@ export default function LandingScreen() {
               </View>
             </View>
           </Animated.View>
-
           {/* User Selection com design futurista */}
-          <Animated.View 
+          <Animated.View
             style={[
               styles.selectionSection,
               {
@@ -203,7 +229,7 @@ export default function LandingScreen() {
               <Text style={styles.selectionTitle}>Escolha sua dimensão</Text>
               <View style={styles.hologramLine} />
             </View>
-            
+
             {/* Client Card - Design Cyberpunk */}
             <TouchableOpacity
               style={styles.userTypeCard}
@@ -228,16 +254,21 @@ export default function LandingScreen() {
                       <Text style={styles.cardTitle}>CLIENTE</Text>
                       <Text style={styles.cardSubtitle}>Portal do Futuro</Text>
                       <Text style={styles.cardDescription}>
-                        Acesse o universo das melhores barbearias com tecnologia de ponta
+                        Acesse o universo das melhores barbearias com tecnologia
+                        de ponta
                       </Text>
                       <View style={styles.cardTechSpecs}>
                         <View style={styles.techSpec}>
                           <Rocket size={12} color="#60A5FA" />
-                          <Text style={styles.techSpecText}>Agendamento Instantâneo</Text>
+                          <Text style={styles.techSpecText}>
+                            Agendamento Instantâneo
+                          </Text>
                         </View>
                         <View style={styles.techSpec}>
                           <Eye size={12} color="#60A5FA" />
-                          <Text style={styles.techSpecText}>Experiência Imersiva</Text>
+                          <Text style={styles.techSpecText}>
+                            Experiência Imersiva
+                          </Text>
                         </View>
                       </View>
                     </View>
@@ -272,13 +303,19 @@ export default function LandingScreen() {
                     </View>
                     <View style={styles.cardText}>
                       <Text style={styles.cardTitle}>BARBEIRO</Text>
-                      <Text style={styles.cardSubtitle}>Central de Comando</Text>                      <Text style={styles.cardDescription}>
-                        Dashboard completo com agenda, relatórios e gestão inteligente
+                      <Text style={styles.cardSubtitle}>
+                        Central de Comando
+                      </Text>{' '}
+                      <Text style={styles.cardDescription}>
+                        Dashboard completo com agenda, relatórios e gestão
+                        inteligente
                       </Text>
                       <View style={styles.cardTechSpecs}>
                         <View style={styles.techSpec}>
                           <TrendingUp size={12} color="#10B981" />
-                          <Text style={styles.techSpecText}>Analytics Avançado</Text>
+                          <Text style={styles.techSpecText}>
+                            Analytics Avançado
+                          </Text>
                         </View>
                         <View style={styles.techSpec}>
                           <Layers size={12} color="#10B981" />
@@ -295,9 +332,8 @@ export default function LandingScreen() {
               </LinearGradient>
             </TouchableOpacity>
           </Animated.View>
-
           {/* Seção de Benefícios Premium */}
-          <Animated.View 
+          <Animated.View
             style={[
               styles.premiumSection,
               {
@@ -311,7 +347,7 @@ export default function LandingScreen() {
               <View style={styles.premiumLine} />
               <Text style={styles.premiumSubtitle}>Disponível Hoje</Text>
             </View>
-            
+
             <View style={styles.benefitsGrid}>
               <View style={styles.benefitCard}>
                 <View style={styles.benefitIconContainer}>
@@ -323,7 +359,7 @@ export default function LandingScreen() {
                   Avaliado 5⭐ pelos melhores profissionais do setor
                 </Text>
               </View>
-                <View style={styles.benefitCard}>
+              <View style={styles.benefitCard}>
                 <View style={styles.benefitIconContainer}>
                   <BarChart3 size={24} color="#00F5FF" />
                   <View style={styles.benefitIconGlow} />
@@ -333,7 +369,7 @@ export default function LandingScreen() {
                   Relatórios detalhados e exportação em CSV/Excel/PDF
                 </Text>
               </View>
-                <View style={styles.benefitCard}>
+              <View style={styles.benefitCard}>
                 <View style={styles.benefitIconContainer}>
                   <Calendar size={24} color="#FF1493" />
                   <View style={styles.benefitIconGlow} />
@@ -343,7 +379,7 @@ export default function LandingScreen() {
                   Visualização semanal e gerenciamento de horários
                 </Text>
               </View>
-              
+
               <View style={styles.benefitCard}>
                 <View style={styles.benefitIconContainer}>
                   <Eye size={24} color="#7FFF00" />
@@ -355,7 +391,8 @@ export default function LandingScreen() {
                 </Text>
               </View>
             </View>
-          </Animated.View>          {/* Footer futurista */}
+          </Animated.View>{' '}
+          {/* Footer futurista */}
           <View style={styles.footer}>
             <Text style={styles.footerText}>
               🌟 Inicie sua jornada no futuro
@@ -378,7 +415,7 @@ const styles = StyleSheet.create({
   gradient: {
     flex: 1,
   },
-  
+
   // Elementos de fundo animados
   backgroundElement1: {
     position: 'absolute',
@@ -411,14 +448,14 @@ const styles = StyleSheet.create({
     opacity: 0.05,
     backgroundColor: 'transparent',
   },
-  
+
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
   },
-  
+
   // Hero Section - Design Futurista
   heroSection: {
     minHeight: height * 0.75,
@@ -428,7 +465,7 @@ const styles = StyleSheet.create({
     paddingTop: 80,
     position: 'relative',
   },
-  
+
   // Logo Holográfico
   logoContainer: {
     marginBottom: 40,
@@ -503,7 +540,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 245, 255, 0.15)',
     zIndex: -1,
   },
-  
+
   // Título com efeito neon
   titleContainer: {
     alignItems: 'center',
@@ -538,7 +575,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 10,
   },
-  
+
   tagline: {
     fontSize: 22,
     fontFamily: 'Inter-Bold',
@@ -560,7 +597,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     maxWidth: width * 0.9,
   },
-  
+
   // Tech Features
   techFeaturesContainer: {
     flexDirection: 'row',
@@ -592,7 +629,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
-  
+
   // Selection Section
   selectionSection: {
     paddingHorizontal: 24,
@@ -623,7 +660,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 8,
   },
-  
+
   // User Type Cards - Design Cyberpunk
   userTypeCard: {
     marginBottom: 24,
@@ -664,7 +701,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
-  
+
   // Ícone Holográfico
   holographicIcon: {
     width: 80,
@@ -695,7 +732,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.3)',
     backgroundColor: 'transparent',
   },
-  
+
   cardText: {
     flex: 1,
   },
@@ -737,7 +774,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
     color: 'rgba(255, 255, 255, 0.85)',
   },
-  
+
   cardArrow: {
     position: 'relative',
     padding: 8,
@@ -751,7 +788,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
   },
-  
+
   // Premium Section
   premiumSection: {
     paddingHorizontal: 24,
@@ -788,7 +825,7 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.8)',
     textAlign: 'center',
   },
-  
+
   // Benefits Grid
   benefitsGrid: {
     gap: 20,
@@ -835,8 +872,9 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Medium',
     color: 'rgba(255, 255, 255, 0.8)',
     textAlign: 'center',
-    lineHeight: 20,  },
-    // Footer
+    lineHeight: 20,
+  },
+  // Footer
   footer: {
     paddingHorizontal: 24,
     paddingVertical: 30,

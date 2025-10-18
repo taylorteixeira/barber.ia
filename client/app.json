@@ -8,7 +8,7 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-     "android": {
+    "android": {
       "package": "com.barbear.ia"
     },
     "ios": {

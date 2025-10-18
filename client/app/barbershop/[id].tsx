@@ -10,19 +10,19 @@ import {
 } from 'react-native';
 import { useState } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { 
-  ArrowLeft, 
-  Star, 
-  MapPin, 
-  Clock, 
-  Phone, 
+import {
+  ArrowLeft,
+  Star,
+  MapPin,
+  Clock,
+  Phone,
   Calendar,
   Scissors,
   DollarSign,
   Users,
   Heart,
   Share2,
-  Camera
+  Camera,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -59,28 +59,28 @@ const SERVICES: Service[] = [
     name: 'Corte Masculino',
     price: 25,
     duration: 30,
-    description: 'Corte moderno e estiloso'
+    description: 'Corte moderno e estiloso',
   },
   {
     id: '2',
     name: 'Barba Completa',
     price: 15,
     duration: 20,
-    description: 'Aparar, modelar e finalizar'
+    description: 'Aparar, modelar e finalizar',
   },
   {
     id: '3',
     name: 'Corte + Barba',
     price: 35,
     duration: 45,
-    description: 'Pacote completo premium'
+    description: 'Pacote completo premium',
   },
   {
     id: '4',
     name: 'Sobrancelha',
     price: 10,
     duration: 15,
-    description: 'Design e modelagem'
+    description: 'Design e modelagem',
   },
 ];
 
@@ -90,21 +90,21 @@ const PRODUCTS: Product[] = [
     name: 'Pomada Modeladora',
     price: 25,
     image: 'https://images.pexels.com/photos/3373736/pexels-photo-3373736.jpeg',
-    description: 'Fixação forte, brilho natural'
+    description: 'Fixação forte, brilho natural',
   },
   {
     id: '2',
     name: 'Óleo para Barba',
     price: 30,
     image: 'https://images.pexels.com/photos/4623103/pexels-photo-4623103.jpeg',
-    description: 'Hidratação e maciez'
+    description: 'Hidratação e maciez',
   },
   {
     id: '3',
     name: 'Shampoo Premium',
     price: 35,
     image: 'https://images.pexels.com/photos/4465124/pexels-photo-4465124.jpeg',
-    description: 'Limpeza profunda'
+    description: 'Limpeza profunda',
   },
 ];
 
@@ -115,15 +115,17 @@ const REVIEWS: Review[] = [
     rating: 5,
     comment: 'Excelente trabalho! Barbeiro muito profissional e ambiente top.',
     date: '2024-06-20',
-    avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg'
+    avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
   },
   {
     id: '2',
     clientName: 'Pedro Santos',
     rating: 5,
-    comment: 'Melhor barbearia da região. Corte perfeito e atendimento nota 10!',
+    comment:
+      'Melhor barbearia da região. Corte perfeito e atendimento nota 10!',
     date: '2024-06-18',
-    avatar: 'https://images.pexels.com/photos/1212984/pexels-photo-1212984.jpeg'
+    avatar:
+      'https://images.pexels.com/photos/1212984/pexels-photo-1212984.jpeg',
   },
   {
     id: '3',
@@ -131,7 +133,8 @@ const REVIEWS: Review[] = [
     rating: 4,
     comment: 'Muito bom! Ambiente moderno e barbeiros experientes.',
     date: '2024-06-15',
-    avatar: 'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg'
+    avatar:
+      'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg',
   },
 ];
 
@@ -139,8 +142,10 @@ export default function BarbershopDetailsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const barberId = params.id as string;
-  
-  const [activeTab, setActiveTab] = useState<'services' | 'products' | 'reviews'>('services');
+
+  const [activeTab, setActiveTab] = useState<
+    'services' | 'products' | 'reviews'
+  >('services');
   const [isFavorite, setIsFavorite] = useState(false);
 
   const barbershop = {
@@ -158,7 +163,8 @@ export default function BarbershopDetailsScreen() {
       'https://images.pexels.com/photos/2040625/pexels-photo-2040625.jpeg',
       'https://images.pexels.com/photos/1570807/pexels-photo-1570807.jpeg',
     ],
-    description: 'Barbearia moderna com profissionais experientes, oferecendo os melhores serviços de corte e cuidados masculinos na região.'
+    description:
+      'Barbearia moderna com profissionais experientes, oferecendo os melhores serviços de corte e cuidados masculinos na região.',
   };
 
   const handleBookAppointment = () => {
@@ -170,8 +176,8 @@ export default function BarbershopDetailsScreen() {
       <Star
         key={i}
         size={16}
-        color={i < rating ? "#F59E0B" : "#E5E7EB"}
-        fill={i < rating ? "#F59E0B" : "transparent"}
+        color={i < rating ? '#F59E0B' : '#E5E7EB'}
+        fill={i < rating ? '#F59E0B' : 'transparent'}
       />
     ));
   };
@@ -188,15 +194,21 @@ export default function BarbershopDetailsScreen() {
                 </View>
                 <View style={styles.serviceInfo}>
                   <Text style={styles.serviceName}>{service.name}</Text>
-                  <Text style={styles.serviceDescription}>{service.description}</Text>
+                  <Text style={styles.serviceDescription}>
+                    {service.description}
+                  </Text>
                   <View style={styles.serviceDetails}>
                     <View style={styles.serviceDetail}>
                       <Clock size={14} color="#6B7280" />
-                      <Text style={styles.serviceDetailText}>{service.duration}min</Text>
+                      <Text style={styles.serviceDetailText}>
+                        {service.duration}min
+                      </Text>
                     </View>
                     <View style={styles.servicePrice}>
                       <DollarSign size={16} color="#059669" />
-                      <Text style={styles.servicePriceText}>R$ {service.price}</Text>
+                      <Text style={styles.servicePriceText}>
+                        R$ {service.price}
+                      </Text>
                     </View>
                   </View>
                 </View>
@@ -211,12 +223,19 @@ export default function BarbershopDetailsScreen() {
             <View style={styles.productsGrid}>
               {PRODUCTS.map((product) => (
                 <View key={product.id} style={styles.productCard}>
-                  <Image source={{ uri: product.image }} style={styles.productImage} />
+                  <Image
+                    source={{ uri: product.image }}
+                    style={styles.productImage}
+                  />
                   <View style={styles.productInfo}>
                     <Text style={styles.productName}>{product.name}</Text>
-                    <Text style={styles.productDescription}>{product.description}</Text>
+                    <Text style={styles.productDescription}>
+                      {product.description}
+                    </Text>
                     <View style={styles.productPrice}>
-                      <Text style={styles.productPriceText}>R$ {product.price}</Text>
+                      <Text style={styles.productPriceText}>
+                        R$ {product.price}
+                      </Text>
                     </View>
                   </View>
                 </View>
@@ -231,7 +250,10 @@ export default function BarbershopDetailsScreen() {
             {REVIEWS.map((review) => (
               <View key={review.id} style={styles.reviewCard}>
                 <View style={styles.reviewHeader}>
-                  <Image source={{ uri: review.avatar }} style={styles.reviewAvatar} />
+                  <Image
+                    source={{ uri: review.avatar }}
+                    style={styles.reviewAvatar}
+                  />
                   <View style={styles.reviewInfo}>
                     <Text style={styles.reviewerName}>{review.clientName}</Text>
                     <View style={styles.reviewRating}>
@@ -257,18 +279,21 @@ export default function BarbershopDetailsScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
           <ArrowLeft size={24} color="#333" />
         </TouchableOpacity>
         <View style={styles.headerActions}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.actionButton}
             onPress={() => setIsFavorite(!isFavorite)}
           >
-            <Heart 
-              size={24} 
-              color={isFavorite ? "#EF4444" : "#6B7280"} 
-              fill={isFavorite ? "#EF4444" : "transparent"}
+            <Heart
+              size={24}
+              color={isFavorite ? '#EF4444' : '#6B7280'}
+              fill={isFavorite ? '#EF4444' : 'transparent'}
             />
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionButton}>
@@ -292,12 +317,14 @@ export default function BarbershopDetailsScreen() {
         {/* Barbershop Info */}
         <View style={styles.infoSection}>
           <Text style={styles.barbershopName}>{barbershop.name}</Text>
-          
+
           <View style={styles.ratingContainer}>
             <View style={styles.rating}>
               {renderStars(Math.floor(barbershop.rating))}
               <Text style={styles.ratingText}>{barbershop.rating}</Text>
-              <Text style={styles.reviewCount}>({barbershop.reviewCount} avaliações)</Text>
+              <Text style={styles.reviewCount}>
+                ({barbershop.reviewCount} avaliações)
+              </Text>
             </View>
             <View style={styles.distance}>
               <MapPin size={14} color="#6B7280" />
@@ -330,7 +357,12 @@ export default function BarbershopDetailsScreen() {
             style={[styles.tab, activeTab === 'services' && styles.activeTab]}
             onPress={() => setActiveTab('services')}
           >
-            <Text style={[styles.tabText, activeTab === 'services' && styles.activeTabText]}>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'services' && styles.activeTabText,
+              ]}
+            >
               Serviços
             </Text>
           </TouchableOpacity>
@@ -338,7 +370,12 @@ export default function BarbershopDetailsScreen() {
             style={[styles.tab, activeTab === 'products' && styles.activeTab]}
             onPress={() => setActiveTab('products')}
           >
-            <Text style={[styles.tabText, activeTab === 'products' && styles.activeTabText]}>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'products' && styles.activeTabText,
+              ]}
+            >
               Produtos
             </Text>
           </TouchableOpacity>
@@ -346,7 +383,12 @@ export default function BarbershopDetailsScreen() {
             style={[styles.tab, activeTab === 'reviews' && styles.activeTab]}
             onPress={() => setActiveTab('reviews')}
           >
-            <Text style={[styles.tabText, activeTab === 'reviews' && styles.activeTabText]}>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'reviews' && styles.activeTabText,
+              ]}
+            >
               Avaliações
             </Text>
           </TouchableOpacity>
@@ -361,7 +403,10 @@ export default function BarbershopDetailsScreen() {
 
       {/* Floating Book Button */}
       <View style={styles.bookingContainer}>
-        <TouchableOpacity style={styles.bookButton} onPress={handleBookAppointment}>
+        <TouchableOpacity
+          style={styles.bookButton}
+          onPress={handleBookAppointment}
+        >
           <LinearGradient
             colors={['#3B82F6', '#1E40AF']}
             style={styles.bookButtonGradient}
@@ -519,7 +564,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     padding: 20,
   },
-  
+
   // Services
   serviceCard: {
     flexDirection: 'row',
@@ -579,7 +624,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold',
     color: '#059669',
   },
-  
+
   // Products
   productsGrid: {
     flexDirection: 'row',
@@ -621,7 +666,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold',
     color: '#059669',
   },
-  
+
   // Reviews
   reviewCard: {
     padding: 16,
@@ -666,7 +711,7 @@ const styles = StyleSheet.create({
     color: '#374151',
     lineHeight: 20,
   },
-  
+
   // Booking
   bookingContainer: {
     padding: 20,

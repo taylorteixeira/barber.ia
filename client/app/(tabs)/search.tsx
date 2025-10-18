@@ -11,7 +11,13 @@ import {
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import { Search, Filter, MapPin, Star, SlidersHorizontal } from 'lucide-react-native';
+import {
+  Search,
+  Filter,
+  MapPin,
+  Star,
+  SlidersHorizontal,
+} from 'lucide-react-native';
 import { getBarbers } from '@/services/database';
 
 type Barber = {
@@ -55,14 +61,31 @@ export default function SearchScreen() {
   };
 
   const filters = [
-    { id: 'distance', name: 'Distância', options: ['< 1km', '1-3km', '3-5km', '> 5km'] },
-    { id: 'price', name: 'Preço', options: ['R$ 20-30', 'R$ 30-40', 'R$ 40-50', '> R$ 50'] },
-    { id: 'rating', name: 'Avaliação', options: ['4+ estrelas', '4.5+ estrelas', '4.8+ estrelas'] },
-    { id: 'services', name: 'Serviços', options: ['Corte', 'Barba', 'Sobrancelha', 'Pacotes'] },
+    {
+      id: 'distance',
+      name: 'Distância',
+      options: ['< 1km', '1-3km', '3-5km', '> 5km'],
+    },
+    {
+      id: 'price',
+      name: 'Preço',
+      options: ['R$ 20-30', 'R$ 30-40', 'R$ 40-50', '> R$ 50'],
+    },
+    {
+      id: 'rating',
+      name: 'Avaliação',
+      options: ['4+ estrelas', '4.5+ estrelas', '4.8+ estrelas'],
+    },
+    {
+      id: 'services',
+      name: 'Serviços',
+      options: ['Corte', 'Barba', 'Sobrancelha', 'Pacotes'],
+    },
   ];
-  const filteredResults = searchResults.filter(barber =>
+  const filteredResults = searchResults.filter((barber) =>
     barber.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );const handleBarberPress = (barberId: string) => {
+  );
+  const handleBarberPress = (barberId: string) => {
     router.push(`/barbershop/${barberId}` as any);
   };
 
@@ -85,7 +108,8 @@ export default function SearchScreen() {
             <MapPin size={12} color="#6B7280" />
             <Text style={styles.distanceText}>{barber.distance}km</Text>
           </View>
-        </View>        <View style={styles.specialtiesContainer}>
+        </View>{' '}
+        <View style={styles.specialtiesContainer}>
           {(barber.specialties || []).map((specialty, index) => (
             <View key={index} style={styles.specialtyTag}>
               <Text style={styles.specialtyText}>{specialty}</Text>
@@ -102,7 +126,6 @@ export default function SearchScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Buscar Barbeiros</Text>
       </View>
-
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
           <Search size={20} color="#6B7280" style={styles.searchIcon} />
@@ -114,16 +137,25 @@ export default function SearchScreen() {
           />
         </View>
         <TouchableOpacity
-          style={[styles.filterButton, showFilters && styles.filterButtonActive]}
+          style={[
+            styles.filterButton,
+            showFilters && styles.filterButtonActive,
+          ]}
           onPress={() => setShowFilters(!showFilters)}
         >
-          <SlidersHorizontal size={20} color={showFilters ? '#FFFFFF' : '#6B7280'} />
+          <SlidersHorizontal
+            size={20}
+            color={showFilters ? '#FFFFFF' : '#6B7280'}
+          />
         </TouchableOpacity>
       </View>
-
       {showFilters && (
         <View style={styles.filtersContainer}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersScroll}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.filtersScroll}
+          >
             {filters.map((filter) => (
               <View key={filter.id} style={styles.filterGroup}>
                 <Text style={styles.filterGroupTitle}>{filter.name}</Text>
@@ -132,11 +164,14 @@ export default function SearchScreen() {
                     key={option}
                     style={[
                       styles.filterOption,
-                      selectedFilters.includes(option) && styles.filterOptionSelected,
+                      selectedFilters.includes(option) &&
+                        styles.filterOptionSelected,
                     ]}
                     onPress={() => {
                       if (selectedFilters.includes(option)) {
-                        setSelectedFilters(selectedFilters.filter((f) => f !== option));
+                        setSelectedFilters(
+                          selectedFilters.filter((f) => f !== option)
+                        );
                       } else {
                         setSelectedFilters([...selectedFilters, option]);
                       }
@@ -145,7 +180,8 @@ export default function SearchScreen() {
                     <Text
                       style={[
                         styles.filterOptionText,
-                        selectedFilters.includes(option) && styles.filterOptionTextSelected,
+                        selectedFilters.includes(option) &&
+                          styles.filterOptionTextSelected,
                       ]}
                     >
                       {option}
@@ -156,21 +192,26 @@ export default function SearchScreen() {
             ))}
           </ScrollView>
         </View>
-      )}      <View style={styles.resultsHeader}>
-        <Text style={styles.resultsCount}>{filteredResults.length} barbeiros encontrados</Text>
+      )}{' '}
+      <View style={styles.resultsHeader}>
+        <Text style={styles.resultsCount}>
+          {filteredResults.length} barbeiros encontrados
+        </Text>
         <TouchableOpacity style={styles.sortButton}>
           <Text style={styles.sortButtonText}>Ordenar</Text>
           <Filter size={16} color="#6B7280" />
         </TouchableOpacity>
       </View>
-
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#D97706" />
           <Text style={styles.loadingText}>Carregando barbearias...</Text>
         </View>
       ) : (
-        <ScrollView style={styles.resultsList} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={styles.resultsList}
+          showsVerticalScrollIndicator={false}
+        >
           {filteredResults.map(renderBarberCard)}
         </ScrollView>
       )}

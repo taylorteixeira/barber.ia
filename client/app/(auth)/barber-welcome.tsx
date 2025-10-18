@@ -9,7 +9,13 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowLeft, LogIn, UserPlus, Scissors, Star } from 'lucide-react-native';
+import {
+  ArrowLeft,
+  LogIn,
+  UserPlus,
+  Scissors,
+  Star,
+} from 'lucide-react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -37,10 +43,7 @@ export default function BarberWelcomeScreen() {
         end={{ x: 1, y: 1 }}
       >
         {/* Back Button */}
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={handleGoBack}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
           <ArrowLeft size={24} color="#FFFFFF" />
         </TouchableOpacity>
 
@@ -60,7 +63,7 @@ export default function BarberWelcomeScreen() {
           <View style={styles.titleContainer}>
             <Text style={styles.title}>Área do Barbeiro</Text>
             <Text style={styles.subtitle}>Central de Comando Profissional</Text>
-            
+
             <View style={styles.featuresContainer}>
               <View style={styles.feature}>
                 <Scissors size={16} color="#FFFFFF" />
@@ -81,7 +84,10 @@ export default function BarberWelcomeScreen() {
               activeOpacity={0.8}
             >
               <LinearGradient
-                colors={['rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.1)']}
+                colors={[
+                  'rgba(255, 255, 255, 0.2)',
+                  'rgba(255, 255, 255, 0.1)',
+                ]}
                 style={styles.buttonGradient}
               >
                 <LogIn size={24} color="#FFFFFF" />

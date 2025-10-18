@@ -51,16 +51,25 @@ export default function EditProfile() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [barbershop, setBarbershop] = useState<Barbershop | null>(null);
-  const [workingHours, setWorkingHours] = useState<WorkingHours>(getDefaultWorkingHours());  const [modalVisible, setModalVisible] = useState(false);
+  const [workingHours, setWorkingHours] = useState<WorkingHours>(
+    getDefaultWorkingHours()
+  );
+  const [modalVisible, setModalVisible] = useState(false);
   const [editingDay, setEditingDay] = useState<string>('');
   const [barbersModalVisible, setBarbersModalVisible] = useState(false);
   const [newBarberModalVisible, setNewBarberModalVisible] = useState(false);
   const [editBarberModalVisible, setEditBarberModalVisible] = useState(false);
-  const [barberWorkingHoursModalVisible, setBarberWorkingHoursModalVisible] = useState(false);
-  const [editingBarberWorkingHours, setEditingBarberWorkingHours] = useState<Partial<WorkingHours> | null>(null);
+  const [barberWorkingHoursModalVisible, setBarberWorkingHoursModalVisible] =
+    useState(false);
+  const [editingBarberWorkingHours, setEditingBarberWorkingHours] =
+    useState<Partial<WorkingHours> | null>(null);
   const [barbers, setBarbers] = useState<BarberProfile[]>([]);
-  const [barbersDetails, setBarbersDetails] = useState<{[key: number]: User}>({});
-  const [editingBarber, setEditingBarber] = useState<BarberProfile | null>(null);
+  const [barbersDetails, setBarbersDetails] = useState<{ [key: number]: User }>(
+    {}
+  );
+  const [editingBarber, setEditingBarber] = useState<BarberProfile | null>(
+    null
+  );
   const [newBarberData, setNewBarberData] = useState({
     name: '',
     email: '',
@@ -91,7 +100,7 @@ export default function EditProfile() {
       const user = await getCurrentUser();
       if (user) {
         setCurrentUser(user);
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           name: user.name,
           email: user.email,
@@ -103,19 +112,19 @@ export default function EditProfile() {
         if (shop) {
           setBarbershop(shop);
           setWorkingHours(shop.workingHours);
-          setFormData(prev => ({
+          setFormData((prev) => ({
             ...prev,
             barbershopName: shop.name,
             barbershopDescription: shop.description || '',
             barbershopAddress: shop.address,
             barbershopPhone: shop.phone,
             barbershopEmail: shop.email,
-          }));          // Buscar barbeiros da barbearia
+          })); // Buscar barbeiros da barbearia
           const shopBarbers = await getBarbersByBarbershopId(shop.id);
           setBarbers(shopBarbers);
-          
+
           // Buscar detalhes dos usuários barbeiros
-          const barbersDetailsMap: {[key: number]: User} = {};
+          const barbersDetailsMap: { [key: number]: User } = {};
           for (const barber of shopBarbers) {
             const userDetails = await getUserById(barber.userId);
             if (userDetails) {
@@ -176,7 +185,10 @@ export default function EditProfile() {
         await loadData();
         Alert.alert('Sucesso', 'Perfil atualizado com sucesso!');
       } else {
-        Alert.alert('Erro', 'Não foi possível salvar as alterações da barbearia.');
+        Alert.alert(
+          'Erro',
+          'Não foi possível salvar as alterações da barbearia.'
+        );
       }
     } catch (error) {
       console.error('Erro ao salvar:', error);
@@ -190,7 +202,7 @@ export default function EditProfile() {
   };
 
   const updateDaySchedule = (schedule: DaySchedule) => {
-    setWorkingHours(prev => ({
+    setWorkingHours((prev) => ({
       ...prev,
       [editingDay]: schedule,
     }));
@@ -215,7 +227,10 @@ export default function EditProfile() {
 
       const userCreated = await registerUser(newUser);
       if (!userCreated) {
-        Alert.alert('Erro', 'Não foi possível criar o usuário barbeiro. Verifique se o e-mail não está em uso.');
+        Alert.alert(
+          'Erro',
+          'Não foi possível criar o usuário barbeiro. Verifique se o e-mail não está em uso.'
+        );
         return;
       }
 
@@ -227,8 +242,18 @@ export default function EditProfile() {
       const newProfile: Omit<BarberProfile, 'id' | 'joinedAt'> = {
         userId: userId,
         barbershopId: barbershop.id,
-        specialties: newBarberData.specialties.split(',').map(s => s.trim()).filter(s => s.length > 0),
-        workingDays: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'],
+        specialties: newBarberData.specialties
+          .split(',')
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0),
+        workingDays: [
+          'monday',
+          'tuesday',
+          'wednesday',
+          'thursday',
+          'friday',
+          'saturday',
+        ],
         isActive: true,
       };
 
@@ -238,7 +263,7 @@ export default function EditProfile() {
         setNewBarberModalVisible(false);
         setNewBarberData({ name: '', email: '', phone: '', specialties: '' });
         Alert.alert(
-          'Sucesso', 
+          'Sucesso',
           `Barbeiro ${newBarberData.name} adicionado com sucesso!\n\nE-mail: ${newBarberData.email}\nSenha padrão: barbeiro123\n\nO barbeiro deve alterar a senha no primeiro acesso.`
         );
       }
@@ -287,7 +312,10 @@ export default function EditProfile() {
 
         const userUpdateSuccess = await updateUser(updatedUser);
         if (!userUpdateSuccess) {
-          Alert.alert('Erro', 'Não foi possível atualizar os dados do barbeiro.');
+          Alert.alert(
+            'Erro',
+            'Não foi possível atualizar os dados do barbeiro.'
+          );
           return;
         }
       }
@@ -295,7 +323,10 @@ export default function EditProfile() {
       // Atualizar perfil do barbeiro
       const updatedProfile: BarberProfile = {
         ...editingBarber,
-        specialties: newBarberData.specialties.split(',').map(s => s.trim()).filter(s => s.length > 0),
+        specialties: newBarberData.specialties
+          .split(',')
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0),
       };
 
       const profileUpdateSuccess = await updateBarberProfile(updatedProfile);
@@ -318,8 +349,11 @@ export default function EditProfile() {
     try {
       if (!editingBarber || !editingBarberWorkingHours) return;
 
-      const result = await updateBarberWorkingHours(editingBarber.userId, editingBarberWorkingHours);
-      
+      const result = await updateBarberWorkingHours(
+        editingBarber.userId,
+        editingBarberWorkingHours
+      );
+
       if (result.success) {
         Alert.alert('Sucesso', 'Horários do barbeiro atualizados com sucesso!');
         setBarberWorkingHoursModalVisible(false);
@@ -327,7 +361,10 @@ export default function EditProfile() {
         setEditingBarberWorkingHours(null);
         loadData(); // Recarregar lista de barbeiros
       } else {
-        Alert.alert('Erro', result.errors?.join('\n') || 'Erro ao atualizar horários');
+        Alert.alert(
+          'Erro',
+          result.errors?.join('\n') || 'Erro ao atualizar horários'
+        );
       }
     } catch (error) {
       console.error('Error saving barber working hours:', error);
@@ -346,7 +383,7 @@ export default function EditProfile() {
       if (success) {
         await loadData(); // Recarregar dados
         Alert.alert(
-          'Sucesso', 
+          'Sucesso',
           `Barbeiro ${barber.isActive ? 'desativado' : 'ativado'} com sucesso!`
         );
       } else {
@@ -371,13 +408,18 @@ export default function EditProfile() {
     return names[day] || day;
   };
 
-  const currentDaySchedule = editingDay ? workingHours[editingDay as keyof WorkingHours] : null;
+  const currentDaySchedule = editingDay
+    ? workingHours[editingDay as keyof WorkingHours]
+    : null;
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
           <ArrowLeft size={24} color="#1F2937" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Editar Perfil</Text>
@@ -396,28 +438,34 @@ export default function EditProfile() {
               <TextInput
                 style={styles.input}
                 value={formData.name}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, name: text }))}
+                onChangeText={(text) =>
+                  setFormData((prev) => ({ ...prev, name: text }))
+                }
                 placeholder="Seu nome completo"
               />
             </View>
-            
+
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>E-mail</Text>
               <TextInput
                 style={styles.input}
                 value={formData.email}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, email: text }))}
+                onChangeText={(text) =>
+                  setFormData((prev) => ({ ...prev, email: text }))
+                }
                 placeholder="seu@email.com"
                 keyboardType="email-address"
               />
             </View>
-            
+
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Telefone</Text>
               <TextInput
                 style={styles.input}
                 value={formData.phone}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, phone: text }))}
+                onChangeText={(text) =>
+                  setFormData((prev) => ({ ...prev, phone: text }))
+                }
                 placeholder="(11) 99999-9999"
                 keyboardType="phone-pad"
               />
@@ -434,51 +482,64 @@ export default function EditProfile() {
               <TextInput
                 style={styles.input}
                 value={formData.barbershopName}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, barbershopName: text }))}
+                onChangeText={(text) =>
+                  setFormData((prev) => ({ ...prev, barbershopName: text }))
+                }
                 placeholder="Nome da sua barbearia"
               />
             </View>
-            
+
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Descrição</Text>
               <TextInput
                 style={[styles.input, styles.textArea]}
                 value={formData.barbershopDescription}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, barbershopDescription: text }))}
+                onChangeText={(text) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    barbershopDescription: text,
+                  }))
+                }
                 placeholder="Descrição da barbearia..."
                 multiline
                 numberOfLines={3}
               />
             </View>
-            
+
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Endereço</Text>
               <TextInput
                 style={styles.input}
                 value={formData.barbershopAddress}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, barbershopAddress: text }))}
+                onChangeText={(text) =>
+                  setFormData((prev) => ({ ...prev, barbershopAddress: text }))
+                }
                 placeholder="Endereço completo"
               />
             </View>
-            
+
             <View style={styles.row}>
               <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
                 <Text style={styles.inputLabel}>Telefone</Text>
                 <TextInput
                   style={styles.input}
                   value={formData.barbershopPhone}
-                  onChangeText={(text) => setFormData(prev => ({ ...prev, barbershopPhone: text }))}
+                  onChangeText={(text) =>
+                    setFormData((prev) => ({ ...prev, barbershopPhone: text }))
+                  }
                   placeholder="(11) 99999-9999"
                   keyboardType="phone-pad"
                 />
               </View>
-              
+
               <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
                 <Text style={styles.inputLabel}>E-mail</Text>
                 <TextInput
                   style={styles.input}
                   value={formData.barbershopEmail}
-                  onChangeText={(text) => setFormData(prev => ({ ...prev, barbershopEmail: text }))}
+                  onChangeText={(text) =>
+                    setFormData((prev) => ({ ...prev, barbershopEmail: text }))
+                  }
                   placeholder="contato@barbearia.com"
                   keyboardType="email-address"
                 />
@@ -500,10 +561,13 @@ export default function EditProfile() {
                 <View style={styles.dayInfo}>
                   <Text style={styles.dayName}>{getDayName(day)}</Text>
                   <Text style={styles.daySchedule}>
-                    {schedule.isOpen 
-                      ? `${schedule.openTime} - ${schedule.closeTime}${schedule.breakStart ? ` (Pausa: ${schedule.breakStart}-${schedule.breakEnd})` : ''}`
-                      : 'Fechado'
-                    }
+                    {schedule.isOpen
+                      ? `${schedule.openTime} - ${schedule.closeTime}${
+                          schedule.breakStart
+                            ? ` (Pausa: ${schedule.breakStart}-${schedule.breakEnd})`
+                            : ''
+                        }`
+                      : 'Fechado'}
                   </Text>
                 </View>
                 <Edit size={16} color="#6B7280" />
@@ -524,7 +588,7 @@ export default function EditProfile() {
               <Text style={styles.addButtonText}>Adicionar</Text>
             </TouchableOpacity>
           </View>
-          
+
           <View style={styles.card}>
             {barbers.length > 0 ? (
               barbers.map((barber, index) => {
@@ -536,14 +600,24 @@ export default function EditProfile() {
                         <Text style={styles.barberName}>
                           {userDetails?.name || `Barbeiro #${barber.userId}`}
                         </Text>
-                        <View style={[
-                          styles.statusBadge,
-                          { backgroundColor: barber.isActive ? '#DCFCE7' : '#FEE2E2' }
-                        ]}>
-                          <Text style={[
-                            styles.statusBadgeText,
-                            { color: barber.isActive ? '#059669' : '#DC2626' }
-                          ]}>
+                        <View
+                          style={[
+                            styles.statusBadge,
+                            {
+                              backgroundColor: barber.isActive
+                                ? '#DCFCE7'
+                                : '#FEE2E2',
+                            },
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.statusBadgeText,
+                              {
+                                color: barber.isActive ? '#059669' : '#DC2626',
+                              },
+                            ]}
+                          >
                             {barber.isActive ? 'Ativo' : 'Inativo'}
                           </Text>
                         </View>
@@ -552,38 +626,47 @@ export default function EditProfile() {
                         {userDetails?.email || 'E-mail não disponível'}
                       </Text>
                       <Text style={styles.barberSpecialties}>
-                        {barber.specialties.length > 0 
-                          ? barber.specialties.join(', ') 
-                          : 'Nenhuma especialidade'
-                        }
+                        {barber.specialties.length > 0
+                          ? barber.specialties.join(', ')
+                          : 'Nenhuma especialidade'}
                       </Text>
                       <Text style={styles.barberDays}>
-                        Trabalha: {barber.workingDays.map(day => getDayName(day)).join(', ')}
+                        Trabalha:{' '}
+                        {barber.workingDays
+                          .map((day) => getDayName(day))
+                          .join(', ')}
                       </Text>
-                    </View>                    <View style={styles.barberActions}>
-                      <TouchableOpacity 
+                    </View>{' '}
+                    <View style={styles.barberActions}>
+                      <TouchableOpacity
                         style={styles.actionButton}
                         onPress={() => handleEditBarber(barber)}
                       >
                         <Edit size={16} color="#6B7280" />
                       </TouchableOpacity>
-                      <TouchableOpacity 
+                      <TouchableOpacity
                         style={styles.actionButton}
                         onPress={() => handleEditBarberWorkingHours(barber)}
                       >
                         <Clock size={16} color="#6B7280" />
                       </TouchableOpacity>
-                      <TouchableOpacity 
+                      <TouchableOpacity
                         style={[
                           styles.actionButton,
-                          { backgroundColor: barber.isActive ? '#FEE2E2' : '#DCFCE7' }
+                          {
+                            backgroundColor: barber.isActive
+                              ? '#FEE2E2'
+                              : '#DCFCE7',
+                          },
                         ]}
                         onPress={() => handleToggleBarberStatus(barber)}
                       >
-                        <Text style={[
-                          styles.actionButtonText,
-                          { color: barber.isActive ? '#DC2626' : '#059669' }
-                        ]}>
+                        <Text
+                          style={[
+                            styles.actionButtonText,
+                            { color: barber.isActive ? '#DC2626' : '#059669' },
+                          ]}
+                        >
                           {barber.isActive ? 'Desativar' : 'Ativar'}
                         </Text>
                       </TouchableOpacity>
@@ -596,7 +679,8 @@ export default function EditProfile() {
                 <Users size={32} color="#D1D5DB" />
                 <Text style={styles.emptyText}>Nenhum barbeiro adicionado</Text>
                 <Text style={styles.emptySubtext}>
-                  Adicione barbeiros à sua equipe para que os clientes possam escolher
+                  Adicione barbeiros à sua equipe para que os clientes possam
+                  escolher
                 </Text>
               </View>
             )}
@@ -621,7 +705,7 @@ export default function EditProfile() {
                 <Text style={styles.modalClose}>✕</Text>
               </TouchableOpacity>
             </View>
-            
+
             {currentDaySchedule && (
               <DayScheduleEditor
                 schedule={currentDaySchedule}
@@ -648,51 +732,61 @@ export default function EditProfile() {
                 <Text style={styles.modalClose}>✕</Text>
               </TouchableOpacity>
             </View>
-            
+
             <View style={styles.modalBody}>
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Nome</Text>
                 <TextInput
                   style={styles.input}
                   value={newBarberData.name}
-                  onChangeText={(text) => setNewBarberData(prev => ({ ...prev, name: text }))}
+                  onChangeText={(text) =>
+                    setNewBarberData((prev) => ({ ...prev, name: text }))
+                  }
                   placeholder="Nome do barbeiro"
                 />
               </View>
-              
+
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>E-mail</Text>
                 <TextInput
                   style={styles.input}
                   value={newBarberData.email}
-                  onChangeText={(text) => setNewBarberData(prev => ({ ...prev, email: text }))}
+                  onChangeText={(text) =>
+                    setNewBarberData((prev) => ({ ...prev, email: text }))
+                  }
                   placeholder="email@exemplo.com"
                   keyboardType="email-address"
                 />
               </View>
-              
+
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Telefone</Text>
                 <TextInput
                   style={styles.input}
                   value={newBarberData.phone}
-                  onChangeText={(text) => setNewBarberData(prev => ({ ...prev, phone: text }))}
+                  onChangeText={(text) =>
+                    setNewBarberData((prev) => ({ ...prev, phone: text }))
+                  }
                   placeholder="(11) 99999-9999"
                   keyboardType="phone-pad"
                 />
               </View>
-              
+
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Especialidades (separadas por vírgula)</Text>
+                <Text style={styles.inputLabel}>
+                  Especialidades (separadas por vírgula)
+                </Text>
                 <TextInput
                   style={styles.input}
                   value={newBarberData.specialties}
-                  onChangeText={(text) => setNewBarberData(prev => ({ ...prev, specialties: text }))}
+                  onChangeText={(text) =>
+                    setNewBarberData((prev) => ({ ...prev, specialties: text }))
+                  }
                   placeholder="Corte, Barba, Sobrancelha"
                 />
               </View>
             </View>
-            
+
             <View style={styles.modalActions}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
@@ -722,55 +816,67 @@ export default function EditProfile() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Editar Barbeiro</Text>
-              <TouchableOpacity onPress={() => setEditBarberModalVisible(false)}>
+              <TouchableOpacity
+                onPress={() => setEditBarberModalVisible(false)}
+              >
                 <Text style={styles.modalClose}>✕</Text>
               </TouchableOpacity>
             </View>
-            
+
             <View style={styles.modalBody}>
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Nome</Text>
                 <TextInput
                   style={styles.input}
                   value={newBarberData.name}
-                  onChangeText={(text) => setNewBarberData(prev => ({ ...prev, name: text }))}
+                  onChangeText={(text) =>
+                    setNewBarberData((prev) => ({ ...prev, name: text }))
+                  }
                   placeholder="Nome do barbeiro"
                 />
               </View>
-              
+
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>E-mail</Text>
                 <TextInput
                   style={styles.input}
                   value={newBarberData.email}
-                  onChangeText={(text) => setNewBarberData(prev => ({ ...prev, email: text }))}
+                  onChangeText={(text) =>
+                    setNewBarberData((prev) => ({ ...prev, email: text }))
+                  }
                   placeholder="email@exemplo.com"
                   keyboardType="email-address"
                 />
               </View>
-              
+
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Telefone</Text>
                 <TextInput
                   style={styles.input}
                   value={newBarberData.phone}
-                  onChangeText={(text) => setNewBarberData(prev => ({ ...prev, phone: text }))}
+                  onChangeText={(text) =>
+                    setNewBarberData((prev) => ({ ...prev, phone: text }))
+                  }
                   placeholder="(11) 99999-9999"
                   keyboardType="phone-pad"
                 />
               </View>
-              
+
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Especialidades (separadas por vírgula)</Text>
+                <Text style={styles.inputLabel}>
+                  Especialidades (separadas por vírgula)
+                </Text>
                 <TextInput
                   style={styles.input}
                   value={newBarberData.specialties}
-                  onChangeText={(text) => setNewBarberData(prev => ({ ...prev, specialties: text }))}
+                  onChangeText={(text) =>
+                    setNewBarberData((prev) => ({ ...prev, specialties: text }))
+                  }
                   placeholder="Corte, Barba, Sobrancelha"
                 />
               </View>
             </View>
-            
+
             <View style={styles.modalActions}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
@@ -800,122 +906,149 @@ export default function EditProfile() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
-                Horário - {editingBarber ? barbersDetails[editingBarber.userId]?.name || 'Barbeiro' : 'Barbeiro'}
+                Horário -{' '}
+                {editingBarber
+                  ? barbersDetails[editingBarber.userId]?.name || 'Barbeiro'
+                  : 'Barbeiro'}
               </Text>
-              <TouchableOpacity onPress={() => setBarberWorkingHoursModalVisible(false)}>
+              <TouchableOpacity
+                onPress={() => setBarberWorkingHoursModalVisible(false)}
+              >
                 <Text style={styles.modalClose}>✕</Text>
               </TouchableOpacity>
             </View>
-            
+
             <ScrollView style={styles.modalBody}>
               <Text style={styles.sectionSubtitle}>
-                Configure horários específicos para este barbeiro. Se não configurado, utilizará o horário da barbearia.
+                Configure horários específicos para este barbeiro. Se não
+                configurado, utilizará o horário da barbearia.
               </Text>
-              
-              {editingBarberWorkingHours && ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(day => {
-                const dayKey = day as keyof WorkingHours;
-                const schedule = editingBarberWorkingHours[dayKey];
-                const barbershopSchedule = barbershop?.workingHours[dayKey];
-                
-                return (
-                  <View key={day} style={styles.dayContainer}>
-                    <View style={styles.dayHeader}>
-                      <Text style={styles.dayTitle}>{getDayName(day)}</Text>
-                      <Switch
-                        value={schedule?.isOpen || false}
-                        onValueChange={(value) => {
-                          setEditingBarberWorkingHours(prev => ({
-                            ...prev,
-                            [dayKey]: {
-                              ...schedule,
-                              isOpen: value,
-                              openTime: value ? (schedule?.openTime || barbershopSchedule?.openTime || '09:00') : '09:00',
-                              closeTime: value ? (schedule?.closeTime || barbershopSchedule?.closeTime || '18:00') : '18:00',
-                            }
-                          }));
-                        }}
-                      />
+
+              {editingBarberWorkingHours &&
+                [
+                  'monday',
+                  'tuesday',
+                  'wednesday',
+                  'thursday',
+                  'friday',
+                  'saturday',
+                  'sunday',
+                ].map((day) => {
+                  const dayKey = day as keyof WorkingHours;
+                  const schedule = editingBarberWorkingHours[dayKey];
+                  const barbershopSchedule = barbershop?.workingHours[dayKey];
+
+                  return (
+                    <View key={day} style={styles.dayContainer}>
+                      <View style={styles.dayHeader}>
+                        <Text style={styles.dayTitle}>{getDayName(day)}</Text>
+                        <Switch
+                          value={schedule?.isOpen || false}
+                          onValueChange={(value) => {
+                            setEditingBarberWorkingHours((prev) => ({
+                              ...prev,
+                              [dayKey]: {
+                                ...schedule,
+                                isOpen: value,
+                                openTime: value
+                                  ? schedule?.openTime ||
+                                    barbershopSchedule?.openTime ||
+                                    '09:00'
+                                  : '09:00',
+                                closeTime: value
+                                  ? schedule?.closeTime ||
+                                    barbershopSchedule?.closeTime ||
+                                    '18:00'
+                                  : '18:00',
+                              },
+                            }));
+                          }}
+                        />
+                      </View>
+
+                      {schedule?.isOpen && (
+                        <>
+                          <View style={styles.timeRow}>
+                            <View style={styles.timeGroup}>
+                              <Text style={styles.timeLabel}>Abertura</Text>
+                              <TextInput
+                                style={styles.timeInput}
+                                value={schedule.openTime || '09:00'}
+                                onChangeText={(text) => {
+                                  setEditingBarberWorkingHours((prev) => ({
+                                    ...prev,
+                                    [dayKey]: { ...schedule, openTime: text },
+                                  }));
+                                }}
+                                placeholder="09:00"
+                              />
+                            </View>
+                            <View style={styles.timeGroup}>
+                              <Text style={styles.timeLabel}>Fechamento</Text>
+                              <TextInput
+                                style={styles.timeInput}
+                                value={schedule.closeTime || '18:00'}
+                                onChangeText={(text) => {
+                                  setEditingBarberWorkingHours((prev) => ({
+                                    ...prev,
+                                    [dayKey]: { ...schedule, closeTime: text },
+                                  }));
+                                }}
+                                placeholder="18:00"
+                              />
+                            </View>
+                          </View>
+
+                          <View style={styles.timeRow}>
+                            <View style={styles.timeGroup}>
+                              <Text style={styles.timeLabel}>
+                                Início do Almoço
+                              </Text>
+                              <TextInput
+                                style={styles.timeInput}
+                                value={schedule.breakStart || ''}
+                                onChangeText={(text) => {
+                                  setEditingBarberWorkingHours((prev) => ({
+                                    ...prev,
+                                    [dayKey]: { ...schedule, breakStart: text },
+                                  }));
+                                }}
+                                placeholder="12:00"
+                              />
+                            </View>
+                            <View style={styles.timeGroup}>
+                              <Text style={styles.timeLabel}>
+                                Fim do Almoço
+                              </Text>
+                              <TextInput
+                                style={styles.timeInput}
+                                value={schedule.breakEnd || ''}
+                                onChangeText={(text) => {
+                                  setEditingBarberWorkingHours((prev) => ({
+                                    ...prev,
+                                    [dayKey]: { ...schedule, breakEnd: text },
+                                  }));
+                                }}
+                                placeholder="13:00"
+                              />
+                            </View>
+                          </View>
+
+                          {barbershopSchedule && (
+                            <Text style={styles.warningText}>
+                              Barbearia:{' '}
+                              {barbershopSchedule.isOpen
+                                ? `${barbershopSchedule.openTime} - ${barbershopSchedule.closeTime}`
+                                : 'Fechada'}
+                            </Text>
+                          )}
+                        </>
+                      )}
                     </View>
-                    
-                    {schedule?.isOpen && (
-                      <>
-                        <View style={styles.timeRow}>
-                          <View style={styles.timeGroup}>
-                            <Text style={styles.timeLabel}>Abertura</Text>
-                            <TextInput
-                              style={styles.timeInput}
-                              value={schedule.openTime || '09:00'}
-                              onChangeText={(text) => {
-                                setEditingBarberWorkingHours(prev => ({
-                                  ...prev,
-                                  [dayKey]: { ...schedule, openTime: text }
-                                }));
-                              }}
-                              placeholder="09:00"
-                            />
-                          </View>
-                          <View style={styles.timeGroup}>
-                            <Text style={styles.timeLabel}>Fechamento</Text>
-                            <TextInput
-                              style={styles.timeInput}
-                              value={schedule.closeTime || '18:00'}
-                              onChangeText={(text) => {
-                                setEditingBarberWorkingHours(prev => ({
-                                  ...prev,
-                                  [dayKey]: { ...schedule, closeTime: text }
-                                }));
-                              }}
-                              placeholder="18:00"
-                            />
-                          </View>
-                        </View>
-                        
-                        <View style={styles.timeRow}>
-                          <View style={styles.timeGroup}>
-                            <Text style={styles.timeLabel}>Início do Almoço</Text>
-                            <TextInput
-                              style={styles.timeInput}
-                              value={schedule.breakStart || ''}
-                              onChangeText={(text) => {
-                                setEditingBarberWorkingHours(prev => ({
-                                  ...prev,
-                                  [dayKey]: { ...schedule, breakStart: text }
-                                }));
-                              }}
-                              placeholder="12:00"
-                            />
-                          </View>
-                          <View style={styles.timeGroup}>
-                            <Text style={styles.timeLabel}>Fim do Almoço</Text>
-                            <TextInput
-                              style={styles.timeInput}
-                              value={schedule.breakEnd || ''}
-                              onChangeText={(text) => {
-                                setEditingBarberWorkingHours(prev => ({
-                                  ...prev,
-                                  [dayKey]: { ...schedule, breakEnd: text }
-                                }));
-                              }}
-                              placeholder="13:00"
-                            />
-                          </View>
-                        </View>
-                        
-                        {barbershopSchedule && (
-                          <Text style={styles.warningText}>
-                            Barbearia: {barbershopSchedule.isOpen 
-                              ? `${barbershopSchedule.openTime} - ${barbershopSchedule.closeTime}` 
-                              : 'Fechada'
-                            }
-                          </Text>
-                        )}
-                      </>
-                    )}
-                  </View>
-                );
-              })}
+                  );
+                })}
             </ScrollView>
-            
+
             <View style={styles.modalActions}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
@@ -938,11 +1071,11 @@ export default function EditProfile() {
 }
 
 // Componente para editar horário do dia
-function DayScheduleEditor({ 
-  schedule, 
-  onSave, 
-  onCancel 
-}: { 
+function DayScheduleEditor({
+  schedule,
+  onSave,
+  onCancel,
+}: {
   schedule: DaySchedule;
   onSave: (schedule: DaySchedule) => void;
   onCancel: () => void;
@@ -1310,7 +1443,8 @@ const styles = StyleSheet.create({
   },
   confirmButton: {
     backgroundColor: '#059669',
-  },  confirmButtonText: {
+  },
+  confirmButtonText: {
     fontSize: 16,
     fontFamily: 'Inter-SemiBold',
     color: '#FFFFFF',
@@ -1346,7 +1480,8 @@ const styles = StyleSheet.create({
   actionButtonText: {
     fontSize: 12,
     fontFamily: 'Inter-Medium',
-  },  dayScheduleGroup: {
+  },
+  dayScheduleGroup: {
     marginBottom: 24,
   },
   dayScheduleTitle: {

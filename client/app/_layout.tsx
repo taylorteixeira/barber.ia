@@ -50,7 +50,8 @@ export default function RootLayout() {
 
   if (!fontsLoaded && !fontError) {
     return null;
-  }  return (
+  }
+  return (
     <>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -62,10 +63,7 @@ export default function RootLayout() {
           name="barber/[id]"
           options={{ headerShown: true, title: 'Perfil do Barbeiro' }}
         />
-        <Stack.Screen
-          name="booking"
-          options={{ headerShown: false }}
-        />
+        <Stack.Screen name="booking" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />

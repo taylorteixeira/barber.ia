@@ -11,17 +11,22 @@ import {
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import { 
-  ArrowLeft, 
-  User, 
-  Mail, 
-  Phone, 
+import {
+  ArrowLeft,
+  User,
+  Mail,
+  Phone,
   Save,
   Eye,
   EyeOff,
-  Lock
+  Lock,
 } from 'lucide-react-native';
-import { getCurrentUser, updateUser, setCurrentUser, checkEmailExistsForUpdate } from '@/services/database';
+import {
+  getCurrentUser,
+  updateUser,
+  setCurrentUser,
+  checkEmailExistsForUpdate,
+} from '@/services/database';
 
 export default function EditProfileScreen() {
   const router = useRouter();
@@ -85,9 +90,15 @@ export default function EditProfileScreen() {
 
     // Check if email is already taken by another user
     if (currentUser && formData.email !== currentUser.email) {
-      const emailExists = await checkEmailExistsForUpdate(formData.email, currentUser.id);
+      const emailExists = await checkEmailExistsForUpdate(
+        formData.email,
+        currentUser.id
+      );
       if (emailExists) {
-        Alert.alert('Erro', 'Este e-mail já está sendo usado por outro usuário');
+        Alert.alert(
+          'Erro',
+          'Este e-mail já está sendo usado por outro usuário'
+        );
         return false;
       }
     }
@@ -132,31 +143,30 @@ export default function EditProfileScreen() {
       }
 
       const success = await updateUser(updatedUser);
-      
+
       if (success) {
         // Atualizar usuário na sessão (sem senha por segurança)
         const sessionUser = {
           ...updatedUser,
         };
         delete sessionUser.password;
-        
+
         await setCurrentUser(sessionUser);
-          Alert.alert(
-          'Sucesso!', 
-          'Perfil atualizado com sucesso!',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                router.back();
-                // Refresh profile screen data by triggering a re-render
-                router.replace('/(tabs)/profile');
-              }
-            }
-          ]
-        );
+        Alert.alert('Sucesso!', 'Perfil atualizado com sucesso!', [
+          {
+            text: 'OK',
+            onPress: () => {
+              router.back();
+              // Refresh profile screen data by triggering a re-render
+              router.replace('/(tabs)/profile');
+            },
+          },
+        ]);
       } else {
-        Alert.alert('Erro', 'Não foi possível atualizar o perfil. Tente novamente.');
+        Alert.alert(
+          'Erro',
+          'Não foi possível atualizar o perfil. Tente novamente.'
+        );
       }
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -181,12 +191,15 @@ export default function EditProfileScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
           <ArrowLeft size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Editar Perfil</Text>
-        <TouchableOpacity 
-          onPress={handleSave} 
+        <TouchableOpacity
+          onPress={handleSave}
           style={styles.saveButton}
           disabled={saving}
         >
@@ -209,7 +222,7 @@ export default function EditProfileScreen() {
               style={styles.input}
               placeholder="Nome completo"
               value={formData.name}
-              onChangeText={(text) => setFormData({...formData, name: text})}
+              onChangeText={(text) => setFormData({ ...formData, name: text })}
             />
           </View>
 
@@ -219,7 +232,7 @@ export default function EditProfileScreen() {
               style={styles.input}
               placeholder="E-mail"
               value={formData.email}
-              onChangeText={(text) => setFormData({...formData, email: text})}
+              onChangeText={(text) => setFormData({ ...formData, email: text })}
               keyboardType="email-address"
               autoCapitalize="none"
             />
@@ -231,7 +244,7 @@ export default function EditProfileScreen() {
               style={styles.input}
               placeholder="Telefone"
               value={formData.phone}
-              onChangeText={(text) => setFormData({...formData, phone: text})}
+              onChangeText={(text) => setFormData({ ...formData, phone: text })}
               keyboardType="phone-pad"
             />
           </View>
@@ -250,10 +263,12 @@ export default function EditProfileScreen() {
               style={styles.input}
               placeholder="Nova senha"
               value={formData.password}
-              onChangeText={(text) => setFormData({...formData, password: text})}
+              onChangeText={(text) =>
+                setFormData({ ...formData, password: text })
+              }
               secureTextEntry={!showPassword}
             />
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => setShowPassword(!showPassword)}
               style={styles.eyeButton}
             >
@@ -271,10 +286,12 @@ export default function EditProfileScreen() {
               style={styles.input}
               placeholder="Confirmar nova senha"
               value={formData.confirmPassword}
-              onChangeText={(text) => setFormData({...formData, confirmPassword: text})}
+              onChangeText={(text) =>
+                setFormData({ ...formData, confirmPassword: text })
+              }
               secureTextEntry={!showConfirmPassword}
             />
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => setShowConfirmPassword(!showConfirmPassword)}
               style={styles.eyeButton}
             >
@@ -289,8 +306,11 @@ export default function EditProfileScreen() {
 
         {/* Save Button */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity 
-            style={[styles.saveButtonLarge, saving && styles.saveButtonDisabled]}
+          <TouchableOpacity
+            style={[
+              styles.saveButtonLarge,
+              saving && styles.saveButtonDisabled,
+            ]}
             onPress={handleSave}
             disabled={saving}
           >
@@ -308,7 +328,8 @@ export default function EditProfileScreen() {
         {/* Info */}
         <View style={styles.infoContainer}>
           <Text style={styles.infoText}>
-            🔒 Seus dados são mantidos em segurança e apenas você pode editá-los.
+            🔒 Seus dados são mantidos em segurança e apenas você pode
+            editá-los.
           </Text>
         </View>
       </ScrollView>

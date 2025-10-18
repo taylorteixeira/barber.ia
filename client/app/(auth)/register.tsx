@@ -9,7 +9,15 @@ import {
 } from 'react-native';
 import { useState } from 'react';
 import { Link, useRouter, useLocalSearchParams } from 'expo-router';
-import { User, Mail, Lock, Eye, EyeOff, Phone, ArrowLeft } from 'lucide-react-native';
+import {
+  User,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  Phone,
+  ArrowLeft,
+} from 'lucide-react-native';
 import { registerAndLoginUser } from '@/services/database';
 
 export default function RegisterScreen() {
@@ -21,7 +29,8 @@ export default function RegisterScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();  const params = useLocalSearchParams();
+  const router = useRouter();
+  const params = useLocalSearchParams();
   const userType = (params.userType as 'client' | 'barber') || 'client';
   const handleGoBack = () => {
     router.push('/landing');
@@ -46,28 +55,41 @@ export default function RegisterScreen() {
     if (password.length < 6) {
       Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres');
       return;
-    }    setLoading(true);
-    
-    try {      const loggedInUser = await registerAndLoginUser({
+    }
+    setLoading(true);
+
+    try {
+      const loggedInUser = await registerAndLoginUser({
         name,
         email,
         phone,
         password,
-        userType
+        userType,
       });
-      
-      if (loggedInUser) {        Alert.alert('Bem-vindo!', 'Conta criada com sucesso! Você já está logado.', [
-          { 
-            text: 'Começar', 
-            onPress: () => router.replace('/(tabs)')
-          },
-        ]);
+
+      if (loggedInUser) {
+        Alert.alert(
+          'Bem-vindo!',
+          'Conta criada com sucesso! Você já está logado.',
+          [
+            {
+              text: 'Começar',
+              onPress: () => router.replace('/(tabs)'),
+            },
+          ]
+        );
       } else {
-        Alert.alert('Erro', 'Ocorreu um erro ao criar sua conta. O email já pode estar em uso.');
+        Alert.alert(
+          'Erro',
+          'Ocorreu um erro ao criar sua conta. O email já pode estar em uso.'
+        );
       }
     } catch (error) {
       console.error('Error during registration:', error);
-      Alert.alert('Erro', 'Ocorreu um erro ao criar sua conta. Tente novamente.');
+      Alert.alert(
+        'Erro',
+        'Ocorreu um erro ao criar sua conta. Tente novamente.'
+      );
     } finally {
       setLoading(false);
     }
@@ -76,20 +98,17 @@ export default function RegisterScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         {/* Back Button */}
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={handleGoBack}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
           <ArrowLeft size={24} color="#6B7280" />
         </TouchableOpacity>
-        
+
         <View style={styles.header}>
           <Text style={styles.title}>
             Criar Conta {userType === 'barber' ? 'Barbeiro' : 'Cliente'}
           </Text>
           <Text style={styles.subtitle}>
-            {userType === 'barber' 
-              ? 'Cadastre sua barbearia na plataforma' 
+            {userType === 'barber'
+              ? 'Cadastre sua barbearia na plataforma'
               : 'Preencha os dados para começar'}
           </Text>
         </View>
@@ -186,7 +205,8 @@ export default function RegisterScreen() {
           >
             <Text style={styles.registerButtonText}>
               {loading ? 'Criando conta...' : 'Criar Conta'}
-            </Text>          </TouchableOpacity>
+            </Text>{' '}
+          </TouchableOpacity>
         </View>
 
         <View style={styles.footer}>
@@ -206,7 +226,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-  },  content: {
+  },
+  content: {
     flex: 1,
     paddingHorizontal: 24,
     justifyContent: 'center',
