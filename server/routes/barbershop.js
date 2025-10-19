@@ -27,13 +27,6 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ message: "Email já cadastrado." });
     }
 
-    const barbershop = await Barbershop.create({
-      name,
-      cnpj,
-      email,
-      phone,
-      address,
-    });
     return res
       .status(201)
       .json({ message: "Barbearia registrada com sucesso!" });

@@ -3,7 +3,7 @@ const Barbershop = require("../models/Barbershop");
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+router.get("/", async (res) => {
   try {
     const barbershops = await Barbershop.find({});
     res.status(200).json(barbershops);
