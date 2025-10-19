@@ -469,8 +469,6 @@ export default function BarberAgenda() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {' '}
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Agenda</Text>
         <View style={styles.headerButtons}>
@@ -488,7 +486,6 @@ export default function BarberAgenda() {
           </TouchableOpacity>
         </View>
       </View>
-      {/* Date Selector */}
       <View style={styles.dateContainer}>
         <View style={styles.weekNavigation}>
           <TouchableOpacity
@@ -503,8 +500,8 @@ export default function BarberAgenda() {
               {currentWeekStart.toLocaleDateString('pt-BR', {
                 day: '2-digit',
                 month: 'short',
-              })}{' '}
-              -{' '}
+              })}
+              -
               {new Date(
                 currentWeekStart.getTime() + 6 * 24 * 60 * 60 * 1000
               ).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
@@ -588,14 +585,13 @@ export default function BarberAgenda() {
           })}
         </ScrollView>
       </View>
-      {/* Appointments List */}
       <ScrollView
         style={styles.appointmentsList}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.appointmentsHeader}>
           <Text style={styles.appointmentsTitle}>
-            Agendamentos -{' '}
+            Agendamentos -
             {new Date(selectedDate).toLocaleDateString('pt-BR', {
               day: '2-digit',
               month: 'long',
@@ -658,7 +654,7 @@ export default function BarberAgenda() {
             <CalendarIcon size={48} color="#D1D5DB" />
             <Text style={styles.emptyDayTitle}>Nenhum agendamento</Text>
             <Text style={styles.emptyDayText}>
-              Não há agendamentos para{' '}
+              Não há agendamentos para
               {new Date(selectedDate).toLocaleDateString('pt-BR', {
                 day: '2-digit',
                 month: 'long',
@@ -675,7 +671,6 @@ export default function BarberAgenda() {
             </TouchableOpacity>
           </View>
         )}
-        {/* Available time slots */}
         {getAppointmentsForDate(selectedDate).length > 0 && (
           <View style={styles.emptySlots}>
             <Text style={styles.emptySlotsTitle}>Horários Livres</Text>
@@ -693,7 +688,6 @@ export default function BarberAgenda() {
           </View>
         )}
       </ScrollView>
-      {/* Modal de Detalhes do Agendamento */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -704,7 +698,6 @@ export default function BarberAgenda() {
           <View style={styles.modalContent}>
             {selectedAppointment && (
               <>
-                {/* Header do Modal */}
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalTitle}>Detalhes do Agendamento</Text>
                   <TouchableOpacity
@@ -718,7 +711,6 @@ export default function BarberAgenda() {
                   style={styles.modalBody}
                   showsVerticalScrollIndicator={false}
                 >
-                  {/* Informações do Cliente */}
                   <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Cliente</Text>
                     <View style={styles.clientCard}>
@@ -782,7 +774,6 @@ export default function BarberAgenda() {
                       </View>
                     </View>
                   </View>
-                  {/* Informações do Serviço */}
                   <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Serviço e Horário</Text>
                     <View style={styles.serviceCard}>
@@ -814,7 +805,6 @@ export default function BarberAgenda() {
                       </View>
                     </View>
                   </View>
-                  {/* Notas */}{' '}
                   {selectedAppointment.notes && (
                     <View style={styles.section}>
                       <Text style={styles.sectionTitle}>Observações</Text>
@@ -828,7 +818,6 @@ export default function BarberAgenda() {
                       </View>
                     </View>
                   )}
-                  {/* Informações Adicionais */}
                   <View style={styles.section}>
                     <Text style={styles.sectionTitle}>
                       Detalhes do Agendamento
@@ -855,7 +844,6 @@ export default function BarberAgenda() {
                     </View>
                   </View>
                 </ScrollView>
-                {/* Ações do Modal */}
                 <View style={styles.modalActions}>
                   {selectedAppointment.status === 'pending' && (
                     <>
@@ -927,7 +915,6 @@ export default function BarberAgenda() {
           </View>
         </View>
       </Modal>
-      {/* Modal de Exportação */}
       <Modal
         visible={exportModalVisible}
         animationType="slide"
@@ -935,7 +922,6 @@ export default function BarberAgenda() {
         onRequestClose={closeExportModal}
       >
         <View style={styles.exportModalContent}>
-          {/* Header do Modal */}
           <View style={styles.exportModalHeader}>
             <Text style={styles.exportModalTitle}>Exportar Agendamentos</Text>
             <TouchableOpacity onPress={closeExportModal}>
@@ -944,7 +930,6 @@ export default function BarberAgenda() {
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false}>
-            {/* Formato de Arquivo */}
             <View style={styles.exportSection}>
               <Text style={styles.exportSectionTitle}>Formato do Arquivo</Text>
               <View style={styles.formatButtons}>
@@ -1014,7 +999,6 @@ export default function BarberAgenda() {
               </View>
             </View>
 
-            {/* Período */}
             <View style={styles.exportSection}>
               <Text style={styles.exportSectionTitle}>Período</Text>
               <View style={styles.periodButtons}>
@@ -1067,7 +1051,6 @@ export default function BarberAgenda() {
               </View>
             </View>
 
-            {/* Filtros de Status */}
             <View style={styles.exportSection}>
               <Text style={styles.exportSectionTitle}>Status (Opcional)</Text>
               <View style={styles.statusFilters}>
@@ -1106,7 +1089,6 @@ export default function BarberAgenda() {
             </View>
           </ScrollView>
 
-          {/* Ações do Modal */}
           <View style={styles.exportModalActions}>
             <TouchableOpacity
               style={styles.exportCancelButton}

@@ -158,7 +158,6 @@ export default function ProfileScreen() {
           <Text style={styles.userName}>{user.name}</Text>
           <Text style={styles.userEmail}>{user.email}</Text>
           <Text style={styles.userPhone}>{user.phone}</Text>
-          {/* Edit Profile Button */}
           <TouchableOpacity
             style={styles.editProfileButton}
             onPress={() => router.push('/(tabs)/edit-profile')}

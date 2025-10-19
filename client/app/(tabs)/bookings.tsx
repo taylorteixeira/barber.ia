@@ -199,7 +199,7 @@ export default function BookingsScreen() {
         <View style={styles.detailRow}>
           <Calendar size={16} color="#6B7280" />
           <Text style={styles.detailText}>
-            {new Date(booking.date).toLocaleDateString('pt-BR')} às{' '}
+            {new Date(booking.date).toLocaleDateString('pt-BR')} às
             {booking.time}
           </Text>
         </View>

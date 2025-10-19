@@ -45,7 +45,7 @@ export default function TabLayout() {
             <Calendar size={size} color={color} />
           ),
         }}
-      />{' '}
+      />
       <Tabs.Screen
         name="profile"
         options={{

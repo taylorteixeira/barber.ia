@@ -131,12 +131,10 @@ export default function BarberProfile() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Meu Perfil</Text>
         </View>
 
-        {/* Profile Info */}
         <View style={styles.profileSection}>
           <Image source={{ uri: barberData.avatar }} style={styles.avatar} />
           <View style={styles.profileInfo}>
@@ -161,7 +159,6 @@ export default function BarberProfile() {
           </View>
         </View>
 
-        {/* Quick Stats */}
         <View style={styles.statsSection}>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{barberData.workingHours}</Text>
@@ -177,7 +174,6 @@ export default function BarberProfile() {
           </View>
         </View>
 
-        {/* Services */}
         <View style={styles.servicesSection}>
           <Text style={styles.sectionTitle}>Meus Serviços</Text>
           <View style={styles.servicesContainer}>
@@ -189,7 +185,6 @@ export default function BarberProfile() {
           </View>
         </View>
 
-        {/* Notifications */}
         <View style={styles.notificationSection}>
           <View style={styles.notificationHeader}>
             <View style={styles.notificationInfo}>
@@ -208,7 +203,6 @@ export default function BarberProfile() {
           </Text>
         </View>
 
-        {/* Menu Sections */}
         {menuSections.map((section, sectionIndex) => (
           <View key={sectionIndex} style={styles.menuSection}>
             <Text style={styles.sectionTitle}>{section.title}</Text>
@@ -235,7 +229,6 @@ export default function BarberProfile() {
           </View>
         ))}
 
-        {/* Logout */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <LogOut size={20} color="#EF4444" />
           <Text style={styles.logoutText}>Sair da Conta</Text>

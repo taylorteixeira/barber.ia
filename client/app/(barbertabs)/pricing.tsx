@@ -202,7 +202,6 @@ export default function PricingManagement() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -216,7 +215,6 @@ export default function PricingManagement() {
         </TouchableOpacity>
       </View>
 
-      {/* Search */}
       <View style={styles.searchContainer}>
         <Search size={20} color="#6B7280" style={styles.searchIcon} />
         <TextInput
@@ -227,7 +225,6 @@ export default function PricingManagement() {
         />
       </View>
 
-      {/* Rules List */}
       <ScrollView style={styles.rulesList} showsVerticalScrollIndicator={false}>
         {filteredRules.map((rule) => (
           <View key={rule.id} style={styles.ruleCard}>
@@ -315,7 +312,6 @@ export default function PricingManagement() {
         )}
       </ScrollView>
 
-      {/* Add/Edit Modal */}
       <Modal
         visible={modalVisible}
         animationType="slide"
@@ -420,7 +416,7 @@ export default function PricingManagement() {
                 <Text style={styles.label}>
                   {formData.type === 'percentage'
                     ? 'Percentual (%)'
-                    : 'Valor (R$)'}{' '}
+                    : 'Valor (R$)'}
                   *
                 </Text>
                 <TextInput

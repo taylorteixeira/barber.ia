@@ -399,7 +399,6 @@ export default function EditProfile() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -414,7 +413,6 @@ export default function EditProfile() {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Informações do Barbeiro */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Informações Pessoais</Text>
           <View style={styles.card}>
@@ -458,7 +456,6 @@ export default function EditProfile() {
           </View>
         </View>
 
-        {/* Informações da Barbearia */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Informações da Barbearia</Text>
           <View style={styles.card}>
@@ -533,7 +530,6 @@ export default function EditProfile() {
           </View>
         </View>
 
-        {/* Horário do Barbeiro */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Horário do Barbeiro</Text>
           <View style={styles.card}>
@@ -561,7 +557,6 @@ export default function EditProfile() {
           </View>
         </View>
 
-        {/* Barbeiros */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Barbeiros da Equipe</Text>
@@ -616,7 +611,7 @@ export default function EditProfile() {
                           : 'Nenhuma especialidade'}
                       </Text>
                       <Text style={styles.barberDays}>
-                        Trabalha:{' '}
+                        Trabalha:
                         {barber.workingDays
                           .map((day) => getDayName(day))
                           .join(', ')}
@@ -673,7 +668,6 @@ export default function EditProfile() {
         </View>
       </ScrollView>
 
-      {/* Modal de Edição de Horário */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -702,7 +696,6 @@ export default function EditProfile() {
         </View>
       </Modal>
 
-      {/* Modal de Novo Barbeiro */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -790,7 +783,6 @@ export default function EditProfile() {
         </View>
       </Modal>
 
-      {/* Modal de Edição de Barbeiro */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -880,7 +872,6 @@ export default function EditProfile() {
         </View>
       </Modal>
 
-      {/* Modal de Horários do Barbeiro */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -891,7 +882,7 @@ export default function EditProfile() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
-                Horário -{' '}
+                Horário -
                 {editingBarber
                   ? barbersDetails[editingBarber.userId]?.name || 'Barbeiro'
                   : 'Barbeiro'}
@@ -1021,7 +1012,7 @@ export default function EditProfile() {
 
                           {barbershopSchedule && (
                             <Text style={styles.warningText}>
-                              Barbearia:{' '}
+                              Barbearia:
                               {barbershopSchedule.isOpen
                                 ? `${barbershopSchedule.openTime} - ${barbershopSchedule.closeTime}`
                                 : 'Fechada'}

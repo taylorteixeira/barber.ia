@@ -277,7 +277,6 @@ export default function BarbershopDetailsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -303,7 +302,6 @@ export default function BarbershopDetailsScreen() {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Hero Image */}
         <View style={styles.heroContainer}>
           <Image source={{ uri: barbershop.image }} style={styles.heroImage} />
           <View style={styles.heroOverlay}>
@@ -314,7 +312,6 @@ export default function BarbershopDetailsScreen() {
           </View>
         </View>
 
-        {/* Barbershop Info */}
         <View style={styles.infoSection}>
           <Text style={styles.barbershopName}>{barbershop.name}</Text>
 
@@ -334,7 +331,6 @@ export default function BarbershopDetailsScreen() {
 
           <Text style={styles.description}>{barbershop.description}</Text>
 
-          {/* Contact Info */}
           <View style={styles.contactSection}>
             <View style={styles.contactItem}>
               <MapPin size={18} color="#059669" />
@@ -351,7 +347,6 @@ export default function BarbershopDetailsScreen() {
           </View>
         </View>
 
-        {/* Tabs */}
         <View style={styles.tabsContainer}>
           <TouchableOpacity
             style={[styles.tab, activeTab === 'services' && styles.activeTab]}
@@ -394,14 +389,11 @@ export default function BarbershopDetailsScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Tab Content */}
         {renderTabContent()}
 
-        {/* Bottom Spacing */}
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
-      {/* Floating Book Button */}
       <View style={styles.bookingContainer}>
         <TouchableOpacity
           style={styles.bookButton}

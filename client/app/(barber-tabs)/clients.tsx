@@ -85,7 +85,6 @@ export default function BarberClients() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Meus Clientes</Text>
         <TouchableOpacity style={styles.addButton}>
@@ -93,7 +92,6 @@ export default function BarberClients() {
         </TouchableOpacity>
       </View>
 
-      {/* Search */}
       <View style={styles.searchContainer}>
         <Search size={20} color="#6B7280" style={styles.searchIcon} />
         <TextInput
@@ -104,7 +102,6 @@ export default function BarberClients() {
         />
       </View>
 
-      {/* Stats */}
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>{clients.length}</Text>
@@ -133,7 +130,6 @@ export default function BarberClients() {
         </View>
       </View>
 
-      {/* Clients List */}
       <ScrollView
         style={styles.clientsList}
         showsVerticalScrollIndicator={false}
@@ -166,7 +162,7 @@ export default function BarberClients() {
               </View>
 
               <Text style={styles.lastVisit}>
-                Última visita:{' '}
+                Última visita:
                 {new Date(client.lastVisit).toLocaleDateString('pt-BR')}
               </Text>
             </View>

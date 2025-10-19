@@ -57,7 +57,6 @@ export default function BarberTabLayout() {
           ),
         }}
       />
-      {/* Hidden screens */}
       <Tabs.Screen
         name="services"
         options={{
@@ -93,7 +92,7 @@ export default function BarberTabLayout() {
         options={{
           href: null,
         }}
-      />{' '}
+      />
       <Tabs.Screen
         name="support"
         options={{

@@ -93,7 +93,6 @@ export default function BarberAgenda() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Agenda</Text>
         <TouchableOpacity
@@ -104,7 +103,6 @@ export default function BarberAgenda() {
         </TouchableOpacity>
       </View>
 
-      {/* Date Selector */}
       <View style={styles.dateContainer}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {Array.from({ length: 7 }, (_, i) => {
@@ -147,14 +145,13 @@ export default function BarberAgenda() {
         </ScrollView>
       </View>
 
-      {/* Appointments List */}
       <ScrollView
         style={styles.appointmentsList}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.appointmentsHeader}>
           <Text style={styles.appointmentsTitle}>
-            Agendamentos -{' '}
+            Agendamentos -
             {new Date(selectedDate).toLocaleDateString('pt-BR', {
               day: '2-digit',
               month: 'long',
@@ -208,7 +205,6 @@ export default function BarberAgenda() {
           </TouchableOpacity>
         ))}
 
-        {/* Empty slots */}
         <View style={styles.emptySlots}>
           <Text style={styles.emptySlotsTitle}>Horários Livres</Text>
           {['12:00', '13:00', '16:30', '18:00'].map((time) => (

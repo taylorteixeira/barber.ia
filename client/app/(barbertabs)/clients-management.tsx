@@ -169,7 +169,6 @@ export default function ClientsManagementScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Clientes</Text>
         <TouchableOpacity style={styles.addButton} onPress={handleAddClient}>
@@ -177,7 +176,6 @@ export default function ClientsManagementScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Search */}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
           <Search size={20} color="#6B7280" />
@@ -190,7 +188,6 @@ export default function ClientsManagementScreen() {
         </View>
       </View>
 
-      {/* Clients List */}
       <ScrollView
         style={styles.clientsList}
         showsVerticalScrollIndicator={false}
@@ -261,7 +258,6 @@ export default function ClientsManagementScreen() {
         )}
       </ScrollView>
 
-      {/* Client Form Modal */}
       <Modal
         visible={showModal}
         transparent

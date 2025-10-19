@@ -42,13 +42,11 @@ export default function BarberWelcomeScreen() {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
-        {/* Back Button */}
         <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
           <ArrowLeft size={24} color="#FFFFFF" />
         </TouchableOpacity>
 
         <View style={styles.content}>
-          {/* Logo */}
           <View style={styles.logoContainer}>
             <View style={styles.logoBackground}>
               <Image
@@ -59,7 +57,6 @@ export default function BarberWelcomeScreen() {
             </View>
           </View>
 
-          {/* Title */}
           <View style={styles.titleContainer}>
             <Text style={styles.title}>Área do Barbeiro</Text>
             <Text style={styles.subtitle}>Central de Comando Profissional</Text>
@@ -76,7 +73,6 @@ export default function BarberWelcomeScreen() {
             </View>
           </View>
 
-          {/* Action Buttons */}
           <View style={styles.buttonsContainer}>
             <TouchableOpacity
               style={styles.loginButton}
@@ -110,7 +106,6 @@ export default function BarberWelcomeScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Info */}
           <Text style={styles.infoText}>
             Já tem uma conta? Use o login para acessar sua central de gestão.
             {'\n'}Novo por aqui? Crie sua conta e configure sua barbearia.

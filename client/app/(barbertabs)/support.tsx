@@ -154,7 +154,6 @@ export default function SupportScreen() {
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
@@ -171,7 +170,6 @@ export default function SupportScreen() {
           </View>
         </View>
 
-        {/* Messages */}
         <ScrollView
           ref={scrollViewRef}
           style={styles.messagesContainer}
@@ -219,7 +217,6 @@ export default function SupportScreen() {
             </View>
           ))}
 
-          {/* Typing indicator */}
           {isTyping && (
             <View style={[styles.messageContainer, styles.aiMessage]}>
               <View style={styles.messageHeader}>
@@ -246,7 +243,6 @@ export default function SupportScreen() {
           )}
         </ScrollView>
 
-        {/* Input */}
         <View style={styles.inputContainer}>
           <View style={styles.inputWrapper}>
             <TextInput

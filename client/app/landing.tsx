@@ -90,7 +90,6 @@ export default function LandingScreen() {
         translucent
       />
 
-      {/* Background com gradiente mais sofisticado */}
       <LinearGradient
         colors={[
           '#0C0C1D',
@@ -104,7 +103,6 @@ export default function LandingScreen() {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
-        {/* Elementos de background animados */}
         <Animated.View
           style={[
             styles.backgroundElement1,
@@ -124,7 +122,6 @@ export default function LandingScreen() {
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Hero Section Revolucionária */}
           <Animated.View
             style={[
               styles.heroSection,
@@ -134,7 +131,6 @@ export default function LandingScreen() {
               },
             ]}
           >
-            {/* Logo com efeito holográfico */}
             <View style={styles.logoContainer}>
               <Animated.View
                 style={[
@@ -163,7 +159,6 @@ export default function LandingScreen() {
               </Animated.View>
             </View>
 
-            {/* Título com efeito neon */}
             <Animated.View
               style={[
                 styles.titleContainer,
@@ -186,7 +181,6 @@ export default function LandingScreen() {
               nível.
             </Text>
 
-            {/* Tech Features com efeito cyberpunk */}
             <View style={styles.techFeaturesContainer}>
               <View style={styles.techFeature}>
                 <View style={styles.techIconContainer}>
@@ -214,7 +208,6 @@ export default function LandingScreen() {
               </View>
             </View>
           </Animated.View>
-          {/* User Selection com design futurista */}
           <Animated.View
             style={[
               styles.selectionSection,
@@ -229,7 +222,6 @@ export default function LandingScreen() {
               <View style={styles.hologramLine} />
             </View>
 
-            {/* Client Card - Design Cyberpunk */}
             <TouchableOpacity
               style={styles.userTypeCard}
               onPress={handleClientAccess}
@@ -280,7 +272,6 @@ export default function LandingScreen() {
               </LinearGradient>
             </TouchableOpacity>
 
-            {/* Barber Card - Design Premium */}
             <TouchableOpacity
               style={styles.userTypeCard}
               onPress={handleBarberAccess}
@@ -304,7 +295,7 @@ export default function LandingScreen() {
                       <Text style={styles.cardTitle}>BARBEIRO</Text>
                       <Text style={styles.cardSubtitle}>
                         Central de Comando
-                      </Text>{' '}
+                      </Text>
                       <Text style={styles.cardDescription}>
                         Dashboard completo com agenda, relatórios e gestão
                         inteligente
@@ -331,7 +322,6 @@ export default function LandingScreen() {
               </LinearGradient>
             </TouchableOpacity>
           </Animated.View>
-          {/* Seção de Benefícios Premium */}
           <Animated.View
             style={[
               styles.premiumSection,
@@ -391,7 +381,6 @@ export default function LandingScreen() {
               </View>
             </View>
           </Animated.View>
-          {/* Footer futurista */}
           <View style={styles.footer}>
             <Text style={styles.footerText}>
               🌟 Inicie sua jornada no futuro

@@ -184,7 +184,6 @@ export default function EditProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -207,7 +206,6 @@ export default function EditProfileScreen() {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* User Info Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Informações Pessoais</Text>
 
@@ -245,7 +243,6 @@ export default function EditProfileScreen() {
           </View>
         </View>
 
-        {/* Password Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Alterar Senha</Text>
           <Text style={styles.sectionSubtitle}>
@@ -299,7 +296,6 @@ export default function EditProfileScreen() {
           </View>
         </View>
 
-        {/* Save Button */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={[
@@ -320,7 +316,6 @@ export default function EditProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Info */}
         <View style={styles.infoContainer}>
           <Text style={styles.infoText}>
             🔒 Seus dados são mantidos em segurança e apenas você pode

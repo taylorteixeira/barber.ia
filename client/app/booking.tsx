@@ -304,7 +304,6 @@ export default function BookingScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -315,7 +314,6 @@ export default function BookingScreen() {
         <Text style={styles.headerTitle}>Agendar Horário</Text>
       </View>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Barbershop Info */}
         {barbershop && (
           <View style={styles.barbershopInfo}>
             <Text style={styles.barbershopName}>{barbershop.name}</Text>
@@ -323,7 +321,6 @@ export default function BookingScreen() {
           </View>
         )}
 
-        {/* Service Selection */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Escolha o Serviço</Text>
           <View style={styles.servicesGrid}>
@@ -403,7 +400,6 @@ export default function BookingScreen() {
           </View>
         </View>
 
-        {/* Date Selection */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Escolha a Data</Text>
           <ScrollView
@@ -449,7 +445,6 @@ export default function BookingScreen() {
           </ScrollView>
         </View>
 
-        {/* Time Selection */}
         {selectedDate && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Escolha o Horário</Text>
@@ -480,7 +475,6 @@ export default function BookingScreen() {
           </View>
         )}
 
-        {/* Summary */}
         {canProceed && (
           <View style={styles.summarySection}>
             <Text style={styles.summaryTitle}>Resumo do Agendamento</Text>
@@ -515,7 +509,6 @@ export default function BookingScreen() {
           </View>
         )}
       </ScrollView>
-      {/* Bottom Button */}
       {canProceed && (
         <View style={styles.bottomContainer}>
           <TouchableOpacity style={styles.bookButton} onPress={handleBooking}>
@@ -525,7 +518,6 @@ export default function BookingScreen() {
           </TouchableOpacity>
         </View>
       )}
-      {/* Confirmation Modal */}
       <Modal
         visible={showConfirmModal}
         transparent
@@ -534,7 +526,6 @@ export default function BookingScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            {' '}
             <Text style={styles.modalTitle}>
               {isLoggedIn
                 ? 'Confirmar Agendamento'

@@ -67,7 +67,6 @@ export default function BarberProfile() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Hero Image */}
         <View style={styles.heroContainer}>
           <Image source={{ uri: barber.image }} style={styles.heroImage} />
           <View style={styles.overlay}>
@@ -81,7 +80,6 @@ export default function BarberProfile() {
             </View>
           </View>
         </View>
-        {/* Info Cards */}
         <View style={styles.infoSection}>
           <View style={styles.infoCard}>
             <MapPin size={24} color="#2563EB" />
@@ -119,14 +117,12 @@ export default function BarberProfile() {
             </View>
           </View>
         </View>
-        {/* Additional Barbershop Info */}
         {barbershop && barbershop.description && (
           <View style={styles.aboutSection}>
             <Text style={styles.sectionTitle}>Sobre a Barbearia</Text>
             <Text style={styles.aboutText}>{barbershop.description}</Text>
           </View>
         )}
-        {/* Services */}
         <View style={styles.servicesSection}>
           <Text style={styles.sectionTitle}>Serviços Oferecidos</Text>
           <View style={styles.servicesList}>
@@ -167,18 +163,16 @@ export default function BarberProfile() {
             )}
           </View>
         </View>
-        {/* About */}
         <View style={styles.aboutSection}>
           <Text style={styles.sectionTitle}>Sobre</Text>
           <Text style={styles.aboutText}>
-            Barbearia especializada em cortes modernos e clássicos. Mais de{' '}
+            Barbearia especializada em cortes modernos e clássicos. Mais de
             {barber.reviews} clientes satisfeitos com nosso atendimento premium.
             Ambiente acolhedor e profissionais experientes.
           </Text>
         </View>
       </ScrollView>
 
-      {/* Book Button */}
       <View style={styles.bookingContainer}>
         <View style={styles.priceContainer}>
           <Text style={styles.priceLabel}>A partir de</Text>

@@ -684,7 +684,6 @@ export default function BarberOnboardingScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <SafeAreaView style={styles.container}>
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
             <ArrowLeft size={24} color="#6B7280" />
@@ -702,10 +701,8 @@ export default function BarberOnboardingScreen() {
 
         <StepProgress currentStep={currentStep} totalSteps={totalSteps} />
 
-        {/* Content */}
         <View style={styles.content}>{renderCurrentStep()}</View>
 
-        {/* Footer */}
         <View style={styles.footer}>
           <TouchableOpacity
             style={[styles.button, styles.primaryButton]}

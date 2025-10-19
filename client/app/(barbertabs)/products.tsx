@@ -187,7 +187,6 @@ export default function ProductsManagement() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -201,7 +200,6 @@ export default function ProductsManagement() {
         </TouchableOpacity>
       </View>
 
-      {/* Search */}
       <View style={styles.searchContainer}>
         <Search size={20} color="#6B7280" style={styles.searchIcon} />
         <TextInput
@@ -212,7 +210,6 @@ export default function ProductsManagement() {
         />
       </View>
 
-      {/* Products List */}
       <ScrollView
         style={styles.productsList}
         showsVerticalScrollIndicator={false}
@@ -269,7 +266,6 @@ export default function ProductsManagement() {
                 </View>
               </View>
 
-              {/* Stock Controls */}
               <View style={styles.stockControls}>
                 <Text style={styles.stockLabel}>Estoque:</Text>
                 <View style={styles.stockButtons}>
@@ -319,7 +315,6 @@ export default function ProductsManagement() {
         )}
       </ScrollView>
 
-      {/* Add/Edit Modal */}
       <Modal
         visible={modalVisible}
         animationType="slide"

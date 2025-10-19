@@ -384,7 +384,6 @@ export default function NewAppointment() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -402,7 +401,6 @@ export default function NewAppointment() {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Client Selection */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Cliente</Text>
           <TouchableOpacity
@@ -431,7 +429,6 @@ export default function NewAppointment() {
           </TouchableOpacity>
         </View>
 
-        {/* Service Selection */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Serviço</Text>
           <TouchableOpacity
@@ -446,7 +443,7 @@ export default function NewAppointment() {
                     {selectedService.name}
                   </Text>
                   <Text style={styles.selectedItemDetail}>
-                    R$ {selectedService.price.toFixed(2)} •{' '}
+                    R$ {selectedService.price.toFixed(2)} •
                     {selectedService.duration} min
                   </Text>
                 </View>
@@ -460,9 +457,8 @@ export default function NewAppointment() {
           </TouchableOpacity>
         </View>
 
-        {/* Barber Selection */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Barbeiro</Text>{' '}
+          <Text style={styles.sectionTitle}>Barbeiro</Text>
           <TouchableOpacity
             style={styles.selectionCard}
             onPress={() => setShowBarberModal(true)}
@@ -488,7 +484,6 @@ export default function NewAppointment() {
           </TouchableOpacity>
         </View>
 
-        {/* Date Selection */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Data</Text>
           <TextInput
@@ -507,7 +502,6 @@ export default function NewAppointment() {
           </TouchableOpacity>
         </View>
 
-        {/* Time Selection */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Horário</Text>
           <View style={styles.timeGrid}>
@@ -541,7 +535,6 @@ export default function NewAppointment() {
           </View>
         </View>
 
-        {/* Summary */}
         {selectedClient &&
           selectedService &&
           selectedBarber &&
@@ -577,7 +570,6 @@ export default function NewAppointment() {
           )}
       </ScrollView>
 
-      {/* Floating Action Button */}
       {selectedClient &&
         selectedService &&
         selectedBarber &&
@@ -592,7 +584,6 @@ export default function NewAppointment() {
           </TouchableOpacity>
         )}
 
-      {/* Client Selection Modal */}
       <Modal
         visible={showClientModal}
         animationType="slide"
@@ -665,7 +656,6 @@ export default function NewAppointment() {
         </SafeAreaView>
       </Modal>
 
-      {/* Service Selection Modal */}
       <Modal
         visible={showServiceModal}
         animationType="slide"
@@ -702,7 +692,6 @@ export default function NewAppointment() {
         </SafeAreaView>
       </Modal>
 
-      {/* Barber Selection Modal */}
       <Modal
         visible={showBarberModal}
         animationType="slide"
@@ -753,7 +742,6 @@ export default function NewAppointment() {
         </SafeAreaView>
       </Modal>
 
-      {/* New Client Modal */}
       <Modal
         visible={showNewClientModal}
         animationType="slide"

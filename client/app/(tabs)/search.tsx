@@ -192,7 +192,7 @@ export default function SearchScreen() {
             ))}
           </ScrollView>
         </View>
-      )}{' '}
+      )}
       <View style={styles.resultsHeader}>
         <Text style={styles.resultsCount}>
           {filteredResults.length} barbeiros encontrados

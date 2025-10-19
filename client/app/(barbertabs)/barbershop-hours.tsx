@@ -117,7 +117,6 @@ export default function BarbershopHours() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -172,7 +171,6 @@ export default function BarbershopHours() {
         </View>
       </ScrollView>
 
-      {/* Modal de Edição de Horário */}
       <Modal
         animationType="slide"
         transparent={true}

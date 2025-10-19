@@ -343,7 +343,6 @@ export default function BarberDashboard() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
         <View style={styles.header}>
           <View>
             <Text style={styles.greeting}>Olá, {barberData.name}!</Text>
@@ -363,7 +362,6 @@ export default function BarberDashboard() {
           </View>
         ) : (
           <>
-            {/* Quick Stats - 4 cards principais */}
             <View style={styles.statsContainer}>
               <View style={styles.statCard}>
                 <View style={styles.statIcon}>
@@ -401,7 +399,6 @@ export default function BarberDashboard() {
                 <Text style={styles.statLabel}>Avaliação</Text>
               </View>
             </View>
-            {/* Ações Rápidas */}
             <View style={styles.actionsSection}>
               <Text style={styles.sectionTitle}>Ações Rápidas</Text>
               <View style={styles.actionsGrid}>
@@ -437,7 +434,7 @@ export default function BarberDashboard() {
                     <Settings size={24} color="#F59E0B" />
                   </View>
                   <Text style={styles.actionText}>Gerenciar Serviços</Text>
-                </TouchableOpacity>{' '}
+                </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.actionCard}
                   onPress={() => handleQuickAction('facecut')}
@@ -462,7 +459,6 @@ export default function BarberDashboard() {
                 </TouchableOpacity>
               </View>
             </View>
-            {/* Atividade Recente */}
             <View style={styles.activitySection}>
               <Text style={styles.sectionTitle}>Atividade Recente</Text>
               <View style={styles.activityCard}>
@@ -536,10 +532,8 @@ export default function BarberDashboard() {
                 )}
               </View>
             </View>
-            {/* Additional Dashboards */}
             <View style={styles.dashboardsSection}>
               <Text style={styles.sectionTitle}>Análises Detalhadas</Text>
-              {/* Performance Comparison */}
               <View style={styles.dashboardCard}>
                 <View style={styles.dashboardHeader}>
                   <BarChart3 size={20} color="#3B82F6" />
@@ -567,7 +561,6 @@ export default function BarberDashboard() {
                   </View>
                 </View>
               </View>
-              {/* Top Services */}
               <View style={styles.dashboardCard}>
                 <View style={styles.dashboardHeader}>
                   <Star size={20} color="#F59E0B" />
@@ -597,7 +590,6 @@ export default function BarberDashboard() {
                   )}
                 </View>
               </View>
-              {/* Client Retention */}
               <View style={styles.dashboardCard}>
                 <View style={styles.dashboardHeader}>
                   <PieChart size={20} color="#8B5CF6" />
@@ -661,7 +653,6 @@ export default function BarberDashboard() {
                   )}
                 </View>
               </View>
-              {/* Busy Hours */}
               <View style={styles.dashboardCard}>
                 <View style={styles.dashboardHeader}>
                   <Activity size={20} color="#EF4444" />
@@ -689,11 +680,11 @@ export default function BarberDashboard() {
                                 )}%`,
                               },
                             ]}
-                          />{' '}
+                          />
                         </View>
                         <Text style={styles.busyHourCount}>
                           {slot.appointments}
-                        </Text>{' '}
+                        </Text>
                       </View>
                     ))
                   ) : (

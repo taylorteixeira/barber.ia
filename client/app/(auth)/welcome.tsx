@@ -76,7 +76,6 @@ export default function WelcomeScreen() {
             },
           ]}
         >
-          {/* Success Icon */}
           <View style={styles.successContainer}>
             <View style={styles.successIcon}>
               <Check size={32} color="#FFFFFF" />
@@ -84,7 +83,6 @@ export default function WelcomeScreen() {
             <Scissors size={24} color="#FFFFFF" style={styles.scissorsIcon} />
           </View>
 
-          {/* Welcome Message */}
           <View style={styles.messageContainer}>
             <Text style={styles.title}>Parabéns! 🎉</Text>
             <Text style={styles.subtitle}>
@@ -96,7 +94,6 @@ export default function WelcomeScreen() {
             </Text>
           </View>
 
-          {/* Features List */}
           <View style={styles.featuresContainer}>
             <Text style={styles.featuresTitle}>
               O que você pode fazer agora:
@@ -132,7 +129,6 @@ export default function WelcomeScreen() {
             ))}
           </View>
 
-          {/* Action Button */}
           <TouchableOpacity
             style={styles.getStartedButton}
             onPress={handleGetStarted}
@@ -142,7 +138,6 @@ export default function WelcomeScreen() {
             <ArrowRight size={20} color="#1E40AF" style={styles.buttonIcon} />
           </TouchableOpacity>
 
-          {/* Tips */}
           <View style={styles.tipsContainer}>
             <Text style={styles.tipsTitle}>💡 Dica:</Text>
             <Text style={styles.tipsText}>

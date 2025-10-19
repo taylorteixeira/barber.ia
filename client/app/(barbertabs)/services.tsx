@@ -179,7 +179,6 @@ export default function ServicesManagement() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -193,7 +192,6 @@ export default function ServicesManagement() {
         </TouchableOpacity>
       </View>
 
-      {/* Search */}
       <View style={styles.searchContainer}>
         <Search size={20} color="#6B7280" style={styles.searchIcon} />
         <TextInput
@@ -204,7 +202,6 @@ export default function ServicesManagement() {
         />
       </View>
 
-      {/* Services List */}
       <ScrollView
         style={styles.servicesList}
         showsVerticalScrollIndicator={false}
@@ -270,7 +267,6 @@ export default function ServicesManagement() {
         )}
       </ScrollView>
 
-      {/* Add/Edit Modal */}
       <Modal
         visible={modalVisible}
         animationType="slide"
