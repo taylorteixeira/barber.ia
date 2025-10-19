@@ -77,13 +77,10 @@ export default function EditProfile() {
     specialties: '',
   });
 
-  // Form data
   const [formData, setFormData] = useState({
-    // Barbeiro
     name: '',
     email: '',
     phone: '',
-    // Barbearia
     barbershopName: '',
     barbershopDescription: '',
     barbershopAddress: '',
@@ -107,7 +104,6 @@ export default function EditProfile() {
           phone: user.phone,
         }));
 
-        // Buscar barbearia do usuário
         const shop = await getBarbershopByOwnerId(user.id!);
         if (shop) {
           setBarbershop(shop);
@@ -119,11 +115,10 @@ export default function EditProfile() {
             barbershopAddress: shop.address,
             barbershopPhone: shop.phone,
             barbershopEmail: shop.email,
-          })); // Buscar barbeiros da barbearia
+          }));
           const shopBarbers = await getBarbersByBarbershopId(shop.id);
           setBarbers(shopBarbers);
 
-          // Buscar detalhes dos usuários barbeiros
           const barbersDetailsMap: { [key: number]: User } = {};
           for (const barber of shopBarbers) {
             const userDetails = await getUserById(barber.userId);
@@ -142,7 +137,6 @@ export default function EditProfile() {
     try {
       if (!currentUser) return;
 
-      // Atualizar dados do usuário
       const userData: User = {
         ...currentUser,
         name: formData.name,
@@ -169,10 +163,8 @@ export default function EditProfile() {
 
       let success = false;
       if (barbershop) {
-        // Atualizar barbearia existente
         success = await updateBarbershop({ ...barbershop, ...barbershopData });
       } else {
-        // Criar nova barbearia
         const newBarbershop = await createBarbershop(barbershopData);
         success = !!newBarbershop;
         if (newBarbershop) {
@@ -181,7 +173,6 @@ export default function EditProfile() {
       }
 
       if (success) {
-        // Recarregar dados atualizados
         await loadData();
         Alert.alert('Sucesso', 'Perfil atualizado com sucesso!');
       } else {
@@ -215,12 +206,11 @@ export default function EditProfile() {
         return;
       }
 
-      // Criar um usuário barbeiro
       const newUser: User = {
         name: newBarberData.name,
         email: newBarberData.email,
         phone: newBarberData.phone,
-        password: 'barbeiro123', // Senha padrão que deve ser alterada no primeiro login
+        password: 'barbeiro123',
         userType: 'barber',
         barbershopId: barbershop.id,
       };
@@ -234,11 +224,8 @@ export default function EditProfile() {
         return;
       }
 
-      // Buscar o usuário criado para pegar o ID
-      // Como não temos uma função para buscar por email, vamos usar um ID baseado no tempo
       const userId = Date.now();
 
-      // Criar o perfil do barbeiro
       const newProfile: Omit<BarberProfile, 'id' | 'joinedAt'> = {
         userId: userId,
         barbershopId: barbershop.id,
@@ -259,7 +246,7 @@ export default function EditProfile() {
 
       const createdProfile = await createBarberProfile(newProfile);
       if (createdProfile) {
-        await loadData(); // Recarregar dados
+        await loadData();
         setNewBarberModalVisible(false);
         setNewBarberData({ name: '', email: '', phone: '', specialties: '' });
         Alert.alert(
@@ -300,7 +287,6 @@ export default function EditProfile() {
         return;
       }
 
-      // Atualizar dados do usuário
       const userDetails = barbersDetails[editingBarber.userId];
       if (userDetails) {
         const updatedUser: User = {
@@ -320,7 +306,6 @@ export default function EditProfile() {
         }
       }
 
-      // Atualizar perfil do barbeiro
       const updatedProfile: BarberProfile = {
         ...editingBarber,
         specialties: newBarberData.specialties
@@ -331,7 +316,7 @@ export default function EditProfile() {
 
       const profileUpdateSuccess = await updateBarberProfile(updatedProfile);
       if (profileUpdateSuccess) {
-        await loadData(); // Recarregar dados
+        await loadData();
         setEditBarberModalVisible(false);
         setEditingBarber(null);
         setNewBarberData({ name: '', email: '', phone: '', specialties: '' });
@@ -359,7 +344,7 @@ export default function EditProfile() {
         setBarberWorkingHoursModalVisible(false);
         setEditingBarber(null);
         setEditingBarberWorkingHours(null);
-        loadData(); // Recarregar lista de barbeiros
+        loadData();
       } else {
         Alert.alert(
           'Erro',
@@ -381,7 +366,7 @@ export default function EditProfile() {
 
       const success = await updateBarberProfile(updatedProfile);
       if (success) {
-        await loadData(); // Recarregar dados
+        await loadData();
         Alert.alert(
           'Sucesso',
           `Barbeiro ${barber.isActive ? 'desativado' : 'ativado'} com sucesso!`
@@ -636,7 +621,7 @@ export default function EditProfile() {
                           .map((day) => getDayName(day))
                           .join(', ')}
                       </Text>
-                    </View>{' '}
+                    </View>
                     <View style={styles.barberActions}>
                       <TouchableOpacity
                         style={styles.actionButton}
@@ -1070,7 +1055,6 @@ export default function EditProfile() {
   );
 }
 
-// Componente para editar horário do dia
 function DayScheduleEditor({
   schedule,
   onSave,
@@ -1449,7 +1433,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
     color: '#FFFFFF',
   },
-  // Novos estilos para barbeiros
   barberHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1490,7 +1473,6 @@ const styles = StyleSheet.create({
     color: '#1F2937',
     marginBottom: 12,
   },
-  // Estilos para horários do barbeiro
   dayContainer: {
     backgroundColor: '#F9FAFB',
     borderRadius: 8,

@@ -5,7 +5,6 @@ const Barbershop = require("../models/Barbershop");
 
 const router = express.Router();
 
-// Registro
 router.post("/register", async (req, res) => {
   const { name, phone, email, password, isBarber } = req.body;
   try {
@@ -25,7 +24,6 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// Login
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   try {

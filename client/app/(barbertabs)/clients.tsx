@@ -5,7 +5,6 @@ export default function BarberClients() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect to the new clients management screen
     router.replace('/(barbertabs)/clients-management');
   }, []);
 

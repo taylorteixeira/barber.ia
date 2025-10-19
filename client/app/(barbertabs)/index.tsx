@@ -35,8 +35,6 @@ import {
   Booking,
   Client,
 } from '../../services/database';
-
-// TypeScript interfaces
 interface DashboardStats {
   todayAppointments: number;
   weekRevenue: number;
@@ -106,38 +104,34 @@ export default function BarberDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let isMounted = true; // Track if component is still mounted
+    let isMounted = true;
 
     const loadDashboardData = async () => {
       try {
-        if (!isMounted) return; // Early return if component unmounted
+        if (!isMounted) return;
         setLoading(true);
         const userData = await getCurrentUser();
         if (userData && isMounted) {
-          // Load barbershop info
           const barbershop = await getBarbershopByOwnerId(userData.id!);
-          if (!isMounted) return; // Check again after async operation
+          if (!isMounted) return;
 
           setBarberData({
             name: userData.name,
             barbershopName: barbershop ? barbershop.name : 'Minha Barbearia',
-          }); // Load real appointments data
+          });
           const appointments = await getAppointmentsForCurrentBarber();
           const bookings = await getBookingsForCurrentBarbershop();
           const clients = await getClientsFromBookings();
 
-          if (!isMounted) return; // Check after all async operations
+          if (!isMounted) return;
 
-          // Set appointments for use in activity section
           setRecentAppointments(appointments);
 
-          // Calculate today's appointments
           const today = new Date().toISOString().split('T')[0];
           const todayAppointments = appointments.filter(
             (apt) => apt.date === today
           ).length;
 
-          // Calculate week revenue from bookings
           const oneWeekAgo = new Date();
           oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
           const weekBookings = bookings.filter(
@@ -150,15 +144,12 @@ export default function BarberDashboard() {
             0
           );
 
-          // Calculate pending appointments
           const pendingAppointments = appointments.filter(
             (apt) => apt.status === 'scheduled'
           ).length;
 
-          // Calculate average rating (mock for now since we don't have ratings system)
           const averageRating = bookings.length > 0 ? 4.5 : 0;
 
-          // Calculate top services from bookings
           const serviceStats = new Map<
             string,
             { count: number; revenue: number }
@@ -179,7 +170,7 @@ export default function BarberDashboard() {
           const topServices: TopService[] = Array.from(serviceStats.entries())
             .map(([name, stats]) => ({ name, ...stats }))
             .sort((a, b) => b.count - a.count)
-            .slice(0, 3); // Calculate busy hours with 3-hour intervals
+            .slice(0, 3);
           const timeSlots = [
             { range: '08:00-11:00', start: 8, end: 11 },
             { range: '11:00-14:00', start: 11, end: 14 },
@@ -199,10 +190,9 @@ export default function BarberDashboard() {
                 appointments: count,
               };
             })
-            .filter((slot) => slot.appointments > 0) // Only show slots with appointments
-            .sort((a, b) => b.appointments - a.appointments); // Sort by most busy
+            .filter((slot) => slot.appointments > 0)
+            .sort((a, b) => b.appointments - a.appointments);
 
-          // Calculate client retention (new vs returning)
           const clientBookingCounts = new Map<string, number>();
           bookings.forEach((booking) => {
             if (booking.clientName) {
@@ -228,7 +218,6 @@ export default function BarberDashboard() {
               ? Math.round((newClients / totalUniqueClients) * 100)
               : 0;
 
-          // Calculate weekly comparison
           const twoWeeksAgo = new Date();
           twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
           const lastWeekAppointments = appointments.filter((apt) => {
@@ -249,16 +238,15 @@ export default function BarberDashboard() {
                 )
               : 0;
 
-          if (!isMounted) return; // Final check before updating state
+          if (!isMounted) return;
 
-          // Update states with real data
           setStats({
             todayAppointments,
             weekRevenue,
             totalClients: clients.length,
             averageRating,
             pendingAppointments,
-            monthlyGrowth: growth, // Using weekly growth as monthly for now
+            monthlyGrowth: growth,
           });
 
           setDashboardData({
@@ -272,11 +260,10 @@ export default function BarberDashboard() {
               returning: returningPercentage,
               new: newPercentage,
             },
-            dailyRevenue: [0, 0, 0, 0, 0, 0, 0], // Would need daily breakdown
+            dailyRevenue: [0, 0, 0, 0, 0, 0, 0],
             busyHours,
           });
 
-          // Set recent appointments for activity section
           const yesterday = new Date();
           yesterday.setDate(yesterday.getDate() - 1);
 
@@ -304,7 +291,6 @@ export default function BarberDashboard() {
 
     loadDashboardData();
 
-    // Cleanup function to prevent state updates on unmounted component
     return () => {
       isMounted = false;
     };
@@ -475,7 +461,7 @@ export default function BarberDashboard() {
                   <Text style={styles.actionText}>Clientes</Text>
                 </TouchableOpacity>
               </View>
-            </View>{' '}
+            </View>
             {/* Atividade Recente */}
             <View style={styles.activitySection}>
               <Text style={styles.sectionTitle}>Atividade Recente</Text>
@@ -580,7 +566,7 @@ export default function BarberDashboard() {
                     </Text>
                   </View>
                 </View>
-              </View>{' '}
+              </View>
               {/* Top Services */}
               <View style={styles.dashboardCard}>
                 <View style={styles.dashboardHeader}>
@@ -610,7 +596,7 @@ export default function BarberDashboard() {
                     </Text>
                   )}
                 </View>
-              </View>{' '}
+              </View>
               {/* Client Retention */}
               <View style={styles.dashboardCard}>
                 <View style={styles.dashboardHeader}>
@@ -674,7 +660,7 @@ export default function BarberDashboard() {
                     </Text>
                   )}
                 </View>
-              </View>{' '}
+              </View>
               {/* Busy Hours */}
               <View style={styles.dashboardCard}>
                 <View style={styles.dashboardHeader}>
@@ -907,7 +893,6 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     marginLeft: 8,
   },
-  // Additional Dashboard Styles
   dashboardsSection: {
     paddingHorizontal: 20,
     marginBottom: 24,
@@ -1067,7 +1052,6 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
 
-  // Novos estilos para ícones das ações
   actionIcon: {
     width: 48,
     height: 48,
@@ -1077,7 +1061,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 
-  // Estilos para atividade recente
   activityContent: {
     flex: 1,
     marginLeft: 12,

@@ -46,14 +46,12 @@ export default function ProfileScreen() {
     await initBookingsDatabase();
     const userData = await getCurrentUser();
     if (userData) {
-      // fetch user stats
       const bookings: Booking[] = await getBookings();
       const userBookings = bookings.filter((b) => b.status !== 'cancelled');
       const total = userBookings.length;
       const completedBookings = userBookings.filter(
         (b) => b.status === 'completed'
       );
-      // placeholder avg rating
       const avgRating = completedBookings.length > 0 ? 4.5 : 0;
       setUser({
         ...user,
@@ -71,7 +69,6 @@ export default function ProfileScreen() {
     loadUserData();
   }, []);
 
-  // Reload user data when screen is focused (useful after editing profile)
   useFocusEffect(
     React.useCallback(() => {
       loadUserData();
@@ -153,7 +150,7 @@ export default function ProfileScreen() {
       >
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Meu Perfil</Text>
-        </View>{' '}
+        </View>
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
             <Image source={{ uri: user.avatar }} style={styles.avatar} />
@@ -196,7 +193,6 @@ export default function ProfileScreen() {
         </View>
         <View style={styles.menuSection}>
           {menuItems.map((item) => (
-            // @ts-ignore: suppress key prop error
             <TouchableOpacity
               key={item.id}
               style={styles.menuItem}

@@ -42,7 +42,6 @@ export default function LandingScreen() {
   const rotateAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Animação de entrada mais sofisticada
     Animated.sequence([
       Animated.parallel([
         Animated.timing(fadeAnim, {
@@ -391,7 +390,7 @@ export default function LandingScreen() {
                 </Text>
               </View>
             </View>
-          </Animated.View>{' '}
+          </Animated.View>
           {/* Footer futurista */}
           <View style={styles.footer}>
             <Text style={styles.footerText}>
@@ -416,7 +415,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // Elementos de fundo animados
   backgroundElement1: {
     position: 'absolute',
     top: '10%',
@@ -456,7 +454,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
 
-  // Hero Section - Design Futurista
   heroSection: {
     minHeight: height * 0.75,
     justifyContent: 'center',
@@ -466,7 +463,6 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
 
-  // Logo Holográfico
   logoContainer: {
     marginBottom: 40,
     alignItems: 'center',
@@ -541,7 +537,6 @@ const styles = StyleSheet.create({
     zIndex: -1,
   },
 
-  // Título com efeito neon
   titleContainer: {
     alignItems: 'center',
     marginBottom: 16,
@@ -598,7 +593,6 @@ const styles = StyleSheet.create({
     maxWidth: width * 0.9,
   },
 
-  // Tech Features
   techFeaturesContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -630,7 +624,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
 
-  // Selection Section
   selectionSection: {
     paddingHorizontal: 24,
     paddingVertical: 40,
@@ -661,7 +654,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
   },
 
-  // User Type Cards - Design Cyberpunk
   userTypeCard: {
     marginBottom: 24,
     borderRadius: 24,
@@ -702,7 +694,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // Ícone Holográfico
   holographicIcon: {
     width: 80,
     height: 80,
@@ -789,7 +780,6 @@ const styles = StyleSheet.create({
     left: 0,
   },
 
-  // Premium Section
   premiumSection: {
     paddingHorizontal: 24,
     paddingVertical: 40,
@@ -826,7 +816,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  // Benefits Grid
   benefitsGrid: {
     gap: 20,
   },
@@ -874,7 +863,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
   },
-  // Footer
   footer: {
     paddingHorizontal: 24,
     paddingVertical: 30,

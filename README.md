@@ -62,11 +62,13 @@ barber.ia/
 ## 🚀 Como funciona
 
 **Instalação:**
+
 ```bash
 npm install
 ```
 
 **Iniciar desenvolvimento:**
+
 ```bash
 npx expo start --offline
 ```
@@ -74,11 +76,13 @@ npx expo start --offline
 ### 👤 **Fluxo do Cliente:**
 
 1. **Cadastro/Login:**
+
    - Cadastra-se com nome, e-mail, telefone e senha
    - Senha criptografada e dados salvos localmente
    - Login seguro com validação
 
 2. **Busca e Agendamento:**
+
    - Visualiza lista de barbeiros disponíveis
    - Seleciona barbeiro específico
    - Vê serviços e preços em tempo real
@@ -92,10 +96,12 @@ npx expo start --offline
 ### ✂️ **Fluxo do Barbeiro:**
 
 1. **Onboarding Profissional:**
+
    - Cadastro específico para barbeiros
    - Configuração de perfil e serviços
 
 2. **Gestão da Agenda:**
+
    - Visualiza agendamentos de clientes reais
    - Confirma, cancela ou conclui serviços
    - Notificações automáticas para clientes
@@ -107,6 +113,7 @@ npx expo start --offline
    - Gestão de produtos e suporte
 
 ### 🔄 **Sincronização Inteligente:**
+
 - **Cliente agenda** → Aparece para barbeiro específico
 - **Barbeiro cancela** → Cliente recebe notificação
 - **Cliente conclui** → Barbeiro vê atualização
@@ -115,17 +122,20 @@ npx expo start --offline
 ## 🗄️ Estrutura do banco de dados
 
 ### **Usuários e Sessões:**
+
 - **Clientes:** Array armazenado em `barber_users`
-- **Barbeiros:** Array armazenado em `barber_barbers` 
+- **Barbeiros:** Array armazenado em `barber_barbers`
 - **Sessão atual:** `barber_current_user` (sem senha)
 - **Contador de IDs:** `barber_user_counter` e `barber_barber_counter`
 
 ### **Sistema de Agendamentos:**
+
 - **Bookings (Cliente):** `barber_bookings` - Agendamentos feitos pelos clientes
 - **Appointments (Barbeiro):** `barber_appointments` - Agendamentos recebidos pelos barbeiros
 - **Sincronização automática:** Status sincronizados bidirecionalmente
 
 ### **Dados de Negócio:**
+
 - **Barbearias:** `barber_barbershops` - Informações, serviços e preços
 - **Clientes por Barbeiro:** Extraídos automaticamente dos agendamentos
 - **Serviços e Preços:** Atualizados em tempo real
@@ -133,21 +143,23 @@ npx expo start --offline
 ### **Estrutura de Dados:**
 
 **Usuário/Cliente:**
+
 ```typescript
 {
   id: number,
   name: string,
-  email: string, // único
+  email: string,
   phone: string,
-  password: string, // criptografada
+  password: string,
   type: 'client'
 }
 ```
 
 **Barbeiro:**
+
 ```typescript
 {
-  id: string, // prefixo real_ ou mock_
+  id: string,
   name: string,
   email: string,
   phone: string,
@@ -159,6 +171,7 @@ npx expo start --offline
 ```
 
 **Agendamento:**
+
 ```typescript
 {
   id: string,
@@ -176,6 +189,7 @@ npx expo start --offline
 ## 🛠️ Tecnologias principais
 
 ### **Frontend:**
+
 - React Native (Expo SDK 51+)
 - Expo Router (navegação baseada em arquivos)
 - TypeScript (tipagem estática)
@@ -183,6 +197,7 @@ npx expo start --offline
 - Lucide React Native (ícones)
 
 ### **Desenvolvimento:**
+
 - EAS Build (compilação e distribuição)
 - Expo Development Build
 - Hot Reload para desenvolvimento rápido
@@ -190,22 +205,26 @@ npx expo start --offline
 ## 🎯 Principais Integrações Implementadas
 
 ### ✅ **Agendamentos Específicos por Barbeiro**
-- Sistema de IDs únicos (`real_` e `mock_`) 
+
+- Sistema de IDs únicos (`real_` e `mock_`)
 - Agendamentos direcionados corretamente
 - Rastreamento preciso por `barbershopId`
 
 ### ✅ **Sincronização Bidirecional**
+
 - Cliente cancela → Barbeiro é notificado
-- Barbeiro confirma → Cliente é notificado  
+- Barbeiro confirma → Cliente é notificado
 - Status sincronizados em tempo real
 - Função `updateBookingStatus()` integrada
 
 ### ✅ **Clientes Reais no Portal do Barbeiro**
+
 - Lista apenas clientes que realmente agendaram
 - Extração automática via `getClientsFromBookings()`
 - Atualização automática a cada novo agendamento
 
 ### ✅ **Atualização em Tempo Real**
+
 - Barbeiro atualiza preços → Cliente vê imediatamente
 - Serviços sincronizados via `updateBarbershopServices()`
 - Dados sempre atualizados com `refreshBarbershopData()`
@@ -213,32 +232,38 @@ npx expo start --offline
 ## 📱 Como usar o aplicativo
 
 ### **Para Clientes:**
+
 1. Faça seu cadastro na tela de registro
 2. Navegue pela lista de barbeiros
-3. Selecione um barbeiro específico  
+3. Selecione um barbeiro específico
 4. Veja serviços e preços atualizados
 5. Agende seu serviço
 6. Acompanhe o status na aba "Agendamentos"
 
 ### **Para Barbeiros:**
+
 1. Complete o onboarding de barbeiro
 2. Configure seus serviços e preços
 3. Gerencie agendamentos na agenda
 4. Veja clientes reais na aba "Clientes"
 5. Atualize informações (aparecem para clientes instantaneamente)
+
 ## 📦 Distribuição e Build
 
 **Build para Android (AAB):**
+
 ```bash
 npx eas build -p android --profile preview --aab
 ```
 
 **Build para iOS:**
+
 ```bash
 npx eas build -p ios --profile preview
 ```
 
 **Desenvolvimento local:**
+
 ```bash
 npx expo start --dev-client
 ```
@@ -262,7 +287,8 @@ Este projeto está sob a licença especificada no arquivo LICENSE.
 ✅ **Sincronização em tempo real** de dados e status  
 ✅ **Experiência profissional** equivalente a apps comerciais  
 ✅ **Interface moderna** e intuitiva  
-✅ **Código bem estruturado** e documentado  
+✅ **Código bem estruturado** e documentado
 
 ## Apresentação
+
 https://www.canva.com/design/DAGrTFfGOo4/jbLifiw2YqcRCngODNhIew/edit?utm_content=DAGrTFfGOo4&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton

@@ -58,7 +58,6 @@ export default function SupportScreen() {
   const generateAIResponse = (userMessage: string): string => {
     const lowerMessage = userMessage.toLowerCase();
 
-    // Respostas específicas baseadas em palavras-chave
     if (
       lowerMessage.includes('agendamento') ||
       lowerMessage.includes('agendar')
@@ -111,7 +110,6 @@ export default function SupportScreen() {
       return 'Olá! Que bom te ver aqui! Como posso ajudar você hoje? Estou pronta para esclarecer qualquer dúvida sobre o Barber.IA!';
     }
 
-    // Resposta genérica aleatória
     const randomIndex = Math.floor(Math.random() * predefinedResponses.length);
     return predefinedResponses[randomIndex];
   };
@@ -130,7 +128,6 @@ export default function SupportScreen() {
     setInputText('');
     setIsTyping(true);
 
-    // Simular delay da IA
     setTimeout(() => {
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
@@ -141,7 +138,7 @@ export default function SupportScreen() {
 
       setMessages((prev) => [...prev, aiResponse]);
       setIsTyping(false);
-    }, 1500 + Math.random() * 1000); // 1.5-2.5 segundos
+    }, 1500 + Math.random() * 1000);
   };
 
   const formatTime = (date: Date) => {

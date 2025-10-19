@@ -26,13 +26,11 @@ export interface ExportOptions {
   status?: string[];
 }
 
-// Função para filtrar agendamentos por período e critérios
 export const filterAppointments = (
   appointments: AppointmentExport[],
   options: ExportOptions
 ): AppointmentExport[] => {
   return appointments.filter((appointment) => {
-    // Filtro por data
     const appointmentDate = new Date(appointment.date);
     const startDate = new Date(options.startDate);
     const endDate = new Date(options.endDate);
@@ -41,12 +39,10 @@ export const filterAppointments = (
       return false;
     }
 
-    // Filtro por barbeiro (se especificado)
     if (options.barberId && appointment.barber !== options.barberId) {
       return false;
     }
 
-    // Filtro por status (se especificado)
     if (
       options.status &&
       options.status.length > 0 &&
@@ -59,7 +55,6 @@ export const filterAppointments = (
   });
 };
 
-// Função para gerar CSV
 export const generateCSV = (appointments: AppointmentExport[]): string => {
   const headers = [
     'Data',
@@ -96,7 +91,6 @@ export const generateCSV = (appointments: AppointmentExport[]): string => {
   return [headers, ...rows].join('\n');
 };
 
-// Função para gerar HTML para PDF
 export const generateHTML = (
   appointments: AppointmentExport[],
   options: ExportOptions
@@ -277,7 +271,6 @@ export const generateHTML = (
   `;
 };
 
-// Função principal de exportação
 export const exportAppointments = async (
   appointments: AppointmentExport[],
   options: ExportOptions
@@ -308,7 +301,6 @@ export const exportAppointments = async (
         break;
 
       case 'excel':
-        // Para Excel, vamos usar CSV com extensão .xls
         const excelContent = generateCSV(filteredAppointments);
         fileUri = `${FileSystem.documentDirectory}${fileName}.xls`;
         await FileSystem.writeAsStringAsync(fileUri, excelContent, {
@@ -318,7 +310,6 @@ export const exportAppointments = async (
         break;
 
       case 'pdf':
-        // Para PDF, vamos criar um HTML e compartilhar
         const htmlContent = generateHTML(filteredAppointments, options);
         fileUri = `${FileSystem.documentDirectory}${fileName}.html`;
         await FileSystem.writeAsStringAsync(fileUri, htmlContent, {
@@ -331,13 +322,11 @@ export const exportAppointments = async (
         throw new Error('Formato não suportado');
     }
 
-    // Verificar se o arquivo foi criado
     const fileInfo = await FileSystem.getInfoAsync(fileUri);
     if (!fileInfo.exists) {
       throw new Error('Erro ao criar arquivo');
     }
 
-    // Compartilhar o arquivo
     const canShare = await Sharing.isAvailableAsync();
     if (canShare) {
       await Sharing.shareAsync(fileUri, {
@@ -353,14 +342,13 @@ export const exportAppointments = async (
       );
     }
 
-    // Limpar arquivo temporário após um tempo
     setTimeout(async () => {
       try {
         await FileSystem.deleteAsync(fileUri, { idempotent: true });
       } catch (error) {
         console.log('Erro ao limpar arquivo temporário:', error);
       }
-    }, 300000); // 5 minutos
+    }, 300000);
   } catch (error) {
     console.error('Erro na exportação:', error);
     Alert.alert('Erro', 'Erro ao exportar agendamentos. Tente novamente.', [
@@ -369,27 +357,22 @@ export const exportAppointments = async (
   }
 };
 
-// Função para gerar opções de período pré-definidas
 export const getPredefinedPeriods = () => {
   const today = new Date();
   const thisWeekStart = new Date(today);
   const thisWeekEnd = new Date(today);
 
-  // Início da semana (segunda-feira)
   const dayOfWeek = today.getDay();
   const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
   thisWeekStart.setDate(today.getDate() + mondayOffset);
   thisWeekEnd.setDate(thisWeekStart.getDate() + 6);
 
-  // Mês atual
   const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
   const thisMonthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
-  // Últimos 30 dias
   const last30DaysStart = new Date(today);
   last30DaysStart.setDate(today.getDate() - 30);
 
-  // Próximos 30 dias
   const next30DaysEnd = new Date(today);
   next30DaysEnd.setDate(today.getDate() + 30);
 

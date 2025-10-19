@@ -36,15 +36,12 @@ export default function BarberProfile() {
       const found = all.find((b) => b.id === id);
       setBarber(found || null);
 
-      // If this is a registered barbershop, get detailed info
       if (found) {
         if (id?.startsWith('real_')) {
-          // Handle new prefixed IDs
           const realBarbershopId = parseInt(id.replace('real_', ''));
           const barbershopDetails = await getBarbershopById(realBarbershopId);
           setBarbershop(barbershopDetails);
         } else if (!isNaN(Number(id))) {
-          // Handle old numeric IDs
           const barbershopDetails = await getBarbershopById(Number(id));
           setBarbershop(barbershopDetails);
         }
@@ -61,7 +58,6 @@ export default function BarberProfile() {
     );
   }
   const handleBook = () => {
-    // Navigate to booking screen with barber ID
     router.push({
       pathname: '/booking',
       params: { id: id },
@@ -84,7 +80,7 @@ export default function BarberProfile() {
               </Text>
             </View>
           </View>
-        </View>{' '}
+        </View>
         {/* Info Cards */}
         <View style={styles.infoSection}>
           <View style={styles.infoCard}>

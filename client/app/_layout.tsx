@@ -31,9 +31,7 @@ export default function RootLayout() {
   useEffect(() => {
     const prepare = async () => {
       try {
-        // Initialize database
         await initDatabase();
-        // Seed barbers and bookings
         await initBarbersDatabase();
         await initBookingsDatabase();
 

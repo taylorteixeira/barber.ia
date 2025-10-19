@@ -33,7 +33,6 @@ export default function HomeScreen() {
     { id: 'promocoes', name: 'Promoções', icon: '🔥' },
   ];
 
-  // Load barbers from database
   useEffect(() => {
     const loadBarbers = async () => {
       await initBarbersDatabase();
@@ -48,24 +47,22 @@ export default function HomeScreen() {
     loadBarbers();
   }, []);
 
-  // Filter barbers based on selected category
   useEffect(() => {
     if (!selectedCategory) {
       setFilteredBarbers(nearbyBarbers);
     } else {
-      // Simple filtering - in a real app you'd have service categories in the data
       const filtered = nearbyBarbers.filter((barber) => {
         switch (selectedCategory) {
           case 'corte':
-            return barber.price <= 35; // Lower price for basic cuts
+            return barber.price <= 35;
           case 'barba':
-            return barber.rating >= 4.7; // High-rated for beard work
+            return barber.rating >= 4.7;
           case 'sobrancelha':
-            return barber.price >= 30; // Premium service
+            return barber.price >= 30;
           case 'pacotes':
-            return barber.price >= 40; // Package deals
+            return barber.price >= 40;
           case 'promocoes':
-            return barber.price <= 30; // Promotional prices
+            return barber.price <= 30;
           default:
             return true;
         }

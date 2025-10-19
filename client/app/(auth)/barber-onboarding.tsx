@@ -56,7 +56,6 @@ export default function BarberOnboardingScreen() {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
 
-  // Etapa 1: Dados Pessoais
   const [personalData, setPersonalData] = useState({
     name: '',
     email: '',
@@ -65,7 +64,6 @@ export default function BarberOnboardingScreen() {
     confirmPassword: '',
   });
 
-  // Etapa 2: Dados da Barbearia
   const [barbershopData, setBarbershopData] = useState({
     name: '',
     description: '',
@@ -75,7 +73,6 @@ export default function BarberOnboardingScreen() {
     zipCode: '',
   });
 
-  // Etapa 3: Configurações Básicas
   const [businessData, setBusinessData] = useState({
     openTime: '08:00',
     closeTime: '18:00',
@@ -92,7 +89,6 @@ export default function BarberOnboardingScreen() {
     },
   });
 
-  // Etapa 4: Serviços Básicos
   const [services, setServices] = useState([
     { name: 'Corte Masculino', price: '25', duration: '30', enabled: true },
     { name: 'Barba Completa', price: '20', duration: '25', enabled: true },
@@ -216,7 +212,6 @@ export default function BarberOnboardingScreen() {
     setLoading(true);
 
     try {
-      // 1. Registrar o usuário barbeiro e fazer login automático
       const loggedInUser = await registerAndLoginUser({
         name: personalData.name,
         email: personalData.email,
@@ -229,14 +224,14 @@ export default function BarberOnboardingScreen() {
         Alert.alert('Erro', 'Erro ao criar conta do usuário');
         setLoading(false);
         return;
-      } // 2. Criar a barbearia
+      }
       const barbershopSuccess = await createBarbershop({
         name: barbershopData.name,
         description: barbershopData.description,
         address: barbershopData.address,
-        phone: personalData.phone, // Usar o telefone do usuário
-        email: personalData.email, // Usar o email do usuário
-        ownerId: loggedInUser.id!, // Usar o ID do usuário logado
+        phone: personalData.phone,
+        email: personalData.email,
+        ownerId: loggedInUser.id!,
         workingHours: {
           monday: {
             isOpen: businessData.workDays.monday,
@@ -301,7 +296,6 @@ export default function BarberOnboardingScreen() {
           })),
       });
       if (barbershopSuccess) {
-        // Sucesso - redirecionar diretamente para o dashboard do barbeiro
         Alert.alert(
           'Bem-vindo!',
           'Conta criada com sucesso! Agora você está logado e pode começar a usar o sistema.',

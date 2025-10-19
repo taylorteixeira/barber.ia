@@ -37,7 +37,6 @@ export default function RegisterScreen() {
   };
 
   const handleRegister = async () => {
-    // Se for barbeiro, redirecionar para o onboarding completo
     if (userType === 'barber') {
       router.push('/(auth)/barber-onboarding');
       return;

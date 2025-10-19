@@ -88,7 +88,6 @@ export default function EditProfileScreen() {
       return false;
     }
 
-    // Check if email is already taken by another user
     if (currentUser && formData.email !== currentUser.email) {
       const emailExists = await checkEmailExistsForUpdate(
         formData.email,
@@ -108,7 +107,6 @@ export default function EditProfileScreen() {
       return false;
     }
 
-    // Se está alterando a senha, validar
     if (formData.password) {
       if (formData.password.length < 6) {
         Alert.alert('Erro', 'Senha deve ter pelo menos 6 caracteres');
@@ -137,7 +135,6 @@ export default function EditProfileScreen() {
         phone: formData.phone.trim(),
       };
 
-      // Se está alterando a senha, incluir no update
       if (formData.password) {
         updatedUser.password = formData.password;
       }
@@ -145,7 +142,6 @@ export default function EditProfileScreen() {
       const success = await updateUser(updatedUser);
 
       if (success) {
-        // Atualizar usuário na sessão (sem senha por segurança)
         const sessionUser = {
           ...updatedUser,
         };
@@ -157,7 +153,6 @@ export default function EditProfileScreen() {
             text: 'OK',
             onPress: () => {
               router.back();
-              // Refresh profile screen data by triggering a re-render
               router.replace('/(tabs)/profile');
             },
           },

@@ -73,7 +73,6 @@ export default function BarberAgenda() {
   const [appointments, setAppointments] = useState<AppointmentDetail[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Estados para exportação
   const [exportModalVisible, setExportModalVisible] = useState(false);
   const [exportFormat, setExportFormat] = useState<'csv' | 'excel' | 'pdf'>(
     'csv'
@@ -85,25 +84,22 @@ export default function BarberAgenda() {
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
     const today = new Date();
     const dayOfWeek = today.getDay();
-    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Começar na segunda-feira
+    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
     const monday = new Date(today);
     monday.setDate(today.getDate() + mondayOffset);
     return monday;
   });
-  // Load appointments from database
   useEffect(() => {
-    let isMounted = true; // Track if component is still mounted
+    let isMounted = true;
 
     const loadAppointmentsData = async () => {
       try {
         if (!isMounted) return;
         setLoading(true);
-        // Get appointments specific to current barber/barbershop
         const data = await getAppointmentsForCurrentBarber();
 
-        if (!isMounted) return; // Check again after async operation
+        if (!isMounted) return;
 
-        // Convert appointments to AppointmentDetail format
         const formattedAppointments: AppointmentDetail[] = data.map((apt) => {
           const clientName = apt.notes?.includes('Cliente:')
             ? apt.notes.split('Cliente: ')[1].split(' (')[0]
@@ -127,7 +123,7 @@ export default function BarberAgenda() {
             time: apt.time,
             client: clientName,
             service: service,
-            duration: 30, // Default duration
+            duration: 30,
             status: apt.status as any,
             phone: phone,
             email: email,
@@ -155,7 +151,6 @@ export default function BarberAgenda() {
 
     loadAppointmentsData();
 
-    // Cleanup function to prevent state updates on unmounted component
     return () => {
       isMounted = false;
     };
@@ -164,10 +159,8 @@ export default function BarberAgenda() {
   const loadAppointments = async () => {
     try {
       setLoading(true);
-      // Get appointments specific to current barber/barbershop
       const data = await getAppointmentsForCurrentBarber();
 
-      // Convert appointments to AppointmentDetail format
       const formattedAppointments: AppointmentDetail[] = data.map((apt) => {
         const clientName = apt.notes?.includes('Cliente:')
           ? apt.notes.split('Cliente: ')[1].split(' (')[0]
@@ -191,7 +184,7 @@ export default function BarberAgenda() {
           time: apt.time,
           client: clientName,
           service: service,
-          duration: 30, // Default duration
+          duration: 30,
           status: apt.status as any,
           phone: phone,
           email: email,
@@ -261,7 +254,6 @@ export default function BarberAgenda() {
     );
     setCurrentWeekStart(newWeekStart);
 
-    // Atualizar a data selecionada para o primeiro dia da nova semana se necessário
     const newWeekDays = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date(newWeekStart);
@@ -274,7 +266,6 @@ export default function BarberAgenda() {
     }
   };
   const getAppointmentsForDate = (date: string) => {
-    // Use only real appointments - no mock data
     return appointments.filter((appointment) => appointment.date === date);
   };
 
@@ -329,13 +320,11 @@ export default function BarberAgenda() {
         text: 'Sim',
         onPress: async () => {
           try {
-            // Extract booking ID from appointment ID if it exists
             let bookingId = selectedAppointment.id;
             if (bookingId.startsWith('booking_')) {
               bookingId = bookingId.replace('booking_', '');
             }
 
-            // Update booking status with bidirectional sync
             const success = await updateBookingStatus(
               bookingId,
               newStatus === 'confirmed'
@@ -347,7 +336,6 @@ export default function BarberAgenda() {
             );
 
             if (success) {
-              // Update local state
               setAppointments((prev) =>
                 prev.map((apt) =>
                   apt.id === selectedAppointment.id
@@ -388,7 +376,6 @@ export default function BarberAgenda() {
           {
             text: 'Ligar',
             onPress: () => {
-              // Aqui você implementaria a funcionalidade de chamada
               Alert.alert(
                 'Funcionalidade',
                 'Integração com telefone será implementada'
@@ -400,7 +387,6 @@ export default function BarberAgenda() {
     }
   };
 
-  // Funções de exportação
   const openExportModal = () => {
     const predefinedPeriods = getPredefinedPeriods();
     setExportStartDate(predefinedPeriods.thisMonth.startDate);
@@ -430,7 +416,6 @@ export default function BarberAgenda() {
     setIsExporting(true);
 
     try {
-      // Converter agendamentos para o formato de exportação
       const appointmentsToExport: AppointmentExport[] = appointments.map(
         (apt) => ({
           id: apt.id,
@@ -445,7 +430,7 @@ export default function BarberAgenda() {
           price: apt.price,
           notes: apt.notes,
           createdAt: apt.createdAt,
-          barber: 'Proprietário', // Por enquanto assumindo que é sempre o proprietário
+          barber: 'Proprietário',
         })
       );
 
@@ -602,7 +587,7 @@ export default function BarberAgenda() {
             );
           })}
         </ScrollView>
-      </View>{' '}
+      </View>
       {/* Appointments List */}
       <ScrollView
         style={styles.appointmentsList}
@@ -620,7 +605,7 @@ export default function BarberAgenda() {
           <TouchableOpacity style={styles.filterButton}>
             <Filter size={16} color="#6B7280" />
           </TouchableOpacity>
-        </View>{' '}
+        </View>
         {getAppointmentsForDate(selectedDate).length > 0 ? (
           getAppointmentsForDate(selectedDate)
             .sort((a, b) => a.time.localeCompare(b.time))
@@ -728,7 +713,7 @@ export default function BarberAgenda() {
                   >
                     <X size={24} color="#6B7280" />
                   </TouchableOpacity>
-                </View>{' '}
+                </View>
                 <ScrollView
                   style={styles.modalBody}
                   showsVerticalScrollIndicator={false}
@@ -869,7 +854,7 @@ export default function BarberAgenda() {
                       </Text>
                     </View>
                   </View>
-                </ScrollView>{' '}
+                </ScrollView>
                 {/* Ações do Modal */}
                 <View style={styles.modalActions}>
                   {selectedAppointment.status === 'pending' && (
@@ -940,7 +925,7 @@ export default function BarberAgenda() {
               </>
             )}
           </View>
-        </View>{' '}
+        </View>
       </Modal>
       {/* Modal de Exportação */}
       <Modal
@@ -1449,7 +1434,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     marginLeft: 8,
   },
-  // Modal Styles
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -1604,7 +1588,6 @@ const styles = StyleSheet.create({
   editButton: {
     backgroundColor: '#F59E0B',
   },
-  // Novos estilos para o modal melhorado
   clientCard: {
     backgroundColor: '#F8FAFC',
     borderRadius: 12,
@@ -1718,7 +1701,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
     color: '#374151',
   },
-  // Estilos para exportação
   headerButtons: {
     flexDirection: 'row',
     alignItems: 'center',

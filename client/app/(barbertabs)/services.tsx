@@ -51,7 +51,6 @@ export default function ServicesManagement() {
 
   const categories = ['Corte', 'Barba', 'Estética', 'Combo', 'Outros'];
 
-  // Load services from database
   useEffect(() => {
     loadServices();
   }, []);
@@ -73,7 +72,6 @@ export default function ServicesManagement() {
       if (currentUser && currentUser.userType === 'barber') {
         const barbershop = await getBarbershopByOwnerId(currentUser.id!);
         if (barbershop) {
-          // Update barbershop services to sync with client views
           await updateBarbershopServices(barbershop.id, services);
           console.log(
             '✅ Services synced with barbershop - clients will see updates immediately'
@@ -130,19 +128,16 @@ export default function ServicesManagement() {
       };
 
       if (editingService) {
-        // Update existing service
         const updatedService = { ...editingService, ...serviceData };
         await updateService(updatedService);
         setServices(
           services.map((s) => (s.id === editingService.id ? updatedService : s))
         );
       } else {
-        // Create new service
         const newService = await createService(serviceData);
         setServices([...services, newService]);
       }
 
-      // Sync with barbershop for real-time client updates
       await syncWithBarbershop();
 
       setModalVisible(false);
@@ -169,7 +164,6 @@ export default function ServicesManagement() {
               await deleteService(service.id);
               setServices(services.filter((s) => s.id !== service.id));
 
-              // Sync with barbershop for real-time client updates
               await syncWithBarbershop();
 
               Alert.alert('Sucesso', 'Serviço excluído!');

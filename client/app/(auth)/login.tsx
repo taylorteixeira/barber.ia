@@ -34,7 +34,6 @@ export default function LoginScreen() {
     try {
       const user = await loginUser(email, password);
       if (user) {
-        // Check if user type matches
         if (user.userType !== userType) {
           const typeText = userType === 'client' ? 'cliente' : 'barbeiro';
           Alert.alert(
@@ -45,7 +44,6 @@ export default function LoginScreen() {
           return;
         }
 
-        // Save current user
         await setCurrentUser(user);
 
         console.log(
@@ -157,7 +155,7 @@ export default function LoginScreen() {
           >
             <Text style={styles.socialButtonText}>Continuar com Apple</Text>{' '}
           </TouchableOpacity>
-        </View>{' '}
+        </View>
         <View style={styles.footer}>
           <Text style={styles.footerText}>
             Não tem uma conta?{' '}

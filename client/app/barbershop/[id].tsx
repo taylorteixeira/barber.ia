@@ -565,7 +565,6 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 
-  // Services
   serviceCard: {
     flexDirection: 'row',
     padding: 16,
@@ -625,7 +624,6 @@ const styles = StyleSheet.create({
     color: '#059669',
   },
 
-  // Products
   productsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -667,7 +665,6 @@ const styles = StyleSheet.create({
     color: '#059669',
   },
 
-  // Reviews
   reviewCard: {
     padding: 16,
     backgroundColor: '#F9FAFB',
@@ -712,7 +709,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 
-  // Booking
   bookingContainer: {
     padding: 20,
     backgroundColor: '#FFFFFF',

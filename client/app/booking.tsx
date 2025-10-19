@@ -94,7 +94,7 @@ const generateTimeSlots = (selectedDate: string): TimeSlot[] => {
         .padStart(2, '0')}`;
       slots.push({
         time: timeString,
-        available: Math.random() > 0.3, // 70% chance of being available
+        available: Math.random() > 0.3,
       });
     }
   }
@@ -123,7 +123,6 @@ export default function BookingScreen() {
   const [availableServices, setAvailableServices] =
     useState<Service[]>(SERVICES);
 
-  // Check if user is logged in and load barbershop data on mount
   useEffect(() => {
     checkLoginStatus();
     loadBarbershopData();
@@ -131,10 +130,8 @@ export default function BookingScreen() {
   const loadBarbershopData = async () => {
     if (barberId) {
       try {
-        // Get real-time barbershop data
         const barbershopInfo = await refreshBarbershopData(barberId);
 
-        // Also get detailed barbershop object if it's a real barbershop
         let barbershopData: Barbershop | null = null;
         if (barberId.startsWith('real_')) {
           const realBarbershopId = parseInt(barberId.replace('real_', ''));
@@ -145,7 +142,6 @@ export default function BookingScreen() {
 
         setBarbershop(barbershopData);
 
-        // Use real-time services data (always current)
         if (barbershopInfo.services && barbershopInfo.services.length > 0) {
           const mappedServices: Service[] = barbershopInfo.services.map(
             (s) => ({
@@ -161,12 +157,10 @@ export default function BookingScreen() {
             `✅ Loaded ${mappedServices.length} real-time services for barbershop ${barberId}`
           );
         } else {
-          // Use default services for mock barbershops
           setAvailableServices(SERVICES);
         }
       } catch (error) {
         console.error('Error loading barbershop data:', error);
-        // Fallback to default services
         setAvailableServices(SERVICES);
       }
     }
@@ -190,7 +184,6 @@ export default function BookingScreen() {
     }
   };
 
-  // Generate dates for next 30 days
   const generateDates = () => {
     const dates = [];
     const today = new Date();
@@ -219,7 +212,7 @@ export default function BookingScreen() {
 
   const handleDateSelect = (date: string) => {
     setSelectedDate(date);
-    setSelectedTime(''); // Reset time when date changes
+    setSelectedTime('');
   };
 
   const handleTimeSelect = (time: string) => {
@@ -238,22 +231,18 @@ export default function BookingScreen() {
     }
 
     if (isLoggedIn) {
-      // User is logged in, confirm booking directly
       confirmBooking();
     } else {
-      // User is not logged in, show modal to get info
       setShowConfirmModal(true);
     }
   };
   const confirmBooking = async () => {
-    // Validate required fields only if user is not logged in
     if (!isLoggedIn && (!clientInfo.name || !clientInfo.phone)) {
       Alert.alert('Erro', 'Por favor, preencha nome e telefone');
       return;
     }
 
     try {
-      // Create client only if not logged in or if it's a new temporary client
       if (!isLoggedIn) {
         await createClient({
           name: clientInfo.name,
@@ -261,10 +250,9 @@ export default function BookingScreen() {
           email: clientInfo.email,
           isTemporary: true,
         });
-      } // Create booking
+      }
       const bookingId = Date.now().toString();
 
-      // Determine correct barbershop ID
       let correctBarbershopId: number | undefined;
       if (barbershop) {
         correctBarbershopId = barbershop.id;
@@ -325,7 +313,7 @@ export default function BookingScreen() {
           <ArrowLeft size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Agendar Horário</Text>
-      </View>{' '}
+      </View>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Barbershop Info */}
         {barbershop && (
@@ -669,7 +657,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
-  // Services
   servicesGrid: {
     gap: 12,
   },
@@ -734,7 +721,6 @@ const styles = StyleSheet.create({
     right: 12,
   },
 
-  // Dates
   datesContainer: {
     paddingVertical: 8,
   },
@@ -780,7 +766,6 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.8)',
   },
 
-  // Time Slots
   timeSlotsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -816,7 +801,6 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
   },
 
-  // Summary
   summarySection: {
     marginVertical: 20,
   },
@@ -866,7 +850,6 @@ const styles = StyleSheet.create({
     color: '#059669',
   },
 
-  // Bottom Button
   bottomContainer: {
     padding: 20,
     backgroundColor: '#FFFFFF',
@@ -885,7 +868,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
 
-  // Modal
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -963,7 +945,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
 
-  // User Info Styles
   userInfoContainer: {
     backgroundColor: '#F0FDF4',
     borderRadius: 12,
@@ -983,7 +964,6 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
 
-  // Barbershop Info Styles
   barbershopInfo: {
     backgroundColor: '#F8FAFC',
     borderRadius: 12,

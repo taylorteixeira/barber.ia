@@ -26,17 +26,14 @@ export default function BookingsScreen() {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
   const [bookings, setBookings] = useState<Booking[]>([]);
   const router = useRouter();
-  // Load bookings from database
   useEffect(() => {
     const load = async () => {
       try {
         const currentUser = await getCurrentUser();
         if (currentUser && currentUser.id) {
-          // Load only bookings for the current user
           const data = await getBookingsByUserId(currentUser.id);
           setBookings(data);
         } else {
-          // If no user is logged in, show all bookings (fallback)
           const data = await getBookings();
           setBookings(data);
         }
@@ -88,7 +85,6 @@ export default function BookingsScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              // Update status with bidirectional sync
               const success = await updateBookingStatus(
                 bookingId,
                 'cancelled',
@@ -96,7 +92,6 @@ export default function BookingsScreen() {
               );
 
               if (success) {
-                // Update local state
                 setBookings((prev) =>
                   prev.map((b) =>
                     b.id === bookingId
@@ -140,7 +135,6 @@ export default function BookingsScreen() {
           text: 'Sim, concluído',
           onPress: async () => {
             try {
-              // Update status with bidirectional sync
               const success = await updateBookingStatus(
                 bookingId,
                 'completed',
@@ -148,7 +142,6 @@ export default function BookingsScreen() {
               );
 
               if (success) {
-                // Update local state
                 setBookings((prev) =>
                   prev.map((b) =>
                     b.id === bookingId
@@ -178,7 +171,6 @@ export default function BookingsScreen() {
   };
 
   const renderBookingCard = (booking: Booking) => (
-    // @ts-ignore: suppress key prop error
     <View key={booking.id} style={styles.bookingCard}>
       <View style={styles.bookingHeader}>
         <Image
@@ -219,7 +211,7 @@ export default function BookingsScreen() {
           <Phone size={16} color="#6B7280" />
           <Text style={styles.detailText}>{booking.phone}</Text>
         </View>
-      </View>{' '}
+      </View>
       <View style={styles.bookingActions}>
         {booking.status === 'confirmed' && (
           <>

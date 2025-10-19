@@ -108,7 +108,7 @@ export default function SearchScreen() {
             <MapPin size={12} color="#6B7280" />
             <Text style={styles.distanceText}>{barber.distance}km</Text>
           </View>
-        </View>{' '}
+        </View>
         <View style={styles.specialtiesContainer}>
           {(barber.specialties || []).map((specialty, index) => (
             <View key={index} style={styles.specialtyTag}>

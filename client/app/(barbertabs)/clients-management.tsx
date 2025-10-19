@@ -45,14 +45,12 @@ export default function ClientsManagementScreen() {
     phone: '',
     email: '',
   });
-  // Load clients
   useEffect(() => {
-    let isMounted = true; // Track if component is still mounted
+    let isMounted = true;
 
     const loadClientsData = async () => {
       try {
         if (!isMounted) return;
-        // Load real clients from bookings (includes both booked clients and manually added ones)
         const data = await getClientsFromBookings();
         if (isMounted) {
           setClients(data);
@@ -67,7 +65,6 @@ export default function ClientsManagementScreen() {
 
     loadClientsData();
 
-    // Cleanup function to prevent state updates on unmounted component
     return () => {
       isMounted = false;
     };
@@ -75,7 +72,6 @@ export default function ClientsManagementScreen() {
 
   const loadClients = async () => {
     try {
-      // Load real clients from bookings (includes both booked clients and manually added ones)
       const data = await getClientsFromBookings();
       setClients(data);
     } catch (error) {
@@ -114,7 +110,6 @@ export default function ClientsManagementScreen() {
     setLoading(true);
     try {
       if (editingClient) {
-        // Update existing client
         const updatedClient: Client = {
           ...editingClient,
           name: clientForm.name,
@@ -123,7 +118,6 @@ export default function ClientsManagementScreen() {
         };
         await updateClient(updatedClient);
       } else {
-        // Create new client
         await createClient({
           name: clientForm.name,
           phone: clientForm.phone,
@@ -505,7 +499,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  // Modal Styles
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',

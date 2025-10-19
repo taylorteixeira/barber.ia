@@ -2,7 +2,6 @@ import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as bcrypt from 'bcryptjs';
 
-// Fallback para aleatoriedade no bcryptjs em ambiente React Native/Expo
 if (typeof bcrypt.setRandomFallback === 'function') {
   bcrypt.setRandomFallback((len: number) => {
     const buf = Array.from({ length: len }, () =>
@@ -11,8 +10,6 @@ if (typeof bcrypt.setRandomFallback === 'function') {
     return buf;
   });
 }
-
-// User interface
 export interface User {
   id?: number;
   name: string;
@@ -20,10 +17,8 @@ export interface User {
   phone: string;
   password?: string;
   userType: 'client' | 'barber';
-  barbershopId?: number; // Para vincular barbeiro à barbearia
+  barbershopId?: number;
 }
-
-// Barbershop interface
 export interface Barbershop {
   id: number;
   name: string;
@@ -32,12 +27,10 @@ export interface Barbershop {
   phone: string;
   email: string;
   workingHours: WorkingHours;
-  ownerId: number; // ID do barbeiro dono
+  ownerId: number;
   services: Service[];
   createdAt: string;
 }
-
-// Working Hours interface
 export interface WorkingHours {
   monday: DaySchedule;
   tuesday: DaySchedule;
@@ -50,32 +43,28 @@ export interface WorkingHours {
 
 export interface DaySchedule {
   isOpen: boolean;
-  openTime: string; // "09:00"
-  closeTime: string; // "18:00"
-  breakStart?: string; // "12:00"
-  breakEnd?: string; // "13:00"
+  openTime: string;
+  closeTime: string;
+  breakStart?: string;
+  breakEnd?: string;
 }
-
-// Barber profile interface
 export interface BarberProfile {
   id: number;
   userId: number;
   barbershopId: number;
   specialties: string[];
-  workingDays: string[]; // ['monday', 'tuesday', etc.]
-  customWorkingHours?: Partial<WorkingHours>; // Horários específicos do barbeiro
+  workingDays: string[];
+  customWorkingHours?: Partial<WorkingHours>;
   avatar?: string;
   bio?: string;
   isActive: boolean;
   joinedAt: string;
 }
-
-// Service interface
 export interface Service {
   id: string;
   name: string;
   description?: string;
-  duration: number; // em minutos
+  duration: number;
   price: number;
   category: string;
   barbershopId?: number;
@@ -83,7 +72,6 @@ export interface Service {
   createdAt?: string;
 }
 
-// Storage keys
 const USERS_STORAGE_KEY = 'barber_users';
 const CURRENT_USER_KEY = 'barber_current_user';
 const USER_COUNTER_KEY = 'barber_user_counter';
@@ -92,18 +80,14 @@ const BARBER_PROFILES_STORAGE_KEY = 'barber_profiles';
 const BARBERSHOP_COUNTER_KEY = 'barbershop_counter';
 const BARBER_PROFILE_COUNTER_KEY = 'barber_profile_counter';
 
-// Initialize the database
 export const initDatabase = async (): Promise<void> => {
   try {
-    // Check if we already have a users array in storage
     const usersJson = await SecureStore.getItemAsync(USERS_STORAGE_KEY);
     if (!usersJson) {
-      // Initialize with empty array
       await SecureStore.setItemAsync(USERS_STORAGE_KEY, JSON.stringify([]));
       await SecureStore.setItemAsync(USER_COUNTER_KEY, '1');
     }
 
-    // Initialize barbershops storage
     const barbershopsJson = await SecureStore.getItemAsync(
       BARBERSHOPS_STORAGE_KEY
     );
@@ -115,7 +99,6 @@ export const initDatabase = async (): Promise<void> => {
       await SecureStore.setItemAsync(BARBERSHOP_COUNTER_KEY, '1');
     }
 
-    // Initialize barber profiles storage
     const barberProfilesJson = await SecureStore.getItemAsync(
       BARBER_PROFILES_STORAGE_KEY
     );
@@ -134,10 +117,8 @@ export const initDatabase = async (): Promise<void> => {
   }
 };
 
-// Register a new user
 export const registerUser = async (user: User): Promise<boolean> => {
   try {
-    // Get existing users
     const usersJson = await SecureStore.getItemAsync(USERS_STORAGE_KEY);
     if (!usersJson) {
       await initDatabase();
@@ -145,16 +126,14 @@ export const registerUser = async (user: User): Promise<boolean> => {
 
     const users: User[] = usersJson ? JSON.parse(usersJson) : [];
 
-    // Check if email already exists
     const emailExists = users.some((u) => u.email === user.email);
     if (emailExists) {
       return false;
     }
 
-    // Get next user ID
     const counterStr =
       (await SecureStore.getItemAsync(USER_COUNTER_KEY)) || '1';
-    const counter = parseInt(counterStr, 10); // Hash password
+    const counter = parseInt(counterStr, 10);
     if (!user.password) {
       console.error('Password is required for user registration');
       return false;
@@ -168,7 +147,7 @@ export const registerUser = async (user: User): Promise<boolean> => {
     } catch (err) {
       console.error('Bcrypt hash error:', err);
       return false;
-    } // Create new user
+    }
     const newUser: User = {
       id: counter,
       name: user.name,
@@ -178,13 +157,10 @@ export const registerUser = async (user: User): Promise<boolean> => {
       userType: user.userType,
     };
 
-    // Add to users array
     users.push(newUser);
 
-    // Save updated users array
     await SecureStore.setItemAsync(USERS_STORAGE_KEY, JSON.stringify(users));
 
-    // Increment counter
     await SecureStore.setItemAsync(USER_COUNTER_KEY, (counter + 1).toString());
 
     return true;
@@ -194,25 +170,21 @@ export const registerUser = async (user: User): Promise<boolean> => {
   }
 };
 
-// Register and auto-login user
 export const registerAndLoginUser = async (
   user: Omit<User, 'id'>
 ): Promise<User | null> => {
   try {
-    // Validate password exists
     if (!user.password) {
       console.error('Password is required for registration');
       return null;
     }
 
-    // First register the user
     const registerSuccess = await registerUser(user);
 
     if (!registerSuccess) {
       return null;
     }
 
-    // Then automatically log them in
     const loggedInUser = await loginUser(user.email, user.password);
     return loggedInUser;
   } catch (error) {
@@ -221,7 +193,6 @@ export const registerAndLoginUser = async (
   }
 };
 
-// Login a user
 export const loginUser = async (
   email: string,
   password: string
@@ -232,23 +203,20 @@ export const loginUser = async (
       return null;
     }
 
-    const users: User[] = JSON.parse(usersJson); // Find user by email
+    const users: User[] = JSON.parse(usersJson);
     const user = users.find((u) => u.email === email);
 
     if (!user) {
       return null;
     }
 
-    // Validate password exists
     if (!user.password) {
       console.error('User password not found');
       return null;
     }
 
-    // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (isPasswordValid) {
-      // Store user session without password
       const userSession = {
         id: user.id,
         name: user.name,
@@ -271,7 +239,6 @@ export const loginUser = async (
   }
 };
 
-// Check if user is logged in
 export const checkUserSession = async (): Promise<boolean> => {
   try {
     const user = await SecureStore.getItemAsync(CURRENT_USER_KEY);
@@ -282,7 +249,6 @@ export const checkUserSession = async (): Promise<boolean> => {
   }
 };
 
-// Logout current user
 export const logoutUser = async (): Promise<void> => {
   try {
     await SecureStore.deleteItemAsync(CURRENT_USER_KEY);
@@ -291,7 +257,6 @@ export const logoutUser = async (): Promise<void> => {
   }
 };
 
-// Get current user data from SecureStore
 export const getCurrentUserFromSecureStore = async (): Promise<any | null> => {
   try {
     const userJson = await SecureStore.getItemAsync(CURRENT_USER_KEY);
@@ -305,7 +270,6 @@ export const getCurrentUserFromSecureStore = async (): Promise<any | null> => {
   }
 };
 
-// Update user data
 export const updateUser = async (user: User): Promise<boolean> => {
   try {
     const usersJson = await SecureStore.getItemAsync(USERS_STORAGE_KEY);
@@ -315,7 +279,6 @@ export const updateUser = async (user: User): Promise<boolean> => {
     if (index !== -1) {
       const updatedUser = { ...users[index], ...user };
 
-      // If password is being updated, hash it
       if (user.password && user.password !== users[index].password) {
         try {
           const saltRounds = 10;
@@ -328,7 +291,6 @@ export const updateUser = async (user: User): Promise<boolean> => {
 
       users[index] = updatedUser;
       await SecureStore.setItemAsync(USERS_STORAGE_KEY, JSON.stringify(users));
-      // Update current user session if it's the same user (without password)
       const currentUser = await getCurrentUser();
       if (currentUser && currentUser.id === user.id) {
         const sessionUser = { ...updatedUser };
@@ -354,7 +316,6 @@ export const updateUser = async (user: User): Promise<boolean> => {
   }
 };
 
-// Get user by ID
 export const getUserById = async (userId: number): Promise<User | null> => {
   try {
     const usersJson = await SecureStore.getItemAsync(USERS_STORAGE_KEY);
@@ -366,7 +327,6 @@ export const getUserById = async (userId: number): Promise<User | null> => {
   }
 };
 
-// Check if email exists for another user (for profile editing)
 export const checkEmailExistsForUpdate = async (
   email: string,
   currentUserId: number
@@ -375,7 +335,6 @@ export const checkEmailExistsForUpdate = async (
     const usersJson = await SecureStore.getItemAsync(USERS_STORAGE_KEY);
     const users: User[] = usersJson ? JSON.parse(usersJson) : [];
 
-    // Check if email exists for a different user
     const existingUser = users.find(
       (u) => u.email === email && u.id !== currentUserId
     );
@@ -385,8 +344,6 @@ export const checkEmailExistsForUpdate = async (
     return false;
   }
 };
-
-// Barber interface and storage functions
 export interface Barber {
   id: string;
   name: string;
@@ -400,11 +357,10 @@ export interface Barber {
     longitude: number;
   };
   specialties?: string[];
-  isRegisteredBarbershop?: boolean; // Indica se é uma barbearia cadastrada
+  isRegisteredBarbershop?: boolean;
 }
 const BARBERS_STORAGE_KEY = 'barber_barbers';
 
-// Initialize barbers storage if not present
 export const initBarbersDatabase = async (): Promise<void> => {
   const data = await AsyncStorage.getItem(BARBERS_STORAGE_KEY);
   let barbers: Barber[] = [];
@@ -464,28 +420,24 @@ export const initBarbersDatabase = async (): Promise<void> => {
   }
 };
 
-// Retrieve all barbers (including registered barbershops)
 export const getBarbers = async (): Promise<Barber[]> => {
   await initBarbersDatabase();
 
-  // Get mock barbers
   const mockJson = await AsyncStorage.getItem(BARBERS_STORAGE_KEY);
   const mockBarbers: Barber[] = mockJson ? JSON.parse(mockJson) : [];
 
-  // Get real registered barbershops
   const realBarbershops = await getAllBarbershops();
-  // Convert barbershops to barber format
   const realBarbers: Barber[] = realBarbershops.map((barbershop) => ({
-    id: `real_${barbershop.id}`, // Prefix to avoid conflicts with mock IDs
+    id: `real_${barbershop.id}`,
     name: barbershop.name,
-    rating: 4.5, // Default rating
-    distance: Math.random() * 2, // Random distance for now
+    rating: 4.5,
+    distance: Math.random() * 2,
     price:
       barbershop.services && barbershop.services.length > 0
         ? Math.min(...barbershop.services.map((s) => s.price))
-        : 30, // Minimum service price or default
-    image: 'https://images.pexels.com/photos/1813272/pexels-photo-1813272.jpeg', // Default image
-    reviews: Math.floor(Math.random() * 100) + 10, // Random reviews
+        : 30,
+    image: 'https://images.pexels.com/photos/1813272/pexels-photo-1813272.jpeg',
+    reviews: Math.floor(Math.random() * 100) + 10,
     location: {
       latitude: -23.5505 + (Math.random() - 0.5) * 0.01,
       longitude: -46.6333 + (Math.random() - 0.5) * 0.01,
@@ -496,19 +448,15 @@ export const getBarbers = async (): Promise<Barber[]> => {
     isRegisteredBarbershop: true,
   }));
 
-  // Combine mock and real barbers, avoiding duplicates
   const allBarbers = [...mockBarbers, ...realBarbers];
   return allBarbers;
 };
 
-// Function to refresh and get updated barber list
 export const getRefreshedBarbers = async (): Promise<Barber[]> => {
-  // Refresh both mock and real barbers every time
   await initBarbersDatabase();
   return await getBarbers();
 };
 
-// Function to simulate realistic data for mock barbers
 export const updateMockBarbersWithRealisticData = async (): Promise<void> => {
   const mockBarbers: Barber[] = [
     {
@@ -555,12 +503,11 @@ export const updateMockBarbersWithRealisticData = async (): Promise<void> => {
   await AsyncStorage.setItem(BARBERS_STORAGE_KEY, JSON.stringify(mockBarbers));
 };
 
-// Booking interface and storage functions
 export type BookingStatus = 'confirmed' | 'completed' | 'cancelled';
 export interface Booking {
   id: string;
-  userId?: number; // ID do usuário que fez o agendamento
-  barbershopId?: number; // ID da barbearia
+  userId?: number;
+  barbershopId?: number;
   barberName: string;
   barberImage: string;
   service: string;
@@ -570,12 +517,11 @@ export interface Booking {
   status: BookingStatus;
   address: string;
   phone: string;
-  clientName?: string; // Nome do cliente
-  clientEmail?: string; // Email do cliente
+  clientName?: string;
+  clientEmail?: string;
 }
 const BOOKINGS_STORAGE_KEY = 'barber_bookings';
 
-// Initialize bookings storage
 export const initBookingsDatabase = async (): Promise<void> => {
   const data = await AsyncStorage.getItem(BOOKINGS_STORAGE_KEY);
   if (!data) {
@@ -583,14 +529,12 @@ export const initBookingsDatabase = async (): Promise<void> => {
   }
 };
 
-// Retrieve all bookings
 export const getBookings = async (): Promise<Booking[]> => {
   await initBookingsDatabase();
   const json = await AsyncStorage.getItem(BOOKINGS_STORAGE_KEY);
   return json ? JSON.parse(json) : [];
 };
 
-// Get bookings for a specific user
 export const getBookingsByUserId = async (
   userId: number
 ): Promise<Booking[]> => {
@@ -603,7 +547,6 @@ export const getBookingsByUserId = async (
   }
 };
 
-// Get bookings for a specific barbershop
 export const getBookingsByBarbershopId = async (
   barbershopId: number
 ): Promise<Booking[]> => {
@@ -618,7 +561,6 @@ export const getBookingsByBarbershopId = async (
   }
 };
 
-// Get appointments for current barbershop owner
 export const getAppointmentsForCurrentBarber = async (): Promise<
   Appointment[]
 > => {
@@ -631,11 +573,9 @@ export const getAppointmentsForCurrentBarber = async (): Promise<
     const barbershop = await getBarbershopByOwnerId(currentUser.id!);
     if (!barbershop) {
       return [];
-    } // Get ONLY bookings for this specific barbershop - no mixing with other barbershops
-    // This ensures new barbers start with empty data
+    }
     const barbershopBookings = await getBookingsByBarbershopId(barbershop.id);
 
-    // Convert bookings to appointments format
     const bookingAppointments: Appointment[] = barbershopBookings.map(
       (booking) => ({
         id: `booking_${booking.id}`,
@@ -660,7 +600,6 @@ export const getAppointmentsForCurrentBarber = async (): Promise<
   }
 };
 
-// Update a booking status
 export const updateBooking = async (updatedBooking: Booking): Promise<void> => {
   const bookings = await getBookings();
   const newList = bookings.map((b) =>
@@ -669,11 +608,9 @@ export const updateBooking = async (updatedBooking: Booking): Promise<void> => {
   await AsyncStorage.setItem(BOOKINGS_STORAGE_KEY, JSON.stringify(newList));
 };
 
-// Create a new booking with specific barber targeting
 export const createBooking = async (newBooking: Booking): Promise<void> => {
   const bookings = await getBookings();
 
-  // Enrich booking with current user info if logged in
   const currentUser = await getCurrentUser();
   if (currentUser) {
     newBooking.userId = currentUser.id;
@@ -685,24 +622,20 @@ export const createBooking = async (newBooking: Booking): Promise<void> => {
   bookings.push(newBooking);
   await AsyncStorage.setItem(BOOKINGS_STORAGE_KEY, JSON.stringify(bookings));
 
-  // Sync with barber appointments - specifically for the selected barber/barbershop
   await syncBookingToAppointment(newBooking);
 
-  // Create/update client record for barber's client management
   if (newBooking.clientName && newBooking.phone) {
     await createOrUpdateClientFromBooking(newBooking);
   }
 };
 
-// Sync bookings with barber appointments
 export const syncBookingToAppointment = async (
   booking: Booking
 ): Promise<void> => {
   try {
-    // Create appointment for barber agenda
     const appointment: Omit<Appointment, 'id' | 'createdAt'> = {
-      clientId: booking.userId?.toString() || booking.id, // Use user ID if available
-      serviceId: 'service_' + Date.now(), // Generate service id
+      clientId: booking.userId?.toString() || booking.id,
+      serviceId: 'service_' + Date.now(),
       date: booking.date,
       time: booking.time,
       status: booking.status === 'confirmed' ? 'confirmed' : 'scheduled',
@@ -719,7 +652,6 @@ export const syncBookingToAppointment = async (
   }
 };
 
-// Update booking status and sync with appointments (bidirectional)
 export const updateBookingStatus = async (
   bookingId: string,
   newStatus: BookingStatus,
@@ -731,11 +663,9 @@ export const updateBookingStatus = async (
 
     if (bookingIndex === -1) return false;
 
-    // Update booking status
     bookings[bookingIndex].status = newStatus;
     await AsyncStorage.setItem(BOOKINGS_STORAGE_KEY, JSON.stringify(bookings));
 
-    // Sync with appointments
     const appointments = await getAppointments();
     const appointmentIndex = appointments.findIndex(
       (a) =>
@@ -780,7 +710,6 @@ export const updateBookingStatus = async (
   }
 };
 
-// Create or update client from booking (for barber's client management)
 export const createOrUpdateClientFromBooking = async (
   booking: Booking
 ): Promise<void> => {
@@ -795,7 +724,6 @@ export const createOrUpdateClientFromBooking = async (
     );
 
     if (existingClient) {
-      // Update existing client with any new info
       const updatedClient = {
         ...existingClient,
         name: booking.clientName,
@@ -804,7 +732,6 @@ export const createOrUpdateClientFromBooking = async (
       };
       await updateClient(updatedClient);
     } else {
-      // Create new client from booking
       await createClient({
         name: booking.clientName,
         phone: booking.phone,
@@ -817,17 +744,14 @@ export const createOrUpdateClientFromBooking = async (
   }
 };
 
-// Get clients from actual bookings (real clients who booked) - ONLY for current barbershop
 export const getClientsFromBookings = async (): Promise<Client[]> => {
   try {
-    // Get bookings ONLY for current barbershop, not all bookings
     const bookings = await getBookingsForCurrentBarbershop();
     const clientsMap = new Map<string, Client>();
 
-    // Extract unique clients from bookings for this barbershop only
     bookings.forEach((booking) => {
       if (booking.clientName && booking.phone) {
-        const clientKey = booking.phone; // Use phone as unique key
+        const clientKey = booking.phone;
         if (!clientsMap.has(clientKey)) {
           clientsMap.set(clientKey, {
             id: clientKey,
@@ -841,12 +765,9 @@ export const getClientsFromBookings = async (): Promise<Client[]> => {
       }
     });
 
-    // Merge with manually created clients for this barbershop
     const currentUser = await getCurrentUser();
     if (currentUser && currentUser.userType === 'barber') {
       const manualClients = await getClients();
-      // Filter manual clients by barbershop if we had that relationship
-      // For now, add all manual clients (they are created by current barber)
       manualClients.forEach((client) => {
         if (!clientsMap.has(client.phone)) {
           clientsMap.set(client.phone, client);
@@ -863,7 +784,6 @@ export const getClientsFromBookings = async (): Promise<Client[]> => {
   }
 };
 
-// Get bookings for current barbershop with real-time sync
 export const getBookingsForCurrentBarbershop = async (): Promise<Booking[]> => {
   try {
     const currentUser = await getCurrentUser();
@@ -882,8 +802,6 @@ export const getBookingsForCurrentBarbershop = async (): Promise<Booking[]> => {
     return [];
   }
 };
-
-// Interfaces for Barber Management System
 export interface Client {
   id: string;
   name: string;
@@ -926,14 +844,12 @@ export interface Appointment {
   createdAt: string;
 }
 
-// Storage keys for barber management
 const CLIENTS_STORAGE_KEY = 'barber_clients';
 const SERVICES_STORAGE_KEY = 'barber_services';
 const PRODUCTS_STORAGE_KEY = 'barber_products';
 const PRICING_RULES_STORAGE_KEY = 'barber_pricing_rules';
 const APPOINTMENTS_STORAGE_KEY = 'barber_appointments';
 
-// Initialize barber management data
 const initBarberManagement = async () => {
   const keys = [
     CLIENTS_STORAGE_KEY,
@@ -947,7 +863,6 @@ const initBarberManagement = async () => {
     if (!data) {
       let initialData: any[] = [];
 
-      // Add mock data for development
       if (key === CLIENTS_STORAGE_KEY) {
         initialData = [
           {
@@ -1021,11 +936,9 @@ const initBarberManagement = async () => {
   }
 };
 
-// Client functions - Now barbershop-specific
 export const getClients = async (): Promise<Client[]> => {
   await initBarberManagement();
 
-  // Get current barbershop to make clients specific to this barbershop
   const currentUser = await getCurrentUser();
   if (!currentUser || currentUser.userType !== 'barber') {
     return [];
@@ -1036,7 +949,6 @@ export const getClients = async (): Promise<Client[]> => {
     return [];
   }
 
-  // Use barbershop-specific storage key
   const barbershopClientsKey = `${CLIENTS_STORAGE_KEY}_${barbershop.id}`;
   const json = await AsyncStorage.getItem(barbershopClientsKey);
   return json ? JSON.parse(json) : [];
@@ -1055,7 +967,7 @@ export const createClient = async (
     throw new Error('Barbershop not found');
   }
 
-  const clients = await getClients(); // This now gets barbershop-specific clients
+  const clients = await getClients();
   const newClient: Client = {
     ...client,
     id: Date.now().toString(),
@@ -1063,7 +975,6 @@ export const createClient = async (
   };
   clients.push(newClient);
 
-  // Save to barbershop-specific storage
   const barbershopClientsKey = `${CLIENTS_STORAGE_KEY}_${barbershop.id}`;
   await AsyncStorage.setItem(barbershopClientsKey, JSON.stringify(clients));
   return newClient;
@@ -1080,7 +991,7 @@ export const updateClient = async (client: Client): Promise<void> => {
     throw new Error('Barbershop not found');
   }
 
-  const clients = await getClients(); // This now gets barbershop-specific clients
+  const clients = await getClients();
   const index = clients.findIndex((c) => c.id === client.id);
   if (index !== -1) {
     clients[index] = client;
@@ -1100,13 +1011,12 @@ export const deleteClient = async (clientId: string): Promise<void> => {
     throw new Error('Barbershop not found');
   }
 
-  const clients = await getClients(); // This now gets barbershop-specific clients
+  const clients = await getClients();
   const filtered = clients.filter((c) => c.id !== clientId);
   const barbershopClientsKey = `${CLIENTS_STORAGE_KEY}_${barbershop.id}`;
   await AsyncStorage.setItem(barbershopClientsKey, JSON.stringify(filtered));
 };
 
-// Service functions
 export const getServices = async (): Promise<Service[]> => {
   await initBarberManagement();
   const json = await AsyncStorage.getItem(SERVICES_STORAGE_KEY);
@@ -1142,7 +1052,6 @@ export const deleteService = async (serviceId: string): Promise<void> => {
   await AsyncStorage.setItem(SERVICES_STORAGE_KEY, JSON.stringify(filtered));
 };
 
-// Product functions
 export const getProducts = async (): Promise<Product[]> => {
   await initBarberManagement();
   const json = await AsyncStorage.getItem(PRODUCTS_STORAGE_KEY);
@@ -1178,7 +1087,6 @@ export const deleteProduct = async (productId: string): Promise<void> => {
   await AsyncStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(filtered));
 };
 
-// Pricing rule functions
 export const getPricingRules = async (): Promise<PricingRule[]> => {
   await initBarberManagement();
   const json = await AsyncStorage.getItem(PRICING_RULES_STORAGE_KEY);
@@ -1220,7 +1128,6 @@ export const deletePricingRule = async (ruleId: string): Promise<void> => {
   );
 };
 
-// Appointment functions
 export const getAppointments = async (): Promise<Appointment[]> => {
   await initBarberManagement();
   const json = await AsyncStorage.getItem(APPOINTMENTS_STORAGE_KEY);
@@ -1269,7 +1176,6 @@ export const deleteAppointment = async (
   );
 };
 
-// Barbershop management functions
 export const createBarbershop = async (
   barbershop: Omit<Barbershop, 'id' | 'createdAt'>
 ): Promise<Barbershop | null> => {
@@ -1325,7 +1231,6 @@ export const getBarbershopByOwnerId = async (
   }
 };
 
-// Get all barbershops
 export const getAllBarbershops = async (): Promise<Barbershop[]> => {
   try {
     const barbershopsJson = await SecureStore.getItemAsync(
@@ -1341,7 +1246,6 @@ export const getAllBarbershops = async (): Promise<Barbershop[]> => {
   }
 };
 
-// Get barbershop by ID
 export const getBarbershopById = async (
   id: number
 ): Promise<Barbershop | null> => {
@@ -1381,7 +1285,6 @@ export const updateBarbershop = async (
   }
 };
 
-// Barber profile management functions
 export const createBarberProfile = async (
   profile: Omit<BarberProfile, 'id' | 'joinedAt'>
 ): Promise<BarberProfile | null> => {
@@ -1483,16 +1386,13 @@ export const updateBarberProfile = async (
   }
 };
 
-// Current user management
 export const getCurrentUser = async (): Promise<User | null> => {
   try {
-    // Try SecureStore first (where login saves the user)
     const userJson = await SecureStore.getItemAsync(CURRENT_USER_KEY);
     if (userJson) {
       return JSON.parse(userJson);
     }
 
-    // Fallback to AsyncStorage
     const userData = await AsyncStorage.getItem(CURRENT_USER_KEY);
     return userData ? JSON.parse(userData) : null;
   } catch (error) {
@@ -1504,7 +1404,6 @@ export const getCurrentUser = async (): Promise<User | null> => {
 export const setCurrentUser = async (user: User | null): Promise<void> => {
   try {
     if (user) {
-      // Save to both for consistency
       await SecureStore.setItemAsync(CURRENT_USER_KEY, JSON.stringify(user));
       await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
     } else {
@@ -1521,7 +1420,6 @@ export const isUserLoggedIn = async (): Promise<boolean> => {
   return user !== null;
 };
 
-// Default working hours
 export const getDefaultWorkingHours = (): WorkingHours => {
   const defaultDay: DaySchedule = {
     isOpen: true,
@@ -1548,7 +1446,6 @@ export const getDefaultWorkingHours = (): WorkingHours => {
   };
 };
 
-// Utility functions for working hours validation
 export const timeToMinutes = (time: string): number => {
   const [hours, minutes] = time.split(':').map(Number);
   return hours * 60 + minutes;
@@ -1562,7 +1459,6 @@ export const minutesToTime = (minutes: number): string => {
     .padStart(2, '0')}`;
 };
 
-// Validate if barber's working hours are within barbershop's working hours
 export const validateBarberWorkingHours = (
   barberHours: Partial<WorkingHours>,
   barbershopHours: WorkingHours
@@ -1605,7 +1501,6 @@ export const validateBarberWorkingHours = (
       );
     }
 
-    // Validate break times if they exist
     if (barberDay.breakStart && barberDay.breakEnd) {
       const barberBreakStart = timeToMinutes(barberDay.breakStart);
       const barberBreakEnd = timeToMinutes(barberDay.breakEnd);
@@ -1632,7 +1527,6 @@ export const validateBarberWorkingHours = (
   };
 };
 
-// Get effective working hours for a barber (combining barbershop and custom hours)
 export const getEffectiveBarberWorkingHours = (
   barberProfile: BarberProfile,
   barbershopHours: WorkingHours
@@ -1661,7 +1555,6 @@ export const getEffectiveBarberWorkingHours = (
   return result;
 };
 
-// Check if a specific time slot is available for a barber
 export const isTimeSlotAvailable = (
   barberProfile: BarberProfile,
   barbershopHours: WorkingHours,
@@ -1682,7 +1575,6 @@ export const isTimeSlotAvailable = (
 
   if (timeMinutes < openMinutes || timeMinutes >= closeMinutes) return false;
 
-  // Check if time is during break
   if (daySchedule.breakStart && daySchedule.breakEnd) {
     const breakStartMinutes = timeToMinutes(daySchedule.breakStart);
     const breakEndMinutes = timeToMinutes(daySchedule.breakEnd);
@@ -1695,7 +1587,6 @@ export const isTimeSlotAvailable = (
   return true;
 };
 
-// Update barber profile with validated working hours
 export const updateBarberWorkingHours = async (
   barberId: number,
   customWorkingHours: Partial<WorkingHours>
@@ -1732,7 +1623,6 @@ export const updateBarberWorkingHours = async (
   }
 };
 
-// Update barbershop services and sync across the system
 export const updateBarbershopServices = async (
   barbershopId: number,
   services: Service[]
@@ -1741,7 +1631,6 @@ export const updateBarbershopServices = async (
     const barbershop = await getBarbershopById(barbershopId);
     if (!barbershop) return false;
 
-    // Update barbershop with new services
     const updatedBarbershop = {
       ...barbershop,
       services: services,
@@ -1753,9 +1642,6 @@ export const updateBarbershopServices = async (
       console.log(
         `Barbershop ${barbershopId} services updated - will be visible to clients immediately`
       );
-
-      // Optionally, you could add notification logic here
-      // await notifyClientsOfServiceUpdate(barbershopId, services);
     }
 
     return success;
@@ -1765,7 +1651,6 @@ export const updateBarbershopServices = async (
   }
 };
 
-// Update barbershop working hours and sync across the system
 export const updateBarbershopWorkingHours = async (
   barbershopId: number,
   workingHours: WorkingHours
@@ -1774,7 +1659,6 @@ export const updateBarbershopWorkingHours = async (
     const barbershop = await getBarbershopById(barbershopId);
     if (!barbershop) return false;
 
-    // Update barbershop with new working hours
     const updatedBarbershop = {
       ...barbershop,
       workingHours: workingHours,
@@ -1795,7 +1679,6 @@ export const updateBarbershopWorkingHours = async (
   }
 };
 
-// Refresh barbershop data for real-time updates (called by client screens)
 export const refreshBarbershopData = async (
   barberId: string
 ): Promise<{
@@ -1825,7 +1708,6 @@ export const refreshBarbershopData = async (
       };
     }
 
-    // Fallback for mock data
     return {
       services: [
         {
@@ -1870,7 +1752,6 @@ export const refreshBarbershopData = async (
   }
 };
 
-// Integration test function to validate the complete system
 export const testIntegratedSystem = async (): Promise<{
   success: boolean;
   message: string;
@@ -1878,26 +1759,21 @@ export const testIntegratedSystem = async (): Promise<{
   try {
     console.log('🔄 Testing integrated barbershop system...');
 
-    // 1. Test database initialization
     await initDatabase();
     await initBookingsDatabase();
     await initBarbersDatabase();
 
-    // 2. Test getting combined barbers list (mock + real)
     const allBarbers = await getBarbers();
     console.log(`✅ Found ${allBarbers.length} barbers (mock + registered)`);
 
-    // 3. Test getting all registered barbershops
     const barbershops = await getAllBarbershops();
     console.log(`✅ Found ${barbershops.length} registered barbershops`);
 
-    // 4. Test user session
     const currentUser = await getCurrentUser();
     console.log(
       `✅ Current user: ${currentUser ? currentUser.name : 'None logged in'}`
     );
 
-    // 5. Test appointments for barber
     if (currentUser && currentUser.userType === 'barber') {
       const appointments = await getAppointmentsForCurrentBarber();
       console.log(
@@ -1905,7 +1781,6 @@ export const testIntegratedSystem = async (): Promise<{
       );
     }
 
-    // 6. Test user bookings
     if (currentUser && currentUser.userType === 'client') {
       const userBookings = await getBookingsByUserId(currentUser.id!);
       console.log(`✅ Found ${userBookings.length} bookings for current user`);
@@ -1924,7 +1799,6 @@ export const testIntegratedSystem = async (): Promise<{
   }
 };
 
-// Function to get system statistics
 export const getSystemStats = async (): Promise<{
   totalBarbers: number;
   registeredBarbershops: number;
@@ -1940,7 +1814,6 @@ export const getSystemStats = async (): Promise<{
       getAppointments(),
     ]);
 
-    // Get total users (need to parse from secure store)
     let totalUsers = 0;
     try {
       const usersJson = await SecureStore.getItemAsync(USERS_STORAGE_KEY);
@@ -1968,39 +1841,3 @@ export const getSystemStats = async (): Promise<{
     };
   }
 };
-
-// SISTEMA COMPLETAMENTE INTEGRADO - RESUMO DAS FUNCIONALIDADES:
-//
-// 1. BARBEARIAS CADASTRADAS & MOCK:
-//    - getBarbers() retorna tanto barbearias cadastradas ('real_') quanto mock ('mock_')
-//    - IDs únicos para evitar conflitos (prefixos: 'real_' e 'mock_')
-//    - Informações completas das barbearias cadastradas aparecem para clientes
-//
-// 2. AGENDAMENTOS INTEGRADOS:
-//    - createBooking() automaticamente inclui dados do usuário logado
-//    - Agendamentos são sincronizados para a agenda do barbeiro via syncBookingToAppointment()
-//    - getAppointmentsForCurrentBarber() mostra agendamentos específicos do barbeiro logado
-//    - getBookingsByUserId() mostra agendamentos específicos do cliente logado
-//
-// 3. PERSISTÊNCIA DE DADOS:
-//    - Sistema unificado SecureStore/AsyncStorage para login/logout
-//    - Dados de barbearias, usuários, agendamentos e perfis persistem
-//    - Validação de sessão e contexto de usuário em todas as telas
-//
-// 4. FLUXO CLIENTE:
-//    - Busca mostra todas as barbearias (cadastradas + mock)
-//    - Detalhes da barbearia exibem informações reais quando disponível
-//    - Agendamento inteligente (usa dados do usuário se logado)
-//    - Histórico de agendamentos por usuário
-//
-// 5. FLUXO BARBEIRO:
-//    - Agenda mostra agendamentos reais dos clientes
-//    - Informações completas do cliente (nome, telefone, email)
-//    - Sincronização automática entre bookings e appointments
-//
-// 6. SISTEMA DE IDs:
-//    - 'mock_X' para barbearias de exemplo
-//    - 'real_X' para barbearias cadastradas no sistema
-//    - Compatibilidade com IDs numéricos antigos
-//
-// ✅ SISTEMA TOTALMENTE FUNCIONAL E INTEGRADO!

@@ -81,7 +81,6 @@ interface Appointment {
 export default function NewAppointment() {
   const router = useRouter();
 
-  // Estados dos dados
   const [clients, setClients] = useState<Client[]>([
     {
       id: '1',
@@ -109,13 +108,11 @@ export default function NewAppointment() {
     { id: '3', name: 'Corte + Barba', price: 40, duration: 50 },
     { id: '4', name: 'Sobrancelha', price: 15, duration: 15 },
   ]);
-  // Form states
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedBarber, setSelectedBarber] = useState<Barber | null>(null);
   const [appointmentDate, setAppointmentDate] = useState('');
   const [appointmentTime, setAppointmentTime] = useState('');
-  // Data states
   const [barbers, setBarbers] = useState<Barber[]>([]);
   const [barbersDetails, setBarbersDetails] = useState<{
     [key: number]: UserType;
@@ -123,20 +120,17 @@ export default function NewAppointment() {
   const [barbershop, setBarbershop] = useState<Barbershop | null>(null);
   const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
 
-  // Search and modal states
   const [clientSearchQuery, setClientSearchQuery] = useState('');
   const [showClientModal, setShowClientModal] = useState(false);
   const [showServiceModal, setShowServiceModal] = useState(false);
   const [showBarberModal, setShowBarberModal] = useState(false);
   const [showNewClientModal, setShowNewClientModal] = useState(false);
 
-  // New client form
   const [newClientForm, setNewClientForm] = useState({
     name: '',
     phone: '',
   });
 
-  // Time slots (simulando horários disponíveis)
   const timeSlots = [
     '08:00',
     '08:30',
@@ -220,7 +214,6 @@ export default function NewAppointment() {
       status: 'pending',
     };
 
-    // Aqui salvaria no banco de dados
     console.log('Agendamento criado:', appointment);
 
     Alert.alert(
@@ -246,7 +239,6 @@ export default function NewAppointment() {
     return today.toISOString().split('T')[0];
   };
 
-  // Função para gerar horários disponíveis baseados na barbearia e barbeiro
   const generateAvailableTimeSlots = async () => {
     if (!selectedBarber || !appointmentDate || !barbershop) {
       setAvailableTimeSlots([]);
@@ -254,13 +246,11 @@ export default function NewAppointment() {
     }
 
     try {
-      // Para o proprietário, usar horários da barbearia
       let workingHours: WorkingHours;
 
       if (selectedBarber.id === 'owner') {
         workingHours = barbershop.workingHours;
       } else {
-        // Para barbeiros da equipe, buscar perfil e usar horários efetivos
         const barberProfile = await getBarberProfileByUserId(
           selectedBarber.userId
         );
@@ -274,7 +264,6 @@ export default function NewAppointment() {
         );
       }
 
-      // Determinar dia da semana
       const date = new Date(appointmentDate);
       const dayNames = [
         'sunday',
@@ -293,7 +282,6 @@ export default function NewAppointment() {
         return;
       }
 
-      // Gerar slots de 30 minutos
       const slots: string[] = [];
       const openMinutes = timeToMinutes(daySchedule.openTime);
       const closeMinutes = timeToMinutes(daySchedule.closeTime);
@@ -305,7 +293,6 @@ export default function NewAppointment() {
         : null;
 
       for (let minutes = openMinutes; minutes < closeMinutes; minutes += 30) {
-        // Pular horário de almoço
         if (
           breakStartMinutes &&
           breakEndMinutes &&
@@ -326,13 +313,11 @@ export default function NewAppointment() {
     }
   };
 
-  // Função utilitária para converter horário em minutos
   const timeToMinutes = (time: string): number => {
     const [hours, minutes] = time.split(':').map(Number);
     return hours * 60 + minutes;
   };
 
-  // Função utilitária para converter minutos em horário
   const minutesToTime = (minutes: number): string => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -340,12 +325,10 @@ export default function NewAppointment() {
       .toString()
       .padStart(2, '0')}`;
   };
-  // Caregar barbeiros da barbearia
   useEffect(() => {
     loadBarbers();
   }, []);
 
-  // Regenerar horários quando barbeiro ou data mudar
   useEffect(() => {
     generateAvailableTimeSlots();
   }, [selectedBarber, appointmentDate, barbershop]);
@@ -362,7 +345,6 @@ export default function NewAppointment() {
           setBarbershop(barbershop);
           const shopBarbers = await getBarbersByBarbershopId(barbershop.id);
 
-          // Buscar detalhes dos usuários barbeiros
           const barbersDetailsMap: { [key: number]: UserType } = {};
           const barbersWithDetails: Barber[] = [];
 
@@ -382,7 +364,6 @@ export default function NewAppointment() {
             }
           }
 
-          // Adicionar o próprio dono como barbeiro
           barbersWithDetails.unshift({
             id: 'owner',
             userId: currentUser.id,
@@ -591,7 +572,7 @@ export default function NewAppointment() {
                 <Text style={[styles.summaryValue, styles.summaryPrice]}>
                   R$ {selectedService.price.toFixed(2)}
                 </Text>
-              </View>{' '}
+              </View>
             </View>
           )}
       </ScrollView>
@@ -717,7 +698,7 @@ export default function NewAppointment() {
                 </View>
               </TouchableOpacity>
             ))}
-          </ScrollView>{' '}
+          </ScrollView>
         </SafeAreaView>
       </Modal>
 
@@ -1147,7 +1128,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginTop: 16,
   },
-  // Novos estilos para seleção de barbeiro
   selector: {
     borderWidth: 1,
     borderColor: '#D1D5DB',
@@ -1171,7 +1151,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  // Estilos para modais de seleção
   headerSpace: {
     width: 24,
   },
@@ -1193,7 +1172,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 8,
   },
-  // Botão flutuante
   floatingButton: {
     position: 'absolute',
     bottom: 20,

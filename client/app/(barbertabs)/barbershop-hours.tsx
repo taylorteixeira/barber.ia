@@ -47,7 +47,6 @@ export default function BarbershopHours() {
       if (user) {
         setCurrentUser(user);
 
-        // Buscar barbearia do usuário
         const shop = await getBarbershopByOwnerId(user.id!);
         if (shop) {
           setBarbershop(shop);
@@ -205,7 +204,6 @@ export default function BarbershopHours() {
   );
 }
 
-// Componente para editar horário do dia
 function DayScheduleEditor({
   schedule,
   onSave,
