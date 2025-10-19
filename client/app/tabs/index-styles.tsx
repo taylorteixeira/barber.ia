@@ -1,0 +1,196 @@
+import { StyleSheet } from 'react-native';
+
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  header: {
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 24,
+  },
+  greeting: {
+    fontSize: 18,
+    fontFamily: 'Inter-Regular',
+    color: '#6B7280',
+    marginBottom: 4,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontFamily: 'Inter-Bold',
+    color: '#111827',
+  },
+  locationButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EFF6FF',
+    marginHorizontal: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginBottom: 24,
+  },
+  locationButtonText: {
+    marginLeft: 8,
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: '#2563EB',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 24,
+    marginBottom: 32,
+  },
+  searchIcon: {
+    position: 'absolute',
+    left: 16,
+    zIndex: 1,
+  },
+  searchInput: {
+    flex: 1,
+    height: 48,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    paddingLeft: 48,
+    paddingRight: 16,
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    color: '#111827',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  filterButton: {
+    marginLeft: 12,
+    padding: 12,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  categoriesContainer: {
+    marginBottom: 32,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontFamily: 'Inter-Bold',
+    color: '#111827',
+    marginHorizontal: 24,
+    marginBottom: 16,
+  },
+  categoriesScroll: {
+    paddingLeft: 24,
+  },
+  categoryChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginRight: 12,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  categoryChipSelected: {
+    backgroundColor: '#2563EB',
+    borderColor: '#2563EB',
+  },
+  categoryEmoji: {
+    fontSize: 16,
+    marginRight: 6,
+  },
+  categoryText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: '#374151',
+  },
+  categoryTextSelected: {
+    color: '#FFFFFF',
+  },
+  barbersContainer: {
+    marginBottom: 32,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginHorizontal: 24,
+    marginBottom: 16,
+  },
+  seeAllText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: '#2563EB',
+  },
+  barbersList: {
+    paddingHorizontal: 24,
+  },
+  barberCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  barberImage: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    marginRight: 16,
+  },
+  barberInfo: {
+    flex: 1,
+  },
+  barberName: {
+    fontSize: 16,
+    fontFamily: 'Inter-Bold',
+    color: '#111827',
+    marginBottom: 4,
+  },
+  barberStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  ratingText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#374151',
+    marginLeft: 4,
+  },
+  reviewsText: {
+    fontSize: 12,
+    fontFamily: 'Inter-Regular',
+    color: '#6B7280',
+    marginLeft: 4,
+  },
+  distanceText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#6B7280',
+  },
+  priceText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Bold',
+    color: '#111827',
+  },
+});

@@ -1,0 +1,5 @@
+MONGO_URI=mongodb+srv://root:Acndwz4u5FV0gEgj@cluster0.rcwqo1o.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+
+JWT_SECRET=eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5NzFkN2VlMmU0MTI3YzcwMjIxYjE3NWQ3NmMzMTlhNiIsInN1YiI6IjY0OGM4MTQxYzJmZjNkMDBjNTk5MmFkNSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.nV5HZkPWuvn3so8d7r_WhYw0K2EWfbnBg_wYX6w-Jhc
+
+PORT=5000

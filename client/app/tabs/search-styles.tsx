@@ -1,0 +1,215 @@
+import { StyleSheet } from 'react-native';
+
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  header: {
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 16,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontFamily: 'Inter-Bold',
+    color: '#111827',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 24,
+    marginBottom: 16,
+  },
+  searchInputContainer: {
+    flex: 1,
+    position: 'relative',
+  },
+  searchIcon: {
+    position: 'absolute',
+    left: 16,
+    top: 14,
+    zIndex: 1,
+  },
+  searchInput: {
+    height: 48,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    paddingLeft: 48,
+    paddingRight: 16,
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    color: '#111827',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  filterButton: {
+    marginLeft: 12,
+    padding: 14,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  filterButtonActive: {
+    backgroundColor: '#2563EB',
+    borderColor: '#2563EB',
+  },
+  filtersContainer: {
+    marginBottom: 16,
+  },
+  filtersScroll: {
+    paddingLeft: 24,
+  },
+  filterGroup: {
+    marginRight: 20,
+  },
+  filterGroupTitle: {
+    fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
+    color: '#111827',
+    marginBottom: 8,
+  },
+  filterOption: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 16,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  filterOptionSelected: {
+    backgroundColor: '#2563EB',
+    borderColor: '#2563EB',
+  },
+  filterOptionText: {
+    fontSize: 12,
+    fontFamily: 'Inter-Medium',
+    color: '#374151',
+  },
+  filterOptionTextSelected: {
+    color: '#FFFFFF',
+  },
+  resultsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginHorizontal: 24,
+    marginBottom: 16,
+  },
+  resultsCount: {
+    fontSize: 16,
+    fontFamily: 'Inter-SemiBold',
+    color: '#111827',
+  },
+  sortButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sortButtonText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: '#6B7280',
+    marginRight: 4,
+  },
+  resultsList: {
+    flex: 1,
+    paddingHorizontal: 24,
+  },
+  barberCard: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  barberImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 12,
+    marginRight: 16,
+  },
+  barberInfo: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  barberName: {
+    fontSize: 18,
+    fontFamily: 'Inter-SemiBold',
+    color: '#111827',
+    marginBottom: 6,
+  },
+  barberStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  ratingText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: '#111827',
+    marginLeft: 4,
+  },
+  reviewsText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#6B7280',
+    marginLeft: 2,
+  },
+  distanceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  distanceText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: '#6B7280',
+    marginLeft: 2,
+  },
+  specialtiesContainer: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  specialtyTag: {
+    backgroundColor: '#EFF6FF',
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    marginRight: 6,
+  },
+  specialtyText: {
+    fontSize: 12,
+    fontFamily: 'Inter-Medium',
+    color: '#2563EB',
+  },
+  priceText: {
+    fontSize: 16,
+    fontFamily: 'Inter-SemiBold',
+    color: '#10B981',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  loadingText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Medium',
+    color: '#6B7280',
+    marginTop: 12,
+  },
+});
